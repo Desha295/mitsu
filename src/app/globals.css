@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/*
+  MITSU Design Tokens
+  Source of truth: 04_DESIGN_SYSTEM.md
+
+  NOTE: Exact brand hex values have not been provided yet.
+  The values below are a professional, accessible interpretation of
+  "Blue / Green / White / Dark Gray" and should be swapped for the
+  official brand hex codes as soon as they are provided.
+*/
+
+:root {
+  /* Brand colors */
+  --color-primary: #1D5FB8;       /* Blue - main branding, primary actions */
+  --color-primary-dark: #164A8F;
+  --color-primary-light: #E8F0FC;
+
+  --color-secondary: #2E9E5B;     /* Green - success, highlights, secondary actions */
+  --color-secondary-dark: #227A45;
+  --color-secondary-light: #E7F6ED;
+
+  --color-neutral-white: #FFFFFF;
+  --color-neutral-gray-50: #F7F8FA;
+  --color-neutral-gray-100: #EEF0F3;
+  --color-neutral-gray-300: #D3D7DE;
+  --color-neutral-gray-600: #5B6270;
+  --color-neutral-dark: #1A1D23;  /* Main text */
+
+  /* Semantic surface tokens (light mode) */
+  --background: var(--color-neutral-white);
+  --foreground: var(--color-neutral-dark);
+  --surface: var(--color-neutral-white);
+  --surface-muted: var(--color-neutral-gray-50);
+  --border: var(--color-neutral-gray-300);
+
+  /* Radius scale (04_DESIGN_SYSTEM.md #9) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Spacing base unit: 8px (04_DESIGN_SYSTEM.md #7) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+}
+
+.dark {
+  --background: #12151A;
+  --foreground: #F0F1F3;
+  --surface: #1A1E25;
+  --surface-muted: #20242C;
+  --border: #2C313A;
+
+  --color-primary: #4E8FE0;
+  --color-primary-dark: #1D5FB8;
+  --color-primary-light: #1E2A3D;
+
+  --color-secondary: #4FBE81;
+  --color-secondary-dark: #2E9E5B;
+  --color-secondary-light: #1B2E22;
+}
+
+/* Class-based dark mode driven by ThemeContext (not prefers-color-scheme) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-light: var(--color-primary-light);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-dark: var(--color-secondary-dark);
+  --color-secondary-light: var(--color-secondary-light);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --font-sans: var(--font-inter);
+  --font-arabic: var(--font-cairo);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+html[dir="rtl"] body {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}

@@ -1,0 +1,22 @@
+{
+  "common": {
+    "brandName": "MITSU",
+    "brandFullName": "اتحاد طلاب تكنولوجيا المعلومات - MITSU",
+    "loading": "جاري التحميل...",
+    "comingSoon": "قريباً"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "guide": "دليل الطالب المستجد",
+    "systems": "أنظمة الجامعة",
+    "announcements": "الإعلانات",
+    "union": "اتحاد الطلاب",
+    "contact": "تواصل معنا"
+  },
+  "foundation": {
+    "title": "الأساس البرمجي لـ MITSU جاهز",
+    "description": "تم إنجاز المرحلة صفر. الوضع الليلي واللغة وهيكل المشروع تعمل بنجاح.",
+    "themeLabel": "المظهر",
+    "languageLabel": "اللغة"
+  }
+}

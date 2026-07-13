@@ -1,0 +1,22 @@
+{
+  "common": {
+    "brandName": "MITSU",
+    "brandFullName": "MUST Information Technology Student Union",
+    "loading": "Loading...",
+    "comingSoon": "Coming soon"
+  },
+  "nav": {
+    "home": "Home",
+    "guide": "Freshman Guide",
+    "systems": "University Systems",
+    "announcements": "Announcements",
+    "union": "Student Union",
+    "contact": "Contact"
+  },
+  "foundation": {
+    "title": "MITSU foundation is ready",
+    "description": "Phase 0 complete. Theme, language, and project structure are working.",
+    "themeLabel": "Theme",
+    "languageLabel": "Language"
+  }
+}
