@@ -6,6 +6,72 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.3.0] — Phase 1 Sprint 1.2: Homepage Hero & Quick Access
+
+### Added
+
+**Section Components:**
+- `HeroSection.tsx` — hero section with MITSU welcome, heading, description, primary/secondary CTAs, campus image placeholder. Responsive (mobile-first), dark mode, EN/AR, RTL/LTR, accessible.
+- `QuickAccessSection.tsx` — quick access section rendering 6 reusable cards in responsive grid (1 col mobile, 2 col tablet, 3 col desktop). Responsive, dark mode, EN/AR.
+
+**Brand Foundation:**
+- Folder structure: `public/images/{branding, university, placeholders}/`.
+- Official MITSU logo (`public/images/branding/mitsu-logo.png`).
+- Official MUST university logo (`public/images/university/must-logo.png`).
+- Campus placeholder image (`public/images/placeholders/campus.svg` — SVG until official campus photo provided).
+
+**Data Layer:**
+- `src/data/home.ts` — `HeroData` and `QuickAccessItem` types with complete data exports (`heroData`, `quickAccessItems`). All content data-driven, zero hardcoding.
+
+**Localization:**
+- Extended `src/locales/en.json`:
+  - `home.hero.heading`, `home.hero.description`, `home.hero.primaryCta`, `home.hero.secondaryCta`, `home.hero.imageAlt`.
+  - `home.quickAccess.heading`, `home.quickAccess.subheading`.
+  - 6 item keys: `guide.title/description`, `systems.title/description`, `union.title/description`, `announcements.title/description`, `contact.title/description`, `about.title/description`.
+  - `home.quickAccess.explore` (used by QuickAccessCard).
+- Extended `src/locales/ar.json`:
+  - Same structure as English, complete Arabic translations.
+
+**Homepage Integration:**
+- Replaced placeholder `src/app/page.tsx` with real Phase 1 homepage composition: `<HeroSection />` → `<QuickAccessSection />`.
+- Layout structure: Navbar (from Providers) → Hero → QuickAccess → Footer (from Providers).
+
+### Fixed
+
+- Icon type casting in `QuickAccessCard.tsx` — simplified to `(Icons as any)[iconName]` for dynamic icon resolution from lucide-react.
+- QuickAccessSection sorting logic — removed redundant sorting (items already in correct order in data).
+
+### Architecture Decisions
+
+- **HeroSection data sourcing:** Imports `heroData` from `src/data/home.ts` — single source of truth, no component-level content logic.
+- **QuickAccessSection card mapping:** Maps over `quickAccessItems` array, delegates rendering to reusable `QuickAccessCard` component.
+- **Icon resolution pattern:** Dynamic icon lookup from lucide-react using `(Icons as any)[iconName]` — necessary for runtime resolution of icon names from data.
+- **Responsive grid:** Uses Tailwind responsive classes (`sm:grid-cols-2 lg:grid-cols-3`) for mobile-first approach.
+- **All content data-driven:** Zero hardcoded text, links, or data in any component (13_CHANGE_POLICY.md compliance).
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds (fonts work in production environment with internet access).
+- Responsive design: mobile < 640px (1 col), tablet 640–1024px (2 cols), desktop > 1024px (3 cols).
+- Dark mode: all components support light/dark themes.
+- Bilingual: English and Arabic fully supported.
+- RTL/LTR: RTL layout works correctly when Arabic is selected.
+- Accessibility: semantic HTML, keyboard navigation, proper focus states.
+
+### Breaking Changes
+
+None.
+
+### Known Issues
+
+- Official campus image not yet provided — using SVG placeholder.
+- Hero primary CTA link is empty (points to "#") — will be populated from Firebase settings in Phase 4.
+- Firebase not configured — all social/external links are placeholders.
+
+---
+
 ## [v0.2.0] — Phase 1 Sprint 1.1: Reusable Layout Foundation
 
 ### Added
@@ -54,9 +120,9 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ### Verification
 
-- `npm run lint` — passes, zero errors
-- `tsc --noEmit` — passes, zero TypeScript errors
-- `npm run build` — succeeds (fonts work in production environment with internet access)
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds (fonts work in production environment with internet access).
 
 ### Breaking Changes
 
@@ -99,4 +165,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.2 — Homepage Hero & Quick Access (see `PROJECT_STATE.md` for next actions).
+Sprint 1.3 — Freshman Guide & Announcements sections (see `PROJECT_STATE.md` for next actions).

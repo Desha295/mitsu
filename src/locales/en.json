@@ -39,6 +39,44 @@
       "instagram": "Instagram"
     }
   },
+  "home": {
+    "hero": {
+      "heading": "Welcome to MITSU",
+      "description": "Your official digital gateway to university life. One platform, one community, one trusted start.",
+      "primaryCta": "Join WhatsApp Community",
+      "secondaryCta": "Explore Freshman Guide",
+      "imageAlt": "MUST Campus"
+    },
+    "quickAccess": {
+      "heading": "Get Started",
+      "subheading": "Quick access to the services and information you need most",
+      "guide": {
+        "title": "Freshman Guide",
+        "description": "Your step-by-step guide to starting university life"
+      },
+      "systems": {
+        "title": "University Systems",
+        "description": "Access official platforms and tools"
+      },
+      "union": {
+        "title": "Student Union",
+        "description": "Learn about committees and activities"
+      },
+      "announcements": {
+        "title": "Announcements",
+        "description": "Stay updated with important news"
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Reach out to the Student Union"
+      },
+      "about": {
+        "title": "About MITSU",
+        "description": "Learn more about our mission"
+      },
+      "explore": "Explore"
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",
