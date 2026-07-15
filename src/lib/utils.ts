@@ -6,3 +6,11 @@
 export function cx(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
+
+/**
+ * Shared keyboard-focus ring, applied to every interactive element.
+ * Centralized here so focus styling stays consistent (07_COMPONENT_RULES.md
+ * §14 Accessibility) without repeating the same utility string everywhere.
+ */
+export const focusRing =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";

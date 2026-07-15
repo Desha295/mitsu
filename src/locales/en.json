@@ -13,6 +13,32 @@
     "union": "Student Union",
     "contact": "Contact"
   },
+  "navbar": {
+    "identity": "Faculty of Information Technology, MUST",
+    "mainNavigation": "Main navigation",
+    "mobileNavigation": "Mobile navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "toggleThemeToDark": "Switch to dark mode",
+    "toggleThemeToLight": "Switch to light mode",
+    "skipToContent": "Skip to main content"
+  },
+  "language": {
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English"
+  },
+  "footer": {
+    "aboutText": "The official digital gateway for MUST Information Technology freshmen — one platform, one community, one trusted start.",
+    "linksHeading": "Quick Links",
+    "systemsHeading": "University Systems",
+    "socialHeading": "Follow Us",
+    "rightsReserved": "All rights reserved.",
+    "social": {
+      "whatsapp": "WhatsApp Community",
+      "facebook": "Facebook",
+      "instagram": "Instagram"
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",

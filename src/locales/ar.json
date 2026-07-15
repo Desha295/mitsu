@@ -13,6 +13,32 @@
     "union": "اتحاد الطلاب",
     "contact": "تواصل معنا"
   },
+  "navbar": {
+    "identity": "كلية تكنولوجيا المعلومات - جامعة مصر للعلوم والتكنولوجيا",
+    "mainNavigation": "التنقل الرئيسي",
+    "mobileNavigation": "قائمة التنقل",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "toggleThemeToDark": "التبديل إلى الوضع الليلي",
+    "toggleThemeToLight": "التبديل إلى الوضع النهاري",
+    "skipToContent": "الانتقال إلى المحتوى الرئيسي"
+  },
+  "language": {
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English"
+  },
+  "footer": {
+    "aboutText": "البوابة الرقمية الرسمية لطلاب تكنولوجيا المعلومات المستجدين — منصة واحدة، مجتمع واحد، بداية موثوقة.",
+    "linksHeading": "روابط سريعة",
+    "systemsHeading": "أنظمة الجامعة",
+    "socialHeading": "تابعنا",
+    "rightsReserved": "جميع الحقوق محفوظة.",
+    "social": {
+      "whatsapp": "مجتمع واتساب",
+      "facebook": "فيسبوك",
+      "instagram": "إنستغرام"
+    }
+  },
   "foundation": {
     "title": "الأساس البرمجي لـ MITSU جاهز",
     "description": "تم إنجاز المرحلة صفر. الوضع الليلي واللغة وهيكل المشروع تعمل بنجاح.",
