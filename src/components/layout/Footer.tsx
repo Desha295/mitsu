@@ -24,12 +24,14 @@ export function Footer() {
     href: item.href,
   }));
 
-  // Convert systems to FooterLinkGroup format (placeholder href since officialUrl not populated)
+  // Convert systems to FooterLinkGroup format — now using real officialUrl
+  // where available (Sprint 1.3 populated official data); empty href still
+  // renders as a "coming soon" placeholder (e.g. MUSTER has no web portal).
   const systemLinks = systems
     .filter((s) => s.isActive)
     .map((s) => ({
-      label: s.name,
-      href: "", // Placeholder — officialUrl not yet populated
+      label: translate(s.nameKey),
+      href: s.officialUrl || undefined,
     }));
 
   return (

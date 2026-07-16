@@ -6,6 +6,67 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.4.0] — Phase 1 Sprint 1.3: University Systems Section
+
+### Added
+
+**Type System:**
+- `src/types/system.types.ts` — added `SystemCategory` type (`academic` | `student-services` | `communication`) and `required: boolean`. Converted `name`/`description`/`instructions` from raw strings to translation-key fields (`nameKey`/`descriptionKey`/`instructionsKey`), matching the pattern already used in `data/navigation.ts` and `data/home.ts`.
+
+**Data Layer:**
+- `src/data/systems.ts` populated with 5 official university systems (real data provided by the Student Union, not invented):
+  - **Banner** (academic, required) — `https://register.must.edu.eg/StudentRegistrationSsb/ssb/registration`
+  - **Smart Learning** (academic, required) — `https://smartlearning.must.edu.eg/login/index.php`
+  - **MUSTER** (student-services, required) — mobile app only, no official web portal (`officialUrl: ""`)
+  - **Microsoft Teams** (communication, required) — `https://teams.microsoft.com/`
+  - **Outlook** (communication, required) — `https://outlook.office.com/`
+- Added `PASSWORD_RESET_URL` export (`https://passwordreset.microsoftonline.com/`) — relevant to Teams/Outlook/MUSTER university-account sign-in.
+
+**Feature Components:**
+- `SystemCard.tsx` (components/shared) — icon, name, category label, required badge, description, "Open" button (external link, opens in new tab) or "Coming soon" placeholder when no URL exists, and an accessible "How to Use" toggle revealing inline instructions (aria-expanded/aria-controls, no modal).
+
+**Section Components:**
+- `SystemsSection.tsx` (components/sections) — responsive grid (1/2/3 columns) of active systems, plus a password-reset note referencing `PASSWORD_RESET_URL`.
+
+**Routing:**
+- `src/app/systems/page.tsx` — new `/systems` route. Navbar/Footer inherited from root layout via `Providers`.
+
+**Localization:**
+- Extended `src/locales/en.json` and `ar.json` with a new top-level `systems` section: heading/subheading, button labels, category labels, password-reset copy, and per-system name/description/instructions for all 5 systems.
+- Added `common.opensInNewTab` key for external-link accessibility.
+- System proper names (Banner, Smart Learning, MUSTER, Microsoft Teams, Outlook) kept in Latin script in Arabic locale, consistent with how "MITSU" is handled — these are official software/product names, not translated terms.
+
+### Fixed (Required Dependency Updates)
+
+- `Footer.tsx` — updated to call `translate(s.nameKey)` instead of the now-removed `s.name` field, and to use the real `s.officialUrl` instead of a hardcoded empty string, now that Sprint 1.3 populated real URLs. Required because Sprint 1.3 changed the shape of `systems.ts` that Footer already depended on — not a redesign of Footer itself.
+- `FooterLinkGroup.tsx` — added external-URL detection (`href.startsWith("http")`) so real system links open in a new tab via a plain `<a target="_blank" rel="noopener noreferrer">`, while internal paths continue using `next/link` for client-side navigation. This edge case didn't exist before Sprint 1.3, since every link passed to this component was previously either internal or an empty placeholder.
+
+### Architecture Decisions
+
+- **Translation-key consistency:** `systems.ts` now follows the same `*Key` pattern as `navigation.ts`/`home.ts` rather than embedding raw English text, keeping all three data files architecturally consistent ahead of eventual Firebase migration.
+- **Category/required badges:** included in `SystemCard` even though not explicitly listed in the sprint's minimum card content spec (Logo, Name, Description, Open, How to Use) — included because the Student Union explicitly supplied this data as part of the official system information; low-risk, non-intrusive additions.
+- **Inline instructions panel over modal:** "How to Use" toggles a simple expand/collapse region within the card rather than a dialog, avoiding focus-trap complexity while remaining fully keyboard accessible.
+- **Generic Lucide icons as placeholders:** ClipboardList (Banner), BookOpen (Smart Learning), Smartphone (MUSTER), Video (Teams), Mail (Outlook) — Lucide ships no brand/logo icons, consistent with the Sprint 1.1 Footer social-icon precedent. Official per-system logos to be swapped in later.
+- **Empty-URL handling:** MUSTER's `officialUrl: ""` renders as a "Coming soon" placeholder (not a broken link) in both `SystemCard` and `Footer`, per the "no broken links" trust principle (03_UI_UX_GUIDELINES.md).
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/systems` now generated as a static route alongside `/`.
+
+### Breaking Changes
+
+- `UniversitySystem` type: `name`/`description`/`instructions` (raw strings) replaced with `nameKey`/`descriptionKey`/`instructionsKey` (translation keys). Any code reading the old fields directly would break — the only existing consumer (`Footer.tsx`) has been updated accordingly in this same release.
+
+### Known Issues
+
+- MUSTER has no official web portal yet — "Open" action shows "Coming soon" until one exists.
+- Official per-system logos not yet provided — using generic Lucide icons.
+- Official campus photo and brand hex colors still pending from earlier sprints.
+
+---
+
 ## [v0.3.0] — Phase 1 Sprint 1.2: Homepage Hero & Quick Access
 
 ### Added
@@ -165,4 +226,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.3 — Freshman Guide & Announcements sections (see `PROJECT_STATE.md` for next actions).
+Sprint 1.4 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).

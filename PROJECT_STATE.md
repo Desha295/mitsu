@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 1 — Core Platform
-**Current Sprint:** Sprint 1.2 — Homepage Hero & Quick Access
+**Current Sprint:** Sprint 1.3 — University Systems Section
 **Status:** Complete
-**Version:** v0.3.0
+**Version:** v0.4.0
 
 ---
 
@@ -24,94 +24,86 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - Configured design tokens in `src/app/globals.css`.
 - Wired Inter (Latin) and Cairo (Arabic) fonts via `next/font/google`.
 - Built full folder skeleton per `05_ARCHITECTURE.md`.
-- Implemented theme system: `ThemeContext` + `useTheme` hook with `localStorage` persistence.
-- Implemented language system: `LanguageContext` + `useLanguage` hook with `translate()` utility.
+- Implemented theme system and language system with `localStorage` persistence.
 - Added Firebase SDK skeleton and typed data stubs.
 - Initialized Git repository.
 
 ### Phase 1 — Sprint 1.1: Reusable Layout Foundation (v0.2.0)
 
-**UI Components:**
-- `IconButton.tsx` — accessible icon-only button primitive.
-
-**Layout Components:**
-- `Container.tsx` — responsive max-width 1200px container.
-- `Navbar.tsx` — global header with navigation, theme/language switchers, mobile hamburger.
-- `NavLinks.tsx` — reusable navigation list (horizontal/vertical).
-- `MobileMenu.tsx` — accessible mobile drawer with focus management.
-- `Footer.tsx` — global footer with branding, links, social placeholders.
-- `FooterLinkGroup.tsx` — reusable footer column component.
-- `FooterSocialLinks.tsx` — social icons display (placeholders).
-
-**Shared Components:**
-- `Logo.tsx` — MITSU wordmark with identity line.
-- `ThemeSwitcher.tsx` — theme toggle button.
-- `LanguageSwitcher.tsx` — language toggle button.
-
-**Styling & Infrastructure:**
-- Extended `globals.css` with overlay token and animations.
-- Extended `lib/utils.ts` with `focusRing` constant.
-- Extended locales with navbar/language/footer keys.
-- Updated `context/Providers.tsx` with Navbar/Footer layout.
+- `IconButton.tsx`, `Container.tsx` — reusable primitives.
+- `Navbar.tsx`, `NavLinks.tsx`, `MobileMenu.tsx` — global navigation with accessible mobile drawer.
+- `Footer.tsx`, `FooterLinkGroup.tsx`, `FooterSocialLinks.tsx` — global footer.
+- `Logo.tsx`, `ThemeSwitcher.tsx`, `LanguageSwitcher.tsx` — shared brand/utility components.
+- Extended `globals.css`, `lib/utils.ts`, locale files, `context/Providers.tsx`.
 
 ### Phase 1 — Sprint 1.2: Homepage Hero & Quick Access (v0.3.0)
 
-**Brand Foundation:**
-- Created `public/images/{branding, university, placeholders}/` folder structure.
-- Integrated official MITSU logo (`public/images/branding/mitsu-logo.png`).
-- Integrated official MUST logo (`public/images/university/must-logo.png`).
-- Created placeholder campus image (`public/images/placeholders/campus.svg`).
+- Official MITSU and MUST logos integrated into `public/images/`.
+- `HeroSection.tsx`, `QuickAccessSection.tsx`, `QuickAccessCard.tsx`.
+- `src/data/home.ts` — hero and quick access data.
+- Homepage composed: `src/app/page.tsx` = Hero + QuickAccess.
+- Full EN/AR localization for homepage content.
+
+### Phase 1 — Sprint 1.3: University Systems Section (v0.4.0)
+
+**Type System:**
+- Extended `src/types/system.types.ts`: added `SystemCategory` type (`academic` | `student-services` | `communication`), `required: boolean`, and converted `name`/`description`/`instructions` from raw strings to translation-key fields (`nameKey`/`descriptionKey`/`instructionsKey`) — consistent with the pattern already used in `data/navigation.ts` and `data/home.ts`.
 
 **Data Layer:**
-- Created `src/data/home.ts` with `HeroData` and `QuickAccessItem` types and data.
-- Fully data-driven — no hardcoded content in components.
-
-**Section Components:**
-- `HeroSection.tsx` — renders MITSU welcome, heading, description, 2 CTAs, campus image.
-- `QuickAccessSection.tsx` — renders 6 quick access cards in responsive grid (1/2/3 col mobile/tablet/desktop).
+- Populated `src/data/systems.ts` with 5 official university systems using real data provided by the Student Union:
+  - Banner (academic, required) — course registration, schedules, records.
+  - Smart Learning (academic, required) — course materials, assignments, quizzes.
+  - MUSTER (student-services, required) — mobile app only, no official web portal yet (`officialUrl: ""`).
+  - Microsoft Teams (communication, required) — lectures, academic advisor communication.
+  - Outlook (communication, required) — official university email.
+- Added `PASSWORD_RESET_URL` export (Microsoft account password reset) — relevant to Teams/Outlook/MUSTER sign-in.
+- All official URLs sourced directly from Student Union-provided data — none invented.
 
 **Feature Components:**
-- `QuickAccessCard.tsx` — reusable card component with dynamic icon resolution, hover effects, link behavior.
+- `SystemCard.tsx` (components/shared) — icon, name, category label, required badge, description, "Open" button (external link, new tab) or "Coming soon" placeholder when no URL, and a "How to Use" toggle revealing inline instructions (accessible via aria-expanded/aria-controls, no modal needed).
+
+**Section Components:**
+- `SystemsSection.tsx` (components/sections) — renders active systems in a responsive grid (1/2/3 columns), plus a password-reset note at the bottom.
+
+**Routing:**
+- `src/app/systems/page.tsx` — new /systems route composing SystemsSection. Navbar/Footer inherited from root layout.
 
 **Localization:**
-- Extended `src/locales/en.json` with complete `home.hero.*` and `home.quickAccess.*` keys.
-- Extended `src/locales/ar.json` with complete `home.hero.*` and `home.quickAccess.*` keys (Arabic translations).
-- Added section heading translations for QuickAccessSection in both languages.
+- Extended `src/locales/en.json` and `ar.json` with a new top-level `systems` section: heading/subheading, button labels, category labels, password reset copy, and per-system name/description/instructions for all 5 systems (Arabic translations for descriptions/instructions; system names kept in Latin script as proper nouns, consistent with brand name handling).
+- Added `common.opensInNewTab` key (accessibility: signals external links to screen reader users).
 
-**Homepage Integration:**
-- Replaced placeholder `src/app/page.tsx` with real homepage composition: Hero → QuickAccess.
-- Both sections integrated into main content region between Navbar and Footer.
+**Required Fixes to Sprint 1.1 Components (dependency updates, not redesigns):**
+- `Footer.tsx` — updated to call `translate(s.nameKey)` instead of the now-removed `s.name`, and to use the real `s.officialUrl` instead of a hardcoded empty string, now that Sprint 1.3 populated real URLs.
+- `FooterLinkGroup.tsx` — added external-URL detection (`href.startsWith("http")`) so real system links (e.g. `https://register.must.edu.eg/...`) open in a new tab via a plain `<a target="_blank">`, while internal paths continue using `next/link`. This edge case was never exercised before Sprint 1.3 since all prior links were either internal or empty placeholders.
 
 **Verification:**
 - `npm run lint` → passes, zero errors.
-- `tsc --noEmit` → passes, zero TypeScript errors (fixed icon type casting and sorting logic).
-- `npm run build` → succeeds (fonts work in production environment).
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/systems` now included as a static route alongside `/`.
 
 **Architecture Decisions:**
-- HeroSection receives data via `heroData` import from `data/home.ts` — single source of truth.
-- QuickAccessSection maps over `quickAccessItems` array, delegating card rendering to reusable `QuickAccessCard`.
-- Icons dynamically resolved from lucide-react using `(Icons as any)[iconName]` pattern.
-- Section components placed in `components/sections/` per 07_COMPONENT_RULES.md §3.3.
-- All navigation and CTA links read from data files — zero hardcoding.
-- Full dark mode, EN/AR, and RTL/LTR support in all components.
+- Translation-key pattern extended to `systems.ts` for consistency with `navigation.ts`/`home.ts` — all display text resolved via `translate()`, zero hardcoded content.
+- Category badge and required badge included in `SystemCard` even though not explicitly listed in the sprint's minimum card spec, since the Student Union explicitly supplied this data — small, low-risk additions that reflect provided data.
+- Instructions shown as inline expandable panel (not a modal) to avoid focus-trap complexity while remaining fully keyboard accessible.
+- Icons are generic Lucide icons (ClipboardList, BookOpen, Smartphone, Video, Mail) — placeholders until official per-system logos are provided (no brand icons exist in Lucide, consistent with the Sprint 1.1 Footer social-icon decision).
+- MUSTER's empty `officialUrl` renders as a "Coming soon" placeholder in both `SystemCard` and `Footer`, consistent with the "no broken links" trust principle (03_UI_UX_GUIDELINES.md).
 
 ---
 
 ## Current Sprint
 
-**Sprint 1.2: Homepage Hero & Quick Access** — CLOSED
+**Sprint 1.3: University Systems Section** — CLOSED
 
 Tasks completed:
-- [x] Brand assets folder structure (public/images/{branding, university, placeholders})
-- [x] Official MITSU and MUST logos integrated
-- [x] Campus placeholder image created
-- [x] Data layer: src/data/home.ts with hero and quick access data
-- [x] English translations: home.hero.* and home.quickAccess.* keys
-- [x] Arabic translations: home.hero.* and home.quickAccess.* keys
-- [x] HeroSection component (responsive, dark mode, EN/AR, RTL/LTR, accessible)
-- [x] QuickAccessSection component (responsive grid, dark mode, EN/AR)
-- [x] QuickAccessCard component (reusable, dynamic icons, hover effects)
-- [x] Homepage integration (page.tsx composed from Hero + QuickAccess)
+- [x] Extend UniversitySystem type (category, required, translation keys)
+- [x] Populate systems.ts with official Student Union data (5 systems + password reset URL)
+- [x] SystemCard component (icon, name, category, required badge, description, Open/How to Use)
+- [x] SystemsSection component (responsive grid + password reset note)
+- [x] /systems page route
+- [x] EN localization (systems.* keys)
+- [x] AR localization (systems.* keys)
+- [x] Required Footer.tsx fix (nameKey + real officialUrl)
+- [x] Required FooterLinkGroup.tsx fix (external link handling)
 - [x] Verification: lint passes, TypeScript passes, build succeeds
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
@@ -120,54 +112,51 @@ Tasks completed:
 
 ---
 
-## Next Actions (Sprint 1.3: Freshman Guide Section)
+## Next Actions (Sprint 1.4 — not yet scoped/approved)
 
-Per `10_ROADMAP.md` Phase 1:
+Per `10_ROADMAP.md` Phase 1/Phase 2, likely candidates for a future sprint:
+- Freshman Guide section (orientation journey, step-by-step onboarding).
+- Student Union section (About, Leadership, Committees).
+- Announcements section (placeholder until Firebase Phase 4).
+- Contact page.
 
-**Sprint 1.3 will include:**
-- Freshman Guide section (timeline of university journey steps)
-- Announcements section (placeholder — real Firebase content Phase 4)
-- Additional polish and refinement
-
-**Not yet started:**
-- Firebase integration (Phase 4 scope)
-- Admin Dashboard (Phase 4 scope)
-- FAQ / AI Assistant (Phase 2+ scope)
+**Not yet started — awaiting explicit sprint scope approval before any implementation.**
 
 ---
 
 ## Outstanding Items / Blockers
 
 - Official brand hex colors not yet provided (using placeholder Blue/Green).
-- Campus image placeholder is SVG (official campus photo pending).
-- Firebase project not created (`.env.local` not populated).
-- Real announcement content pending (Firebase Phase 4).
-- Real Freshman Guide content pending (requires Step-by-Step guide creation).
+- Official campus photo not yet provided (using SVG placeholder from Sprint 1.2).
+- Official per-system logos (Banner/Smart Learning/MUSTER/Teams/Outlook) not provided — using generic Lucide icons.
+- MUSTER has no official web portal yet — "Open" button shows "Coming soon" until one exists.
+- Firebase project not created; `.env.local` not populated; all data remains local/static.
 
 ---
 
 ## File Summary
 
-### New in Sprint 1.2
+### New in Sprint 1.3
 
-**Section Components (2 files):**
-- `src/components/sections/HeroSection.tsx`
-- `src/components/sections/QuickAccessSection.tsx`
+**Components (2 files):**
+- `src/components/shared/SystemCard.tsx`
+- `src/components/sections/SystemsSection.tsx`
 
-**Brand Assets (3 files):**
-- `public/images/branding/mitsu-logo.png`
-- `public/images/university/must-logo.png`
-- `public/images/placeholders/campus.svg`
+**Routes (1 file):**
+- `src/app/systems/page.tsx`
 
-**Data (1 file):**
-- `src/data/home.ts` (HeroData + QuickAccessItem types and data)
+### Modified in Sprint 1.3
 
-### Modified in Sprint 1.2
+- `src/types/system.types.ts` — added SystemCategory type, required field, translation-key fields
+- `src/data/systems.ts` — populated with official 5-system data + PASSWORD_RESET_URL
+- `src/locales/en.json` — added top-level `systems` section + `common.opensInNewTab`
+- `src/locales/ar.json` — added top-level `systems` section (Arabic) + `common.opensInNewTab`
+- `src/components/layout/Footer.tsx` — required fix: nameKey + real officialUrl
+- `src/components/layout/FooterLinkGroup.tsx` — required fix: external link handling
 
-- `src/locales/en.json` — added complete `home` section (hero + quickAccess + section headings)
-- `src/locales/ar.json` — added complete `home` section (Arabic translations)
-- `src/app/page.tsx` — replaced placeholder with real homepage composition
-- `src/components/shared/QuickAccessCard.tsx` — fixed icon type casting
+### Removed in Sprint 1.3
+
+- `src/app/systems/.gitkeep` — no longer needed, folder now has a real page.tsx
 
 ---
 

@@ -3,7 +3,8 @@
     "brandName": "MITSU",
     "brandFullName": "MUST Information Technology Student Union",
     "loading": "Loading...",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "opensInNewTab": "Opens in a new tab"
   },
   "nav": {
     "home": "Home",
@@ -75,6 +76,49 @@
         "description": "Learn more about our mission"
       },
       "explore": "Explore"
+    }
+  },
+  "systems": {
+    "heading": "University Systems",
+    "subheading": "Access official university platforms for registration, learning, and communication.",
+    "openButton": "Open",
+    "howToUseButton": "How to Use",
+    "requiredBadge": "Required",
+    "categories": {
+      "academic": "Academic",
+      "studentServices": "Student Services",
+      "communication": "Communication"
+    },
+    "passwordReset": {
+      "label": "Forgot your university account password?",
+      "linkText": "Reset it here"
+    },
+    "items": {
+      "banner": {
+        "name": "Banner",
+        "description": "Course registration, schedules, academic records, and university services.",
+        "instructions": "Sign in with your official university account. Use Banner to register for courses, view your schedule, and access your academic records."
+      },
+      "smartLearning": {
+        "name": "Smart Learning",
+        "description": "Course materials, assignments, quizzes, and learning resources.",
+        "instructions": "Sign in with your official university account to access your course materials, assignments, and quizzes."
+      },
+      "muster": {
+        "name": "MUSTER",
+        "description": "Official student mobile application for timetable, grades, doctor evaluation, and student services.",
+        "instructions": "Download MUSTER from the App Store or Google Play and sign in with your official university account. A web portal is not available yet."
+      },
+      "teams": {
+        "name": "Microsoft Teams",
+        "description": "Online lectures and communication with academic advisors.",
+        "instructions": "Sign in with your official university account. Academic advisors communicate with students exclusively through Microsoft Teams."
+      },
+      "outlook": {
+        "name": "Outlook",
+        "description": "Official university email.",
+        "instructions": "Sign in with your official university account to access your university email. If you forget your password, use the password reset tool below."
+      }
     }
   },
   "foundation": {
