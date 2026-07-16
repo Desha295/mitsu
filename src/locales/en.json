@@ -121,6 +121,101 @@
       }
     }
   },
+  "guide": {
+    "heading": "Freshman Guide",
+    "subheading": "Everything you need to know to start your university journey with confidence.",
+    "learnMore": "Learn more",
+    "showLess": "Show less",
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "description": "This guide walks you through registration, academic advising, credit hours, and the key rules every MUST IT student should know."
+      },
+      "registrationProcess": {
+        "title": "Registration Process",
+        "description": "Your first semester is registered for you — here's how it works.",
+        "facts": {
+          "advisorRegisters": "Your first semester registration is performed by your Academic Advisor."
+        }
+      },
+      "academicAdvisor": {
+        "title": "Academic Advisor",
+        "description": "Your advisor is your main point of contact for registration and academic planning.",
+        "facts": {
+          "teamsOnly": "Academic Advisors communicate with students exclusively through Microsoft Teams."
+        }
+      },
+      "creditHourSystem": {
+        "title": "Credit Hour System",
+        "description": "Your degree requires a total of 140 credit hours, distributed across four years.",
+        "stats": {
+          "year1": "Year 1",
+          "year2": "Year 2",
+          "year3": "Year 3",
+          "year4": "Year 4",
+          "summer": "Summer",
+          "graduationSummer": "Graduation Summer",
+          "total": "Total"
+        }
+      },
+      "gpaRules": {
+        "title": "GPA Rules",
+        "description": "Your GPA affects how many credit hours you're allowed to register.",
+        "facts": {
+          "belowTwo": "A GPA below 2.0 normally allows registration of 14 hours, up to 15 hours with advisor approval."
+        }
+      },
+      "summerRegistration": {
+        "title": "Summer Registration",
+        "description": "Summer semesters let you register for a limited number of hours.",
+        "stats": {
+          "summer": "Regular Summer",
+          "graduationSummer": "Graduation Summer"
+        }
+      },
+      "overloadRules": {
+        "title": "Overload Rules",
+        "description": "Overload lets high-performing students register beyond the normal hour limit.",
+        "facts": {
+          "cgpaAboveThree": "Overload is allowed only for students with a CGPA above 3.0."
+        }
+      },
+      "importantNotes": {
+        "title": "Important Notes",
+        "description": "The most important rules to remember, all in one place.",
+        "facts": {
+          "advisorRegisters": "Your first semester registration is performed by your Academic Advisor.",
+          "teamsOnly": "Academic Advisors communicate exclusively through Microsoft Teams.",
+          "gpaBelowTwo": "GPA below 2.0 allows 14 hours (up to 15 with advisor approval).",
+          "overload": "Overload is allowed only for CGPA above 3.0."
+        }
+      }
+    }
+  },
+  "studyPlans": {
+    "heading": "Study Plans",
+    "subheading": "Official reference study plans for each major. Tap any plan to view it in full size.",
+    "viewFullSize": "View Full Size",
+    "closeViewer": "Close",
+    "items": {
+      "general": {
+        "name": "General Major",
+        "alt": "General Major official study plan"
+      },
+      "computerScience": {
+        "name": "Computer Science Major",
+        "alt": "Computer Science Major official study plan"
+      },
+      "artificialIntelligence": {
+        "name": "Artificial Intelligence Major",
+        "alt": "Artificial Intelligence Major official study plan"
+      },
+      "informationSystems": {
+        "name": "Information Systems Major",
+        "alt": "Information Systems Major official study plan"
+      }
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",

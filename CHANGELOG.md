@@ -6,6 +6,65 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.5.0] — Phase 1 Sprint 1.4: Freshman Guide
+
+### Added
+
+**Data Layer:**
+- `src/data/guide.ts` — 8 guide sections with inline `GuideSection`/`GuideStat` types: Introduction, Registration Process, Academic Advisor, Credit Hour System, GPA Rules, Summer Registration, Overload Rules, Important Notes. Official academic rules used verbatim (not invented):
+  - Total Credit Hours = 140 (Year 1: 36, Year 2: 36, Year 3: 36, Year 4: 32, Summer: 9, Graduation Summer: 12).
+  - First semester registration performed by the Academic Advisor.
+  - Academic Advisors communicate only through Microsoft Teams.
+  - GPA below 2.0 → 14 hours (up to 15 with advisor approval).
+  - Overload allowed only for CGPA above 3.0.
+- `src/data/studyPlans.ts` — 4 official study plans (General, Computer Science, Artificial Intelligence, Information Systems) with inline `StudyPlan` type, including exact intrinsic image dimensions.
+
+**Assets:**
+- `public/images/study-plans/` — 4 official study plan reference images (general-major.png, computer-science-major.png, artificial-intelligence-major.png, information-systems-major.png). Displayed as-is; contents never extracted, OCR'd, or summarized.
+
+**Feature Components:**
+- `GuideCard.tsx` (components/shared) — numbered step card with icon, title, description, and an expandable "Learn more" panel showing fact bullets and/or a stat-chip grid (used for Credit Hour System and Summer Registration numbers). `highlight` variant gives Important Notes distinct secondary/green styling.
+- `StudyPlanCard.tsx` (components/shared) — thumbnail preview (next/image, `fill`) + "View Full Size" trigger opening a self-contained accessible full-screen viewer: focus moves in on open, Escape closes, background scroll locks, focus returns to the trigger on close (same conventions as Sprint 1.1's MobileMenu).
+
+**Section Components:**
+- `FreshmanGuideSection.tsx` (components/sections) — renders all 8 guide steps as a sequential numbered card list.
+- `StudyPlansSection.tsx` (components/sections) — responsive grid (1/2/4 columns) of study plan cards.
+
+**Routing:**
+- `src/app/guide/page.tsx` — new `/guide` route composing `FreshmanGuideSection` + `StudyPlansSection`.
+
+**Localization:**
+- Extended `src/locales/en.json` and `ar.json` with top-level `guide` section (heading, subheading, learn more/show less, all 8 topics' titles/descriptions/facts/stat labels) and `studyPlans` section (heading, subheading, view full size/close, 4 major names + alt text).
+
+### Fixed
+
+- `StudyPlanCard.tsx` — fixed `react-hooks/exhaustive-deps` lint warning by copying `triggerRef.current` to a local variable inside the effect before the cleanup closure captures it, rather than reading the ref directly in cleanup.
+
+### Architecture Decisions
+
+- **Inline types over separate type files:** `GuideSection`/`GuideStat`/`StudyPlan` interfaces are defined directly inside `guide.ts`/`studyPlans.ts` rather than in new `src/types/*.types.ts` files — a deliberate, scoped deviation from the Sprint 1.1–1.3 convention, made to strictly respect this sprint's explicit "Create:" file list and "no architecture changes" instruction.
+- **Reused disclosure pattern:** GuideCard's "Learn more" toggle follows the exact same inline-expand pattern as SystemCard's "How to Use" button (Sprint 1.3) — no new disclosure primitive introduced.
+- **Self-contained lightbox:** StudyPlanCard's full-size viewer is implemented inline rather than extracted into a new shared `ImageLightbox` component, again to respect the sprint's closed file list. Its accessible-dialog behavior mirrors MobileMenu's established conventions.
+- **next/image throughout:** both thumbnail (`fill` + `aspect-[4/3]` container) and full-size (`width`/`height` from real intrinsic dimensions) views use `next/image`, never a plain `<img>` tag, per 05_ARCHITECTURE.md #14.
+- **Study plans treated as opaque assets:** at no point in the data, components, or this changelog are the study plan images' contents described, transcribed, or summarized — only their major names (provided directly by the user) are used as labels.
+
+### Verification
+
+- `npm run lint` — 1 warning found (react-hooks/exhaustive-deps in StudyPlanCard) and fixed; passes clean afterward.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/guide` now generated as a static route alongside `/` and `/systems`.
+
+### Breaking Changes
+
+None.
+
+### Known Issues
+
+- Official brand hex colors, campus photo, and per-system logos still pending from earlier sprints.
+- `CHANGE_POLICY.md` and `AI_INSTRUCTIONS.md` were not present as standalone files in this sprint's project mount; their rules were applied from earlier in the working session.
+
+---
+
 ## [v0.4.0] — Phase 1 Sprint 1.3: University Systems Section
 
 ### Added
@@ -226,4 +285,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.4 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).
+Sprint 1.5 — Student Union (About, Leadership, Committees) — scope not yet approved (see `PROJECT_STATE.md` Next Actions).
