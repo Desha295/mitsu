@@ -6,6 +6,71 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.7.0] — Phase 1 Sprint 1.6: Announcements & Events
+
+### Added
+
+**Data Layer:**
+- `src/data/announcements.ts` — new data file with inline types (`Announcement`, `Event`, `AnnouncementPriority`, `AnnouncementCategory`, `EventCategory`), mirroring the `/announcements` and `/events` Firestore collection shape (`06_FIREBASE_SCHEMA.md` #5-6).
+  - 8 sample announcements (one featured + urgent: "Fall Semester Registration Now Open"), 6 sample upcoming events.
+  - **Explicitly labeled as sample/placeholder content** in the file's header comment — unlike Sprints 1.3-1.5, no real Student Union announcements/events were supplied this sprint.
+
+**Feature Components:**
+- `AnnouncementCard.tsx` (components/shared) — category badge, priority-based visual emphasis, date, title, description; `featured` prop for the larger hero-style slot.
+- `EventCard.tsx` (components/shared) — category badge, title, description, formatted date, optional location.
+
+**Section Components:**
+- `AnnouncementsSection.tsx` — featured announcement, static search input, static category filter chips, "Latest Announcements" grid (newest first).
+- `EventsSection.tsx` — "Upcoming Events" grid (soonest first).
+
+**Routing:**
+- `src/app/announcements/page.tsx` — new `/announcements` route: Announcements → Events.
+
+**Localization:**
+- Extended `en.json`/`ar.json` with top-level `announcements` and `events` sections: headings, search/filter labels, category labels, priority labels, empty states, and full title/description/location text for every sample item.
+
+**Shared Utility:**
+- `formatDate(dateString, language)` added to `src/lib/utils.ts` — locale-aware date formatting shared by both new cards (avoids duplicating `Intl.DateTimeFormat` logic). Forces Western digits in Arabic (`ar-EG-u-nu-latn`) for consistency with existing numeric displays elsewhere in the app.
+
+### Architecture Decisions
+
+- **Priority uses only brand colors, not red:** "urgent" announcements are differentiated through a solid primary (Blue) badge, an `AlertCircle` icon, and a heavier border — not a conventional red/orange — because `04_DESIGN_SYSTEM.md`/`08_BRAND_GUIDELINES.md` repeatedly prohibit introducing colors outside the locked Blue/Green/White palette. "Important" reuses the secondary-light "highlight" treatment already established for `GuideCard`'s Important Notes in Sprint 1.4, keeping the visual language consistent across sprints.
+- **Search and filter are genuinely static, not disabled:** both controls are fully interactive and accessible (controlled input state, `aria-pressed` on filter chips) so they don't feel broken to a user — but neither actually filters the rendered list, per `CURRENT_SPRINT.md`'s explicit "(Static)" scope and the "No CRUD" / "No Firebase" restriction for this sprint.
+- **Types co-located with data:** `Announcement`/`Event` and their supporting types live inline in `announcements.ts`, continuing the Sprint 1.4/1.5 pattern rather than adding a new `src/types/*` file not listed in this sprint's approved scope.
+- **Content honesty:** the data file's header comment explicitly flags all announcements/events as sample placeholders, distinct from the real official data used in Sprints 1.3 (Systems), 1.4 (Guide/academic rules), and 1.5 (Union/leadership) — this sprint had no real Student Union submissions to work from.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/announcements` now generated as a static route alongside `/`, `/guide`, `/systems`, `/union`.
+
+### Breaking Changes
+
+None.
+
+### Known Issues
+
+- All announcement/event content is sample/placeholder — needs replacement with real Student Union submissions before launch.
+- Search and category filters are UI-only; no real filtering logic yet (by design, per Sprint 1.6 scope).
+
+---
+
+## [v0.6.1] — Bug Fix: Unified WhatsApp Community Link
+
+### Fixed
+
+- The Hero section's "Join WhatsApp Community" button (`src/data/home.ts`) pointed to an empty placeholder href left over from Sprint 1.2, while the Student Union page (`src/data/union.ts`) had the real, working URL. Extracted `WHATSAPP_COMMUNITY_URL` as a single named constant in `union.ts`; `home.ts` now imports and reuses it. Both places now open the exact same link, from one source of truth.
+
+### Verification
+
+- `npm run lint` — passes.
+- `tsc --noEmit` — passes.
+
+Commit: `fix: unify WhatsApp community link across homepage and student union`
+
+---
+
 ## [v0.6.0] — Phase 1 Sprint 1.5: Student Union Section
 
 ### Added
@@ -347,4 +412,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.6 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).
+Sprint 1.7 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).

@@ -283,6 +283,110 @@
       "whatsappCommunity": "WhatsApp Community"
     }
   },
+  "announcements": {
+    "heading": "Announcements",
+    "subheading": "Stay up to date with the latest news from the Student Union.",
+    "featuredLabel": "Featured",
+    "latestHeading": "Latest Announcements",
+    "searchPlaceholder": "Search announcements...",
+    "searchLabel": "Search announcements",
+    "filterLabel": "Filter by category",
+    "filters": {
+      "all": "All",
+      "academic": "Academic",
+      "deadline": "Deadline",
+      "general": "General",
+      "event": "Event",
+      "orientation": "Orientation"
+    },
+    "priority": {
+      "normal": "Normal",
+      "important": "Important",
+      "urgent": "Urgent"
+    },
+    "emptyState": "No announcements available yet.",
+    "items": {
+      "fallRegistrationOpen": {
+        "title": "Fall Semester Registration Now Open",
+        "description": "Registration for the upcoming Fall semester is now open. Contact your Academic Advisor through Microsoft Teams to complete your course registration before the deadline."
+      },
+      "orientationScheduleReleased": {
+        "title": "New Student Orientation Schedule Released",
+        "description": "The full orientation schedule for new IT freshmen is now available, covering campus tours, account activation, and welcome sessions."
+      },
+      "newStudySpaces": {
+        "title": "New Study Spaces Now Available in the IT Building",
+        "description": "Additional quiet study areas and group work rooms have opened on the second floor of the IT building, available during regular building hours."
+      },
+      "aiGuestLecture": {
+        "title": "Guest Lecture: Careers in Artificial Intelligence",
+        "description": "Join us for a guest lecture exploring career paths in AI, featuring alumni working in the field. Open to all IT students."
+      },
+      "libraryHoursExtended": {
+        "title": "Library Hours Extended During Registration Week",
+        "description": "The university library will extend its hours throughout registration week to support students preparing their course schedules."
+      },
+      "committeeApplicationsOpen": {
+        "title": "Student Union Committee Applications Open",
+        "description": "Applications to join a Student Union committee for the upcoming year are now open. Choose from Scientific, Cultural, Sports, Artistic, Social & Trips, Student Families, or Scouts."
+      },
+      "wifiMaintenance": {
+        "title": "Campus Wi-Fi Maintenance This Weekend",
+        "description": "Campus Wi-Fi will be temporarily unavailable this weekend for scheduled maintenance. We apologize for any inconvenience."
+      },
+      "hackathonWinners": {
+        "title": "Congratulations to Our Hackathon Winners",
+        "description": "Congratulations to the IT faculty teams who placed in this year's university-wide hackathon. Full results will be shared soon."
+      }
+    }
+  },
+  "events": {
+    "heading": "Events",
+    "subheading": "Upcoming activities and events organized by the Student Union.",
+    "upcomingHeading": "Upcoming Events",
+    "dateLabel": "Date",
+    "locationLabel": "Location",
+    "categories": {
+      "academic": "Academic",
+      "orientation": "Orientation",
+      "cultural": "Cultural",
+      "sports": "Sports",
+      "social": "Social"
+    },
+    "emptyState": "No upcoming events available yet.",
+    "items": {
+      "orientationDay": {
+        "title": "New Student Orientation Day",
+        "description": "A welcome day for new IT freshmen, covering campus tours, account setup help, and an introduction to the Student Union.",
+        "location": "Main Campus Auditorium"
+      },
+      "programmingCompetition": {
+        "title": "Programming Competition",
+        "description": "Test your coding skills in a friendly inter-year programming competition hosted by the Scientific Committee.",
+        "location": "IT Building, Lab 3"
+      },
+      "culturalNight": {
+        "title": "Cultural Night",
+        "description": "An evening celebrating student creativity through music, poetry, and performances, hosted by the Cultural Committee.",
+        "location": "Student Union Hall"
+      },
+      "sportsTournamentFinals": {
+        "title": "Sports Tournament Finals",
+        "description": "The final matches of this semester's inter-faculty sports tournament, hosted by the Sports Committee.",
+        "location": "University Sports Complex"
+      },
+      "careerFair": {
+        "title": "Career Fair",
+        "description": "Meet employers and explore internship and job opportunities relevant to IT students.",
+        "location": "Main Campus Auditorium"
+      },
+      "communityCharityTrip": {
+        "title": "Community Charity Trip",
+        "description": "A day trip organized by the Social & Trips Committee supporting a local community initiative.",
+        "location": "Off-Campus — meeting point at the Main Gate"
+      }
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",
