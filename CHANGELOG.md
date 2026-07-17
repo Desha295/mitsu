@@ -6,6 +6,68 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.6.0] — Phase 1 Sprint 1.5: Student Union Section
+
+### Added
+
+**Data Layer:**
+- `src/data/union.ts` — new data file with inline types (`SocialLinkItem`, `UnionLeader`, `UnionCommittee`), consistent with the Sprint 1.4 precedent of co-locating types with their sole data file.
+  - `unionOverview` — name, overview, vision, mission, hero image path (official text, used verbatim).
+  - `president` — includes 4 personal social links (Facebook, Instagram, LinkedIn, WhatsApp).
+  - `vicePresident` — no personal links provided; `socialLinks: []`.
+  - `committees` — 7 official committees: Scientific, Cultural, Sports, Artistic, Social & Trips, Student Families, Scouts.
+  - `unionSocialLinks` — 4 official Union channels, structurally separate from the President's personal links.
+
+**Images:**
+- `public/images/union/president.jpg`, `vice-president.jpg` — real photos provided by the Student Union.
+- `public/images/union/union-hero.svg` — abstract placeholder echoing the MITSU logo's connected-node motif (no official hero photo provided yet).
+- `public/images/union/team-placeholder.svg` — generic silhouette-group placeholder, provisioned per sprint instruction for future use.
+
+**Feature Components:**
+- `LeaderCard.tsx` (components/shared) — image, name, position, and a social-links row that only renders when the leader actually has links.
+- `CommitteeCard.tsx` (components/shared) — icon, name, description.
+
+**Section Components:**
+- `UnionHeroSection.tsx` — identity, overview, hero image, Vision & Mission cards.
+- `LeadershipSection.tsx` — President and Vice President.
+- `CommitteesSection.tsx` — all 7 committees plus official Union social links.
+
+**Routing:**
+- `src/app/union/page.tsx` — new `/union` route, composition: Hero → Leadership → Committees (Vision/Mission and Social Links nested within Hero/Committees respectively, matching the specified page flow).
+
+**Localization:**
+- Extended `en.json`/`ar.json` with a new top-level `union` section covering identity text, section headings, leadership names/positions, all 7 committee names/descriptions, and social link labels — personal and official links use distinct translation keys to keep them separable.
+
+### Architecture Decisions
+
+- **Icon verification, not assumption:** checked the installed `lucide-react` package directly before choosing icons — confirmed Facebook/Instagram/LinkedIn icons don't exist (Lucide ships no brand logos, consistent with the Sprint 1.1 Footer precedent). Reused `Users`/`Camera`/`MessageCircle` and added `Briefcase` as a generic LinkedIn stand-in.
+- **WhatsApp number → deep link:** the President's WhatsApp was provided as a phone number (01558989980); converted to `https://wa.me/201558989980` (Egypt country code, leading 0 dropped) so the link actually opens a chat — a direct formatting of the given data, not new information.
+- **SVG placeholders use honest extensions:** `union-hero` and `team-placeholder` are saved as `.svg` rather than the `.jpg` implied by the sprint brief, since they're vector graphics, not photos. Rendered with `unoptimized` on `next/image` to guarantee correct display regardless of Next's SVG optimizer restrictions, without any `next.config.ts` changes.
+- **Personal/official social separation:** enforced structurally — `president.socialLinks` (personal) only ever renders inside `LeaderCard`; `unionSocialLinks` (official) only ever renders inside `CommitteesSection`. No shared array, no possibility of the two lists merging.
+- **Empty social links handled gracefully:** `LeaderCard` conditionally renders the entire social-links row, so the Vice President's card (no personal links provided) shows cleanly with no empty/broken UI.
+
+### Not Touched (Explicitly Out of Scope)
+
+- `src/data/committees.ts` / `src/types/committee.types.ts` — Phase 0 placeholder files, never wired to any UI, left untouched since Sprint 1.5 scoped committee data inside the new `union.ts` instead. Flagged in `PROJECT_STATE.md` as a future cleanup candidate.
+- Navbar, Footer, Theme system, Language system — untouched, per sprint instructions.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/union` now generated as a static route alongside `/`, `/guide`, `/systems`.
+
+### Breaking Changes
+
+None.
+
+### Known Issues
+
+- Official union hero photo and team photo not yet provided — using abstract SVG placeholders.
+- `team-placeholder.svg` exists but isn't referenced by any component yet (no current section needs a generic team-member fallback).
+
+---
+
 ## [v0.5.0] — Phase 1 Sprint 1.4: Freshman Guide
 
 ### Added
@@ -285,4 +347,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.5 — Student Union (About, Leadership, Committees) — scope not yet approved (see `PROJECT_STATE.md` Next Actions).
+Sprint 1.6 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#EEF0F3"/>
+  <!-- Generic group-of-people silhouette icon (no invented identities) -->
+  <g fill="#5B6270" opacity="0.55">
+    <circle cx="200" cy="160" r="52" />
+    <path d="M 110 320 Q 110 220 200 220 Q 290 220 290 320 Z" />
+  </g>
+  <g fill="#5B6270" opacity="0.35">
+    <circle cx="100" cy="185" r="36" />
+    <path d="M 30 320 Q 30 245 100 245 Q 150 245 165 280 Q 110 300 110 320 Z" />
+    <circle cx="300" cy="185" r="36" />
+    <path d="M 370 320 Q 370 245 300 245 Q 250 245 235 280 Q 290 300 290 320 Z" />
+  </g>
+</svg>

@@ -216,6 +216,73 @@
       }
     }
   },
+  "union": {
+    "name": "MITSU Student Union",
+    "overview": "The Student Union of the Faculty of Information Technology at MUST is the official representative body of students. It works to enhance student life by organizing academic, cultural, social, sports, artistic, and community activities while strengthening communication between students and the faculty administration. The Union aims to create an engaging, supportive, and inspiring university environment for every student.",
+    "vision": "To build an innovative, collaborative, and inclusive student community that empowers every student to achieve academic excellence, personal growth, leadership, and social responsibility.",
+    "mission": "To represent students effectively, organize meaningful activities, support student initiatives, foster leadership skills, and connect students with university opportunities through transparent communication and teamwork.",
+    "heroImageAlt": "MITSU Student Union",
+    "visionHeading": "Our Vision",
+    "missionHeading": "Our Mission",
+    "leadershipHeading": "Leadership",
+    "leadershipSubheading": "Meet the students leading the Union this year.",
+    "committeesHeading": "Committees",
+    "committeesSubheading": "Seven committees, each driving a different part of student life.",
+    "socialHeading": "Connect With Us",
+    "socialSubheading": "Follow the official Student Union channels for updates and events.",
+    "leadership": {
+      "president": {
+        "name": "Mustafa Hani",
+        "position": "Student Union President",
+        "imageAlt": "Mustafa Hani, Student Union President"
+      },
+      "vicePresident": {
+        "name": "Nourhan Waleed",
+        "position": "Student Union Vice President",
+        "imageAlt": "Nourhan Waleed, Student Union Vice President"
+      }
+    },
+    "committees": {
+      "scientific": {
+        "name": "Scientific Committee",
+        "description": "Promotes scientific awareness through workshops, competitions, technical events, programming activities, and educational initiatives."
+      },
+      "cultural": {
+        "name": "Cultural Committee",
+        "description": "Organizes cultural events, reading initiatives, debates, public speaking activities, and celebrations that enrich students' knowledge and creativity."
+      },
+      "sports": {
+        "name": "Sports Committee",
+        "description": "Encourages students to participate in sports tournaments, fitness activities, and university competitions while promoting teamwork and healthy lifestyles."
+      },
+      "artistic": {
+        "name": "Artistic Committee",
+        "description": "Supports artistic talents through drawing, photography, music, theater, design, and creative exhibitions."
+      },
+      "socialTrips": {
+        "name": "Social & Trips Committee",
+        "description": "Strengthens friendships and student engagement by organizing trips, social events, charity initiatives, and recreational activities."
+      },
+      "studentFamilies": {
+        "name": "Student Families Committee",
+        "description": "Supports student clubs and families, helping students participate in collaborative activities, competitions, and university events."
+      },
+      "scouts": {
+        "name": "Scouts Committee",
+        "description": "Develops leadership, teamwork, volunteerism, discipline, and community service through scouting activities and outdoor events."
+      }
+    },
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "whatsapp": "WhatsApp",
+      "officialFacebook": "Official Facebook Page",
+      "officialInstagram": "Official Instagram",
+      "facultyGroup": "Faculty Facebook Group",
+      "whatsappCommunity": "WhatsApp Community"
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",

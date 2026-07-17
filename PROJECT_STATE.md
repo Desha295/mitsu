@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 1 — Core Platform
-**Current Sprint:** Sprint 1.4 — Freshman Guide
+**Current Sprint:** Sprint 1.5 — Student Union Section
 **Status:** Complete
-**Version:** v0.5.0
+**Version:** v0.6.0
 
 ---
 
@@ -21,8 +21,12 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ### Phase 0 — Planning & Foundation (v0.1.0)
 
 - Scaffolded Next.js 16 project (App Router, TypeScript, Tailwind CSS v4, ESLint).
-- Design tokens, fonts (Inter/Cairo), theme + language systems with `localStorage` persistence.
-- Firebase SDK skeleton and typed data stubs. Git repository initialized.
+- Configured design tokens in `src/app/globals.css`.
+- Wired Inter (Latin) and Cairo (Arabic) fonts via `next/font/google`.
+- Built full folder skeleton per `05_ARCHITECTURE.md`.
+- Implemented theme system and language system with `localStorage` persistence.
+- Added Firebase SDK skeleton and typed data stubs.
+- Initialized Git repository.
 
 ### Phase 1 — Sprint 1.1: Reusable Layout Foundation (v0.2.0)
 
@@ -35,73 +39,81 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 - Official MITSU and MUST logos integrated into `public/images/`.
 - `HeroSection.tsx`, `QuickAccessSection.tsx`, `QuickAccessCard.tsx`.
-- `src/data/home.ts` — hero and quick access data. Homepage composed at `src/app/page.tsx`.
+- `src/data/home.ts` — hero and quick access data.
+- Homepage composed: `src/app/page.tsx` = Hero + QuickAccess.
 
 ### Phase 1 — Sprint 1.3: University Systems Section (v0.4.0)
 
-- Extended `UniversitySystem` type with category/required/translation-key fields.
+- Extended `system.types.ts` with category/required/translation-key fields.
 - Populated `src/data/systems.ts` with 5 official systems (Banner, Smart Learning, MUSTER, Teams, Outlook).
 - `SystemCard.tsx`, `SystemsSection.tsx`, `/systems` route.
-- Required fixes to `Footer.tsx`/`FooterLinkGroup.tsx` for real URLs and external-link handling.
+- Required dependency fixes to `Footer.tsx`/`FooterLinkGroup.tsx` for real URLs.
 
 ### Phase 1 — Sprint 1.4: Freshman Guide (v0.5.0)
 
+- `src/data/guide.ts` — 8 guide topics with official academic rules (credit hours, GPA, overload).
+- `src/data/studyPlans.ts` — 4 official study plan reference images.
+- `GuideCard.tsx`, `StudyPlanCard.tsx` (with accessible full-size viewer), `FreshmanGuideSection.tsx`, `StudyPlansSection.tsx`.
+- `/guide` route composing both sections.
+
+### Phase 1 — Sprint 1.5: Student Union Section (v0.6.0)
+
 **Data Layer:**
-- `src/data/guide.ts` — 8 guide sections (Introduction, Registration Process, Academic Advisor, Credit Hour System, GPA Rules, Summer Registration, Overload Rules, Important Notes) with inline `GuideSection`/`GuideStat` types. Official academic rules used verbatim, not invented:
-  - Total Credit Hours = 140 (Year 1–3: 36 each, Year 4: 32, Summer: 9, Graduation Summer: 12).
-  - First semester registration performed by Academic Advisor.
-  - Academic Advisors communicate only through Microsoft Teams.
-  - GPA below 2.0 → 14 hours (up to 15 with advisor approval).
-  - Overload allowed only for CGPA above 3.0.
-- `src/data/studyPlans.ts` — 4 official study plans (General, Computer Science, Artificial Intelligence, Information Systems) with inline `StudyPlan` type, including exact intrinsic image dimensions for correct `next/image` usage.
+- `src/data/union.ts` — types (`SocialLinkItem`, `UnionLeader`, `UnionCommittee`) defined inline, consistent with the Sprint 1.4 precedent (no new `src/types/*` files, since this sprint's approved file list didn't include one).
+- `unionOverview` — name, overview, vision, mission, hero image (all official text provided by the Student Union, used verbatim).
+- `president` / `vicePresident` — leadership data. President includes 4 personal social links (Facebook, Instagram, LinkedIn, WhatsApp); Vice President has none provided, so her `socialLinks` array is empty.
+- `committees` — 7 official committees (Scientific, Cultural, Sports, Artistic, Social & Trips, Student Families, Scouts) with real descriptions.
+- `unionSocialLinks` — 4 official Union channels (Facebook, Instagram, Faculty Group, WhatsApp Community), kept structurally and visually separate from the President's personal links per Sprint 1.5's "Personal Information Separation" rule.
 
-**Brand/Reference Assets:**
-- `public/images/study-plans/` — 4 official study plan images (general-major.png, computer-science-major.png, artificial-intelligence-major.png, information-systems-major.png). Copied as-is; contents never extracted, OCR'd, or summarized, per explicit instruction — displayed as reference images only.
+**Images:**
+- `public/images/union/president.jpg`, `vice-president.jpg` — real photos provided by the Student Union.
+- `public/images/union/union-hero.svg`, `team-placeholder.svg` — abstract placeholder graphics (not fake photos) for assets not yet provided. `union-hero.svg` echoes the official MITSU logo's connected-node motif for brand consistency. Saved as `.svg` (not `.jpg` as originally suggested) since they're vector placeholders — using an honest extension rather than mislabeling file type. `team-placeholder.svg` is provisioned per sprint instruction but not yet referenced by any current component (no generic team-member grid exists yet in Sprint 1.5's scope).
 
-**Feature Components:**
-- `GuideCard.tsx` (components/shared) — step-numbered card with icon, title, description, expandable "Learn more" panel showing fact bullets and/or stat chips. `highlight` variant for Important Notes (secondary/green styling, per "important notes should be highlighted").
-- `StudyPlanCard.tsx` (components/shared) — thumbnail preview + "View Full Size" trigger opening a self-contained accessible full-screen viewer (focus management, Escape-to-close, scroll lock, focus-return-to-trigger — same conventions as Sprint 1.1's MobileMenu).
-
-**Section Components:**
-- `FreshmanGuideSection.tsx` (components/sections) — renders guide steps as a numbered card list, step-by-step onboarding feel.
-- `StudyPlansSection.tsx` (components/sections) — responsive grid (1/2/4 columns) of study plan cards.
+**Components:**
+- `LeaderCard.tsx` (components/shared) — image, name, position, and a conditionally-rendered social links row (hidden entirely when a leader has none, e.g. the Vice President).
+- `CommitteeCard.tsx` (components/shared) — icon, name, description.
+- `UnionHeroSection.tsx` — identity, overview, hero image, plus Vision & Mission cards (per the page composition order: Hero → Vision/Mission → Leadership → Committees → Social).
+- `LeadershipSection.tsx` — President and Vice President via `LeaderCard`.
+- `CommitteesSection.tsx` — all 7 committees via `CommitteeCard`, plus the official Union social links at the end of the page.
 
 **Routing:**
-- `src/app/guide/page.tsx` — new `/guide` route composing FreshmanGuideSection + StudyPlansSection.
+- `src/app/union/page.tsx` — new `/union` route composing Hero → Leadership → Committees in order.
 
 **Localization:**
-- Extended `src/locales/en.json` and `ar.json` with top-level `guide` and `studyPlans` sections: all 8 guide topics (titles, descriptions, facts, stat labels), study plan names/alt text, and UI labels (Learn more, Show less, View Full Size, Close).
+- Extended `src/locales/en.json` and `ar.json` with a new top-level `union` section: name/overview/vision/mission, section headings, leadership names/positions, all 7 committee names/descriptions, and social link labels (both personal and official, using distinct keys to keep them separable).
+
+**Icon Decisions:**
+- Verified via the installed `lucide-react` package (not assumed) that Facebook/Instagram/LinkedIn icons don't exist in Lucide. Reused the Sprint 1.1 precedent (`Users` for Facebook, `Camera` for Instagram, `MessageCircle` for WhatsApp) and added `Briefcase` as a generic LinkedIn stand-in.
+- Committee icons: FlaskConical (Scientific), BookOpenText (Cultural), Dumbbell (Sports), Palette (Artistic), Plane (Social & Trips), Users2 (Student Families), Tent (Scouts).
+
+**Data Correction Applied:**
+- The President's WhatsApp contact was provided as a phone number (01558989980). Converted to the standard `https://wa.me/201558989980` deep-link format (Egypt country code +20, leading 0 dropped) so it opens a WhatsApp chat correctly — a direct, non-inventive formatting of the number given, not new information.
 
 **Verification:**
-- `npm run lint` → 1 warning found and fixed (react-hooks/exhaustive-deps ref-in-cleanup issue in StudyPlanCard), then passes with zero errors/warnings.
+- `npm run lint` → passes, zero errors.
 - `tsc --noEmit` → passes, zero TypeScript errors.
-- `npm run build` → succeeds; `/guide` now included as a static route alongside `/` and `/systems`.
+- `npm run build` → succeeds; `/union` now included as a static route alongside `/`, `/guide`, `/systems`.
 
-**Architecture Decisions:**
-- Types for `GuideSection`/`GuideStat`/`StudyPlan` defined inline within their respective data files (`guide.ts`, `studyPlans.ts`) rather than separate `src/types/*.types.ts` files — deliberate deviation from the Sprint 1.1–1.3 convention, to strictly match the sprint's explicit approved file list ("no architecture changes" + a closed "Create:" list that didn't include new type files).
-- "Learn more" expandable panel (GuideCard) reuses the same inline-disclosure pattern established by SystemCard's "How to Use" toggle — no new disclosure component needed.
-- Full-size image viewer (StudyPlanCard) is self-contained rather than extracted into a shared `ImageLightbox` component, again to respect the sprint's closed file list; the accessible-dialog conventions (focus management, Escape, scroll lock) mirror MobileMenu's existing pattern for consistency.
-- Both thumbnail and full-size views use `next/image` (never plain `<img>`), per 05_ARCHITECTURE.md #14 — full-size view uses each image's real intrinsic width/height (stored in data) rather than `fill`, since exact aspect ratios differ slightly per image.
-- Study plan images are never analyzed, OCR'd, or have their contents summarized anywhere in the implementation — treated strictly as opaque reference images per explicit instruction.
+**Not Touched (Out of Scope):**
+- `src/data/committees.ts` and `src/types/committee.types.ts` (Phase 0 placeholder files, never wired to any UI) were left untouched — Sprint 1.5 explicitly scoped committee data inside the new `union.ts` file instead. These Phase 0 files are now redundant/unused; flagged below for future cleanup.
+- Navbar, Footer, Theme system, Language system — untouched, as instructed.
 
 ---
 
 ## Current Sprint
 
-**Sprint 1.4: Freshman Guide** — CLOSED
+**Sprint 1.5: Student Union Section** — CLOSED
 
 Tasks completed:
-- [x] src/data/guide.ts (8 sections, official academic rules)
-- [x] src/data/studyPlans.ts (4 official study plans)
-- [x] Study plan images placed in public/images/study-plans/
-- [x] GuideCard component (expandable, highlight variant)
-- [x] StudyPlanCard component (thumbnail + accessible full-size viewer)
-- [x] FreshmanGuideSection component
-- [x] StudyPlansSection component
-- [x] /guide page route
-- [x] EN localization (guide.* and studyPlans.* keys)
-- [x] AR localization (guide.* and studyPlans.* keys)
-- [x] Verification: lint (1 warning fixed), TypeScript passes, build succeeds
+- [x] `src/data/union.ts` — overview, vision, mission, leadership, committees, social links
+- [x] Real president/vice-president photos + placeholder hero/team images
+- [x] `LeaderCard.tsx`, `CommitteeCard.tsx`
+- [x] `UnionHeroSection.tsx`, `LeadershipSection.tsx`, `CommitteesSection.tsx`
+- [x] `/union` page route (Hero → Leadership → Committees composition)
+- [x] EN localization (`union.*` keys)
+- [x] AR localization (`union.*` keys)
+- [x] Personal vs. official social link separation maintained
+- [x] Verification: lint passes, TypeScript passes, build succeeds
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
 - [x] Git commit created
@@ -109,10 +121,12 @@ Tasks completed:
 
 ---
 
-## Next Actions (Sprint 1.5 — not yet scoped/approved)
+## Next Actions (Sprint 1.6 — not yet scoped/approved)
 
-Per `PROJECT_STATE.md` (project-level) and `10_ROADMAP.md`:
-- Sprint 1.5 — Student Union (About, Leadership, Committees).
+Per `10_ROADMAP.md` Phase 1, likely candidates for a future sprint:
+- Announcements section (placeholder until Firebase Phase 4).
+- Contact page.
+- About page.
 
 **Not yet started — awaiting explicit sprint scope approval before any implementation.**
 
@@ -121,45 +135,45 @@ Per `PROJECT_STATE.md` (project-level) and `10_ROADMAP.md`:
 ## Outstanding Items / Blockers
 
 - Official brand hex colors not yet provided (using placeholder Blue/Green).
-- Official campus photo not yet provided (using SVG placeholder from Sprint 1.2).
-- Official per-system logos not provided (using generic Lucide icons, Sprint 1.3).
+- Official campus photo, union hero photo, and team photo not yet provided (using placeholders).
+- Official per-system logos (Sprint 1.3) not yet provided.
 - MUSTER has no official web portal yet.
-- Firebase project not created; `.env.local` not populated; all data remains local/static.
-- `CHANGE_POLICY.md` and `AI_INSTRUCTIONS.md` are not currently present as standalone files in the project mount (only referenced from earlier in the working session) — flagged for visibility, not blocking.
+- Firebase project not created; all data remains local/static.
+- **Cleanup candidate:** `src/data/committees.ts` + `src/types/committee.types.ts` (Phase 0 placeholders) are now superseded by `src/data/union.ts`'s committee data and are unused by any component — safe to remove in a future sprint if approved.
 
 ---
 
 ## File Summary
 
-### New in Sprint 1.4
+### New in Sprint 1.5
 
-**Components (4 files):**
-- `src/components/shared/GuideCard.tsx`
-- `src/components/shared/StudyPlanCard.tsx`
-- `src/components/sections/FreshmanGuideSection.tsx`
-- `src/components/sections/StudyPlansSection.tsx`
-
-**Data (2 files):**
-- `src/data/guide.ts`
-- `src/data/studyPlans.ts`
+**Components (5 files):**
+- `src/components/shared/LeaderCard.tsx`
+- `src/components/shared/CommitteeCard.tsx`
+- `src/components/sections/UnionHeroSection.tsx`
+- `src/components/sections/LeadershipSection.tsx`
+- `src/components/sections/CommitteesSection.tsx`
 
 **Routes (1 file):**
-- `src/app/guide/page.tsx`
+- `src/app/union/page.tsx`
 
-**Assets (4 files):**
-- `public/images/study-plans/general-major.png`
-- `public/images/study-plans/computer-science-major.png`
-- `public/images/study-plans/artificial-intelligence-major.png`
-- `public/images/study-plans/information-systems-major.png`
+**Data (1 file):**
+- `src/data/union.ts`
 
-### Modified in Sprint 1.4
+**Images (4 files):**
+- `public/images/union/president.jpg`
+- `public/images/union/vice-president.jpg`
+- `public/images/union/union-hero.svg`
+- `public/images/union/team-placeholder.svg`
 
-- `src/locales/en.json` — added top-level `guide` and `studyPlans` sections
-- `src/locales/ar.json` — added top-level `guide` and `studyPlans` sections (Arabic)
+### Modified in Sprint 1.5
 
-### Removed in Sprint 1.4
+- `src/locales/en.json` — added top-level `union` section
+- `src/locales/ar.json` — added top-level `union` section (Arabic)
 
-- `src/app/guide/.gitkeep` — no longer needed, folder now has a real page.tsx
+### Removed in Sprint 1.5
+
+- `src/app/union/.gitkeep` — superseded by real `page.tsx`
 
 ---
 
