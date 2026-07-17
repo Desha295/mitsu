@@ -4,6 +4,8 @@
  * Data-driven per CHANGE_POLICY.md — no hardcoded content in components.
  */
 
+import { WHATSAPP_COMMUNITY_URL } from "@/data/union";
+
 export interface HeroData {
   /** Translation key for main heading */
   headingKey: string;
@@ -39,7 +41,7 @@ export const heroData: HeroData = {
   headingKey: "home.hero.heading",
   descriptionKey: "home.hero.description",
   primaryCtaKey: "home.hero.primaryCta",
-  primaryCtaHref: "", // Placeholder: WhatsApp link from Firebase settings (Phase 4)
+  primaryCtaHref: WHATSAPP_COMMUNITY_URL,
   secondaryCtaKey: "home.hero.secondaryCta",
   secondaryCtaHref: "/guide",
   imagePath: "/images/placeholders/campus.svg",

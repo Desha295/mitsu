@@ -37,6 +37,15 @@ export interface UnionCommittee {
   order: number;
 }
 
+/**
+ * Single source of truth for the official Student Union WhatsApp
+ * Community link. Referenced here in `unionSocialLinks` and imported by
+ * `src/data/home.ts` for the Hero section's "Join WhatsApp Community"
+ * CTA, so both places always point to the exact same URL.
+ */
+export const WHATSAPP_COMMUNITY_URL =
+  "https://chat.whatsapp.com/KlzgjQmRqGd1fAq6VwqCrd";
+
 /** Union identity: overview, vision, mission, hero image. */
 export const unionOverview = {
   nameKey: "union.name",
@@ -173,7 +182,7 @@ export const unionSocialLinks: SocialLinkItem[] = [
   },
   {
     labelKey: "union.social.whatsappCommunity",
-    href: "https://chat.whatsapp.com/KlzgjQmRqGd1fAq6VwqCrd",
+    href: WHATSAPP_COMMUNITY_URL,
     icon: "MessageCircle",
   },
 ];
