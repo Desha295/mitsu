@@ -6,6 +6,59 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.9.0] — Phase 2 Sprint 2.1: Firebase Foundation
+
+### Added
+
+**Backend Foundation:**
+- `src/lib/firebase/collections.ts` — typed Firestore document interfaces (`AnnouncementDoc`, `EventDoc`, `SystemDoc`, `CommitteeDoc`, `LeadershipDoc`, `SettingsDoc`, `DocumentResourceDoc`, `AdminDoc`) mirroring `06_FIREBASE_SCHEMA.md` #5-12 exactly, plus typed `CollectionReference`/`DocumentReference` getter functions for all 8 canonical collections. A generic pass-through `FirestoreDataConverter` gives every reference full TypeScript typing via `withConverter` without repeating boilerplate per collection.
+- `src/lib/firebase/index.ts` — barrel export (`export * from "./config"` + `"./collections"`), giving future code a single, stable import path.
+
+### Changed
+
+- `src/lib/firebase.ts` (Phase 0's flat skeleton) → `src/lib/firebase/config.ts`. Content and behavior preserved exactly (same env vars, same safe-`null`-until-configured pattern) — only the location changed, per Sprint 2.1's "Backend folder structure" requirement.
+
+### Removed
+
+- `src/lib/firebase.ts` — superseded by the `src/lib/firebase/` folder.
+
+### Safety Verification
+
+- Searched the entire `src/` tree for imports of `@/lib/firebase` **before** restructuring: zero results. The Phase 0 file was completely unused by every one of the 7 Phase 1 sprints, confirming this move carried no risk to any existing page.
+- Re-ran the same search **after** restructuring: still zero references to the old path.
+- Diffed `.env.local.example`'s variable names against what `config.ts` actually reads: exact match, confirmed rather than assumed — no changes needed.
+
+### Explicitly Not Built (Reserved for Sprint 2.2)
+
+Per `CURRENT_SPRINT.md`'s "Out of Scope" and `10_ROADMAP.md`'s Sprint 2.2 definition:
+- No generic CRUD functions (create/read/update/delete).
+- No `getDocs`/`addDoc`/`setDoc`/`onSnapshot` calls anywhere in the new code — `collections.ts` only returns typed references, it never reads or writes data.
+- No upload service, query helpers, or pagination helpers.
+- No login page, admin dashboard, role management, or any Firebase UI.
+- No static data migrated — all 8 public pages continue running on local data exactly as before.
+
+### Architecture Decisions
+
+- **Typed references now, CRUD later:** using Firestore's `withConverter` at the foundation layer means Sprint 2.2's services get compile-time type safety "for free" instead of every future service redefining converters ad hoc.
+- **Settings is a document, not a collection:** `/settings/general` is a single fixed document per `06_FIREBASE_SCHEMA.md` #10, so `getSettingsDocRef()` returns a `DocumentReference`, not a `CollectionReference` — modeled correctly rather than forced into the same shape as the other 7 collections.
+- **`null`-safe by design, not by accident:** every getter checks `db` first and returns `null` if Firebase isn't configured, consistent with `config.ts`'s existing pattern — callers (Sprint 2.2+) must handle the `null` case explicitly, so an unconfigured Firebase project can never silently crash a public page.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; all 8 existing public routes (`/`, `/about`, `/announcements`, `/contact`, `/guide`, `/systems`, `/union`, plus `/_not-found`) generate exactly as before this sprint — no public-facing behavior changed.
+
+### Breaking Changes
+
+None for consumers — nothing imported the old file. Internal-only path change (`@/lib/firebase.ts` → `@/lib/firebase/` folder, same public API via the barrel export).
+
+### Known Issues
+
+- No real Firebase project exists yet; `.env.local` remains unpopulated and every public page continues running on local static data, exactly as intended for this sprint.
+
+---
+
 ## [v0.8.0] — Phase 1 Sprint 1.7: About MITSU & Contact
 
 ### Added
@@ -465,4 +518,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.8 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates; likely "Platform Polish" per `10_ROADMAP.md`).
+Sprint 2.2 — Firebase Services (generic CRUD, upload service, query/pagination helpers) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.

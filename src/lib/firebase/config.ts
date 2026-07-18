@@ -1,13 +1,23 @@
 /**
- * Firebase initialization for MITSU.
+ * Firebase app initialization (Sprint 2.1 — Firebase Foundation).
  *
- * Phase 0 status: NO real Firebase project exists yet. All values come from
- * environment variables (see .env.local.example). Until a real project is
- * created and `.env.local` is filled in, `firebaseConfig` will be incomplete
- * and `app`/`db`/`storage`/`auth` will be `null` rather than throwing, so the
- * rest of the app (static pages, theme, language) keeps working.
+ * Relocated from the flat `src/lib/firebase.ts` created in Phase 0 into
+ * this dedicated folder, per Sprint 2.1's "Backend folder structure"
+ * requirement. Nothing in the app imported the old file (verified before
+ * this refactor), so this is a zero-risk move — no existing page,
+ * component, or data file is affected.
+ *
+ * Sprint 2.1 status: still NO real Firebase project exists. All values
+ * come from environment variables (see .env.local.example). Until a real
+ * project is created and `.env.local` is filled in, `firebaseConfig` is
+ * incomplete and `app`/`db`/`storage`/`auth` remain `null` rather than
+ * throwing, so every public page keeps working exactly as before
+ * (Sprint 2.1's "Keep all current public pages working" requirement).
  *
  * Do NOT hardcode real credentials here. See 09_DEVELOPMENT_STANDARDS.md #11.
+ *
+ * Out of scope for this sprint (see CURRENT_SPRINT.md): no reads, no
+ * writes, no auth screens, no CRUD. This file only initializes the SDK.
  */
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
@@ -23,7 +33,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const isFirebaseConfigured = Boolean(
+export const isFirebaseConfigured = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId
 );
 
@@ -44,4 +54,4 @@ if (isFirebaseConfigured) {
   );
 }
 
-export { app, db, storage, auth, isFirebaseConfigured };
+export { app, db, storage, auth };

@@ -9,10 +9,10 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ## Current Status
 
-**Phase:** Phase 1 — Core Platform
-**Current Sprint:** Sprint 1.7 — About MITSU & Contact
+**Phase:** Phase 2 — Backend Foundation
+**Current Sprint:** Sprint 2.1 — Firebase Foundation
 **Status:** Complete
-**Version:** v0.8.0
+**Version:** v0.9.0
 
 ---
 
@@ -20,89 +20,73 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ### Phase 0 — Planning & Foundation (v0.1.0)
 
-- Scaffolded Next.js 16 project, design tokens, fonts, theme/language systems, Firebase skeleton, Git init.
+- Scaffolded Next.js 16 project, design tokens, fonts, theme/language systems, Git init.
+- Original flat `src/lib/firebase.ts` skeleton (safe no-op until configured) — superseded in Sprint 2.1.
 
-### Phase 1 — Sprint 1.1: Reusable Layout Foundation (v0.2.0)
+### Phase 1 — Core Platform (v0.2.0 – v0.8.0)
 
-- `Navbar.tsx`, `NavLinks.tsx`, `MobileMenu.tsx`, `Footer.tsx`, `FooterLinkGroup.tsx`, `FooterSocialLinks.tsx`, `Logo.tsx`, `ThemeSwitcher.tsx`, `LanguageSwitcher.tsx`, `Container.tsx`, `IconButton.tsx`.
+**Sprint 1.1:** Reusable layout foundation — Navbar, Footer, MobileMenu, Container, Logo, Theme/Language switchers.
+**Sprint 1.2:** Homepage — HeroSection, QuickAccessSection.
+**Sprint 1.3:** University Systems — 5 official systems (Banner, Smart Learning, MUSTER, Teams, Outlook).
+**Sprint 1.4:** Freshman Guide — 8 official academic-rule topics, 4 official study plan images.
+**Sprint 1.5:** Student Union — overview, vision, mission, leadership, 7 committees, social links.
+**Sprint 1.6:** Announcements & Events — sample/placeholder content (flagged for real-data replacement), static search/filter UI.
+**Sprint 1.7:** About MITSU & Contact — platform identity, platform goals, office info (pending), President contact, official channels.
 
-### Phase 1 — Sprint 1.2: Homepage Hero & Quick Access (v0.3.0)
+*(Bug fix between 1.5/1.6: unified WhatsApp Community URL to one source of truth.)*
 
-- `HeroSection.tsx`, `QuickAccessSection.tsx`, `QuickAccessCard.tsx`, `src/data/home.ts`.
+Phase 1 is complete: all 7 public content sprints delivered, 8 total routes, fully bilingual (EN/AR), dark mode, RTL/LTR, accessible, 100% data-driven.
 
-### Phase 1 — Sprint 1.3: University Systems Section (v0.4.0)
+### Phase 2 — Sprint 2.1: Firebase Foundation (v0.9.0)
 
-- `src/data/systems.ts` (5 official systems), `SystemCard.tsx`, `SystemsSection.tsx`, `/systems` route.
+**Objective:** build the backend foundation without changing any existing public functionality (per `CURRENT_SPRINT.md`).
 
-### Phase 1 — Sprint 1.4: Freshman Guide (v0.5.0)
+**Restructured (zero-risk — verified nothing imported the old file before moving it):**
+- Replaced the flat `src/lib/firebase.ts` (Phase 0) with a proper `src/lib/firebase/` folder, per this sprint's explicit "Backend folder structure" requirement:
+  - `src/lib/firebase/config.ts` — Firebase app/Firestore/Storage/Auth initialization, relocated from the old file with the same safe-`null`-until-configured behavior preserved exactly.
+  - `src/lib/firebase/collections.ts` — **new.** Typed Firestore document interfaces (`AnnouncementDoc`, `EventDoc`, `SystemDoc`, `CommitteeDoc`, `LeadershipDoc`, `SettingsDoc`, `DocumentResourceDoc`, `AdminDoc`) mirroring `06_FIREBASE_SCHEMA.md` #5-12 exactly, plus typed `CollectionReference`/`DocumentReference` getter functions for all 8 canonical collections (`announcements`, `events`, `systems`, `committees`, `leadership`, `settings` — a single doc at `/settings/general`, `documents`, `admins`).
+  - `src/lib/firebase/index.ts` — barrel export so future code can `import { db, getAnnouncementsCollection } from "@/lib/firebase"` without knowing the internal layout.
+- `.env.local.example` — verified unchanged; already exactly matches the 6 env vars `config.ts` reads (Phase 0 got this right the first time, confirmed via diff, not assumed).
 
-- `src/data/guide.ts`, `src/data/studyPlans.ts`, `GuideCard.tsx`, `StudyPlanCard.tsx`, `FreshmanGuideSection.tsx`, `StudyPlansSection.tsx`, `/guide` route.
+**Explicitly NOT built (reserved for Sprint 2.2 — Firebase Services, per `10_ROADMAP.md`):**
+- No generic CRUD functions (`getAll`, `create`, `update`, `delete`).
+- No `getDocs`/`addDoc`/`setDoc`/`onSnapshot` calls anywhere — the collection helpers only return typed references, never read or write data.
+- No upload service, query helpers, or pagination helpers.
 
-### Phase 1 — Sprint 1.5: Student Union Section (v0.6.0)
-
-- `src/data/union.ts` (overview, vision, mission, leadership, 7 committees, social links), `LeaderCard.tsx`, `CommitteeCard.tsx`, `UnionHeroSection.tsx`, `LeadershipSection.tsx`, `CommitteesSection.tsx`, `/union` route.
-
-### Post-Sprint 1.5 Bug Fix (v0.6.1)
-
-- Unified the WhatsApp Community URL via a single named constant in `union.ts`, imported by `home.ts`.
-
-### Phase 1 — Sprint 1.6: Announcements & Events (v0.7.0)
-
-- `src/data/announcements.ts` (sample/placeholder content, clearly labeled), `AnnouncementCard.tsx`, `EventCard.tsx`, `AnnouncementsSection.tsx` (featured + static search/filter), `EventsSection.tsx`, `/announcements` route.
-- Added shared `formatDate()` helper to `lib/utils.ts`.
-
-### Phase 1 — Sprint 1.7: About MITSU & Contact (v0.8.0)
-
-**Data Layer:**
-- `src/data/about.ts` — platform identity content sourced from `01_PROJECT_IDENTITY.md`: introduction, Vision, Mission, motto, and the 8 Core Values presented as "Platform Goals". Deliberately kept distinct from `union.ts`'s `unionOverview` (Sprint 1.5), which describes the Student Union *organization*, not the *platform* — the two are different content, not duplicates of each other.
-- `src/data/contact.ts` — office information (location/hours/email) and official communication channels (Microsoft Teams for advisors). President contact and official social links are **not** duplicated here — imported directly from `union.ts` (`president`, `unionSocialLinks`), keeping one source of truth per DATA_ARCHITECTURE.md.
-  - Office location, hours, and a direct email address have not been provided by the Student Union. Rather than inventing plausible-looking details, these fields are left unset in the data and rendered as "Coming soon" by `ContactCard` — consistent with `00_PROJECT_RULES.md` #17/#27 ("never invent — mark for review").
-
-**Feature Components:**
-- `ContactCard.tsx` (components/shared) — generic icon+title+description(+optional link) card, reused for both office info and communication channels (receives pre-resolved strings, same pattern as `FooterLinkGroup` from Sprint 1.1, since it serves two unrelated data shapes).
-
-**Section Components:**
-- `AboutSection.tsx` — platform introduction, motto, and the 8 "Platform Goals" as a card grid.
-- `VisionMissionSection.tsx` — Vision/Mission cards for the platform, visually consistent with `UnionHeroSection`'s Vision/Mission treatment (Sprint 1.5) but sourced from `about.ts`, not `union.ts`.
-- `ContactSection.tsx` — office information, President contact (reuses `LeaderCard` + `president` directly — no duplicated component or data), and official communication channels.
-- `SocialLinksSection.tsx` — reuses `unionSocialLinks` from `union.ts` directly (same links already shown on `/union`, not a second copy) and the existing `union.socialHeading`/`socialSubheading` translation keys.
-
-**Routing:**
-- `src/app/about/page.tsx` — new `/about` route (About → Vision/Mission). This folder didn't exist from Phase 0's original scaffold (only `/contact` did); created fresh.
-- `src/app/contact/page.tsx` — new `/contact` route (Contact → Social Links).
-
-**Localization:**
-- Extended `en.json`/`ar.json` with new top-level `about` and `contact` sections, plus a new `nav.about` key.
-
-**Required Connections (minimal, closely-related fixes — not scope creep):**
-- Added `{ labelKey: "nav.about", href: "/about" }` to `data/navigation.ts` — without this, the new `/about` page would be unreachable from the Navbar/Footer (both already render whatever is in this data file; no component changes needed).
-- Fixed the homepage's "About MITSU" Quick Access card (`data/home.ts`): its `href` was `/union`, a Sprint 1.2 placeholder standing in for a page that didn't exist yet. Now points to the real `/about` page — the same category of fix as the earlier WhatsApp URL bug.
+**Safety verification performed before touching anything:**
+- Searched the entire `src/` tree for any import of `@/lib/firebase` — found none, confirming the Phase 0 file was completely unused and this restructure carries zero risk to any of the 8 existing public pages.
+- Re-ran the same search after the move — still zero references to the old path, and the build's route list is unchanged (`/`, `/about`, `/announcements`, `/contact`, `/guide`, `/systems`, `/union`, `/_not-found`).
 
 **Verification:**
 - `npm run lint` → passes, zero errors.
-- `tsc --noEmit` → passes, zero TypeScript errors.
-- `npm run build` → succeeds; `/about` and `/contact` now included as static routes alongside all 6 existing pages (8 total).
+- `tsc --noEmit` → passes, zero TypeScript errors (confirms the typed converters/collection generics are sound).
+- `npm run build` → succeeds; all 8 existing routes generate exactly as before — no public page behavior changed.
 
-**Not Touched (Out of Scope):**
-- Navbar.tsx, Footer.tsx, MobileMenu.tsx (components) — untouched; only their shared data source (`navigation.ts`) gained one entry.
-- Theme system, Language system, Firebase, Admin Dashboard, AI — untouched/not introduced.
+**Constraints honored (per `CURRENT_SPRINT.md`):**
+- No completed public page was modified.
+- No static data was migrated to Firebase.
+- No UI changed.
+- No authentication screens or placeholder auth created.
+- Only backend infrastructure was built.
 
 ---
 
 ## Current Sprint
 
-**Sprint 1.7: About MITSU & Contact** — CLOSED
+**Sprint 2.1: Firebase Foundation** — CLOSED
 
 Tasks completed:
-- [x] `src/data/about.ts` — platform identity, vision, mission, 8 platform goals
-- [x] `src/data/contact.ts` — office info (pending items marked, not invented), communication channels
-- [x] `AboutSection.tsx`, `VisionMissionSection.tsx`
-- [x] `ContactCard.tsx`, `ContactSection.tsx`, `SocialLinksSection.tsx`
-- [x] `/about` and `/contact` page routes
-- [x] EN localization (`about.*`, `contact.*`, `nav.about`)
-- [x] AR localization (`about.*`, `contact.*`, `nav.about`)
-- [x] Connected new pages into navigation and the homepage Quick Access card
-- [x] Verification: lint passes, TypeScript passes, build succeeds (8 routes)
+- [x] Firebase SDK installation (already present from Phase 0, verified)
+- [x] Firebase configuration (`config.ts`, relocated + preserved)
+- [x] Environment variable setup (`.env.local.example`, verified matching, unchanged)
+- [x] Firebase initialization (app)
+- [x] Firestore initialization
+- [x] Firebase Storage initialization
+- [x] Firebase Authentication initialization
+- [x] Shared Firebase service layer (`src/lib/firebase/` module, barrel-exported)
+- [x] Collection reference helpers (all 8 collections, typed)
+- [x] Folder structure for future backend services
+- [x] Verification: lint passes, TypeScript passes, build succeeds (all 8 public routes unaffected)
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
 - [x] Git commit created
@@ -110,12 +94,11 @@ Tasks completed:
 
 ---
 
-## Next Actions (Sprint 1.8+ — not yet scoped/approved)
+## Next Actions (Sprint 2.2+ — not yet scoped/approved)
 
-Per `10_ROADMAP.md`, Sprint 1.8 (Platform Polish) is the next listed candidate:
-- SEO / metadata refinement, performance optimization, accessibility audit, error pages, loading states, empty states, animation polish.
-
-Beyond that, Phase 2 (Dynamic Platform / Firebase) and Phase 3 (Admin Dashboard) remain future work.
+Per `10_ROADMAP.md` Phase 2:
+- **Sprint 2.2 — Firebase Services:** generic CRUD services, upload service, query helpers, pagination helpers, built on top of this sprint's typed collection references.
+- **Sprint 2.3 — Security Foundation:** Firestore/Storage security rules, auth roles, permission helpers.
 
 **Not yet started — awaiting explicit sprint scope approval before any implementation.**
 
@@ -123,45 +106,26 @@ Beyond that, Phase 2 (Dynamic Platform / Firebase) and Phase 3 (Admin Dashboard)
 
 ## Outstanding Items / Blockers
 
-- Official brand hex colors, campus/union hero/team photos still pending.
-- MUSTER has no official web portal yet.
-- Firebase project not created; all data remains local/static.
-- All announcements/events content (Sprint 1.6) is sample/placeholder pending real submissions.
-- **New this sprint:** Student Union office location, office hours, and a direct contact email have not been provided — currently shown as "Coming soon" on `/contact`. Needs real information before launch.
-- Cleanup candidate (carried over): `src/data/committees.ts` + `src/types/committee.types.ts` (Phase 0 placeholders) remain unused by any component.
-- Search/category filtering on `/announcements` remains UI-only (static), by design per Sprint 1.6 scope.
+- No real Firebase project exists yet — `.env.local` is not populated; all 8 public pages continue running entirely on local static data.
+- All Phase 1 outstanding items remain (official brand colors/photos pending, sample announcement content, unused Phase 0 `committees.ts`/`committee.types.ts`, static-only search/filter on `/announcements`, unconfirmed Student Union office details).
 
 ---
 
 ## File Summary
 
-### New in Sprint 1.7
+### New in Sprint 2.1
 
-**Components (5 files):**
-- `src/components/shared/ContactCard.tsx`
-- `src/components/sections/AboutSection.tsx`
-- `src/components/sections/VisionMissionSection.tsx`
-- `src/components/sections/ContactSection.tsx`
-- `src/components/sections/SocialLinksSection.tsx`
+**Backend foundation (2 files):**
+- `src/lib/firebase/collections.ts`
+- `src/lib/firebase/index.ts`
 
-**Routes (2 files):**
-- `src/app/about/page.tsx`
-- `src/app/contact/page.tsx`
+### Moved/Restructured in Sprint 2.1
 
-**Data (2 files):**
-- `src/data/about.ts`
-- `src/data/contact.ts`
+- `src/lib/firebase.ts` → `src/lib/firebase/config.ts` (content preserved exactly; confirmed zero existing imports before moving)
 
-### Modified in Sprint 1.7
+### Removed in Sprint 2.1
 
-- `src/locales/en.json` — added top-level `about`, `contact` sections + `nav.about`
-- `src/locales/ar.json` — added top-level `about`, `contact` sections (Arabic) + `nav.about`
-- `src/data/navigation.ts` — added About MITSU entry
-- `src/data/home.ts` — fixed "About MITSU" quick access card href (`/union` → `/about`)
-
-### Removed in Sprint 1.7
-
-- `src/app/contact/.gitkeep` — superseded by real `page.tsx`
+- `src/lib/firebase.ts` (flat file, superseded by the folder)
 
 ---
 
