@@ -88,7 +88,7 @@ export const quickAccessItems: QuickAccessItem[] = [
     id: "about",
     titleKey: "home.quickAccess.about.title",
     descriptionKey: "home.quickAccess.about.description",
-    href: "/union",
+    href: "/about",
     icon: "Info",
   },
 ];

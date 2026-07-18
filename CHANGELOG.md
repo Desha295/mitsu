@@ -6,6 +6,59 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.8.0] — Phase 1 Sprint 1.7: About MITSU & Contact
+
+### Added
+
+**Data Layer:**
+- `src/data/about.ts` — platform identity content sourced from `01_PROJECT_IDENTITY.md`: introduction, Vision, Mission, motto, and the 8 Core Values presented as "Platform Goals". Kept distinct from `union.ts`'s `unionOverview` (Sprint 1.5) — that describes the Student Union *organization*; this describes the MITSU *platform*. Different content, not a duplicate.
+- `src/data/contact.ts` — office information (location/hours/email) and official communication channels (Microsoft Teams for advisors). President contact and official social links are imported directly from `union.ts` (`president`, `unionSocialLinks`) rather than duplicated.
+  - Office location, hours, and a direct email address haven't been provided yet. Left unset rather than invented; `ContactCard` renders these as "Coming soon".
+
+**Feature Components:**
+- `ContactCard.tsx` (components/shared) — generic icon+title+description(+optional link) card, reused for both office info and communication channels.
+
+**Section Components:**
+- `AboutSection.tsx` — platform introduction, motto, 8 "Platform Goals" card grid.
+- `VisionMissionSection.tsx` — Vision/Mission cards for the platform (visually consistent with `UnionHeroSection`'s treatment, different data source).
+- `ContactSection.tsx` — office information, President contact (reuses `LeaderCard` + `president`), official communication channels.
+- `SocialLinksSection.tsx` — reuses `unionSocialLinks` and the existing `union.socialHeading`/`socialSubheading` keys.
+
+**Routing:**
+- `src/app/about/page.tsx` — new `/about` route (About → Vision/Mission). This folder didn't exist in Phase 0's original scaffold; created fresh.
+- `src/app/contact/page.tsx` — new `/contact` route (Contact → Social Links).
+
+**Localization:**
+- Extended `en.json`/`ar.json` with top-level `about` and `contact` sections, plus `nav.about`.
+
+### Fixed (Required Connections — Not Scope Creep)
+
+- `data/navigation.ts` — added `{ labelKey: "nav.about", href: "/about" }`. Without this, the new page would be unreachable from Navbar/Footer (both already render this data dynamically; no component changes needed).
+- `data/home.ts` — the homepage's "About MITSU" Quick Access card pointed to `/union`, a Sprint 1.2 placeholder standing in for a page that didn't exist yet. Now points to the real `/about` page — the same category of fix as the earlier WhatsApp Community URL bug.
+
+### Architecture Decisions
+
+- **Platform identity vs. organization identity kept separate:** `about.ts` (the platform) and `union.ts`'s `unionOverview` (the Student Union organization) are deliberately distinct data sources, even though both have a "vision" and "mission" — conflating them would have misrepresented one as the other.
+- **No duplicated data:** President contact and official social links are imported from `union.ts`, not copied. `ContactCard` receives pre-resolved strings (not translation keys) since it serves two unrelated data shapes — the same pattern `FooterLinkGroup` already established in Sprint 1.1.
+- **No invented contact details:** office location/hours/email are explicitly left blank in the data (with a comment explaining why) rather than filled with plausible-looking placeholder text that could be mistaken for real information.
+- **Types co-located with data:** continuing the Sprint 1.4-1.6 precedent, no new `src/types/*` files were added.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/about` and `/contact` now generated as static routes, bringing the site to 8 total routes (`/`, `/guide`, `/systems`, `/announcements`, `/union`, `/about`, `/contact`, plus `/_not-found`).
+
+### Breaking Changes
+
+None.
+
+### Known Issues
+
+- Student Union office location, hours, and direct email are not yet available — shown as "Coming soon" on `/contact`.
+
+---
+
 ## [v0.7.0] — Phase 1 Sprint 1.6: Announcements & Events
 
 ### Added
@@ -412,4 +465,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 1.7 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates).
+Sprint 1.8 — scope not yet defined/approved (see `PROJECT_STATE.md` Next Actions for candidates; likely "Platform Polish" per `10_ROADMAP.md`).

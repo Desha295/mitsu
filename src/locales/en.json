@@ -12,6 +12,7 @@
     "systems": "University Systems",
     "announcements": "Announcements",
     "union": "Student Union",
+    "about": "About MITSU",
     "contact": "Contact"
   },
   "navbar": {
@@ -384,6 +385,72 @@
         "title": "Community Charity Trip",
         "description": "A day trip organized by the Social & Trips Committee supporting a local community initiative.",
         "location": "Off-Campus — meeting point at the Main Gate"
+      }
+    }
+  },
+  "about": {
+    "heading": "About MITSU",
+    "introduction": "MITSU is the official digital platform developed by the Student Union of the Faculty of Information Technology at Misr University for Science and Technology (MUST). The platform is designed to become the primary digital gateway for freshmen, providing one trusted place where students can begin their university journey. MITSU is intended to remain useful for future Student Union boards through a scalable and maintainable architecture.",
+    "visionHeading": "Our Vision",
+    "vision": "Create a unified digital experience that allows every freshman to begin university life with confidence, clarity, and immediate access to official university resources.",
+    "missionHeading": "Our Mission",
+    "mission": "Simplify communication between freshmen, the Student Union, and official university systems through one reliable, modern, mobile-first platform.",
+    "goalsHeading": "Platform Goals",
+    "goalsSubheading": "Eight core values guide every decision we make.",
+    "motto": "One Platform. One Community. One Trusted Start.",
+    "goals": {
+      "studentFirst": {
+        "title": "Student First",
+        "description": "Every decision must improve the student experience. If a feature does not help students, it should not exist."
+      },
+      "official": {
+        "title": "Official",
+        "description": "All information must originate from official university or Student Union sources. No unofficial policies should appear."
+      },
+      "simple": {
+        "title": "Simple",
+        "description": "Freshmen should never feel overwhelmed. Complex university processes are explained through simple language and step-by-step guidance."
+      },
+      "accessible": {
+        "title": "Accessible",
+        "description": "The platform must be usable by everyone, on mobile, tablet, and desktop, in both Arabic and English."
+      },
+      "reliable": {
+        "title": "Reliable",
+        "description": "Students must trust the information presented. Broken links, outdated announcements, and unofficial information are unacceptable."
+      },
+      "scalable": {
+        "title": "Scalable",
+        "description": "The platform is built to keep growing, so future Student Union boards can add new sections without redesigning the system."
+      },
+      "maintainable": {
+        "title": "Maintainable",
+        "description": "The project stays understandable to developers who didn't originally build it, with readable code and documentation."
+      },
+      "professional": {
+        "title": "Professional",
+        "description": "The platform represents the Student Union. Every screen reflects professionalism, clarity, and quality."
+      }
+    }
+  },
+  "contact": {
+    "heading": "Contact Us",
+    "subheading": "Reach the Student Union office, leadership, and official channels.",
+    "officeHeading": "Contact Information",
+    "officeSubheading": "The Student Union office at the Faculty of Information Technology.",
+    "office": {
+      "location": "Office Location",
+      "hours": "Office Hours",
+      "email": "Email"
+    },
+    "presidentHeading": "President Contact",
+    "presidentSubheading": "Reach the Student Union President directly.",
+    "channelsHeading": "Official Communication Channels",
+    "channelsSubheading": "The official ways to reach the Student Union and your Academic Advisor.",
+    "channels": {
+      "advisorTeams": {
+        "name": "Academic Advisor (Microsoft Teams)",
+        "description": "Academic Advisors communicate with students exclusively through Microsoft Teams."
       }
     }
   },

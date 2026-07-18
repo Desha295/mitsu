@@ -11,5 +11,6 @@ export const mainNavigation: NavigationItem[] = [
   { labelKey: "nav.systems", href: "/systems" },
   { labelKey: "nav.announcements", href: "/announcements" },
   { labelKey: "nav.union", href: "/union" },
+  { labelKey: "nav.about", href: "/about" },
   { labelKey: "nav.contact", href: "/contact" },
 ];
