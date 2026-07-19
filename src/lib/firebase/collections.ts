@@ -1,20 +1,26 @@
 /**
- * Typed Firestore collection reference helpers (Sprint 2.1 — Firebase
- * Foundation).
+ * Typed Firestore collection reference helpers.
+ *
+ * Originally created in Sprint 2.1 — Firebase Foundation with 8
+ * collections (announcements/events/systems/committees/leadership/
+ * settings/documents/admins). Extended in Sprint 2.2 — Firebase Services
+ * with 3 more (hero/homepage/guide), needed to back the Hero, Homepage,
+ * and Freshman Guide services. All Sprint 2.1 exports are unchanged;
+ * this file was only appended to, never rewritten.
  *
  * These functions only return typed `CollectionReference`/`DocumentReference`
  * objects — they do NOT call `getDocs`, `addDoc`, `setDoc`, `onSnapshot`,
- * or any other read/write operation. Actual CRUD services are explicitly
- * out of scope for this sprint (see CURRENT_SPRINT.md) and are reserved
- * for Sprint 2.2 — Firebase Services (10_ROADMAP.md), which will build
- * generic CRUD/query/pagination helpers on top of this foundation.
+ * or any other read/write operation themselves. Actual CRUD lives in
+ * services/createFirestoreService.ts (Sprint 2.2), which wraps these
+ * references with getAll/getById/create/update/remove.
  *
- * Document field shapes mirror 06_FIREBASE_SCHEMA.md exactly (collection
- * names, field names, and types) so future services can rely on them
- * without redefining the schema. All getters return `null` when Firebase
- * isn't configured yet, matching config.ts's existing safety pattern —
- * calling code must handle the `null` case rather than assume a
- * connection exists.
+ * Document field shapes mirror 06_FIREBASE_SCHEMA.md exactly for the
+ * original 8 collections; the 3 Sprint 2.2 additions mirror their
+ * equivalent local data files (src/data/home.ts, guide.ts) instead, since
+ * they predate any formal schema entry. All getters return `null` when
+ * Firebase isn't configured yet, matching config.ts's existing safety
+ * pattern — calling code must handle the `null` case rather than assume
+ * a connection exists.
  */
 import {
   collection,
@@ -39,6 +45,14 @@ export const COLLECTIONS = {
   settings: "settings",
   documents: "documents",
   admins: "admins",
+  // Added in Sprint 2.2 to back the Hero/Homepage/Guide services — these
+  // domains didn't have a dedicated collection in the original Phase 0
+  // schema (06_FIREBASE_SCHEMA.md documents the original 8 above; adding
+  // new collections as the app grows is expected — see that doc's own
+  // "Future Collections" section).
+  hero: "hero",
+  homepage: "homepage",
+  guide: "guide",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -124,6 +138,46 @@ export interface AdminDoc {
 }
 
 // ---------------------------------------------------------------------------
+// Document shapes added in Sprint 2.2 (Hero/Homepage/Guide services).
+// Mirror the equivalent local data files (src/data/home.ts, guide.ts)
+// field-for-field, so a future migration sprint can map them 1:1.
+// ---------------------------------------------------------------------------
+
+export interface HeroDoc {
+  heading: string;
+  description: string;
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+  secondaryCtaLabel: string;
+  secondaryCtaHref: string;
+  imageUrl: string;
+  isActive: boolean;
+  updatedAt: Timestamp;
+}
+
+/** One document per Quick Access card (src/data/home.ts's quickAccessItems). */
+export interface QuickAccessItemDoc {
+  title: string;
+  description: string;
+  href: string;
+  icon: string;
+  order: number;
+  isActive: boolean;
+}
+
+/** One document per Freshman Guide topic (src/data/guide.ts's guideSections). */
+export interface GuideSectionDoc {
+  icon: string;
+  title: string;
+  description: string;
+  facts?: string[];
+  stats?: Array<{ label: string; value: string }>;
+  highlight?: boolean;
+  order: number;
+  isActive: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Generic typed converter + reference helpers
 // ---------------------------------------------------------------------------
 
@@ -197,4 +251,20 @@ export function getAdminsCollection(): CollectionReference<AdminDoc> | null {
 /** /settings/general is a single document, so this returns a DocumentReference, not a CollectionReference. */
 export function getSettingsDocRef(): DocumentReference<SettingsDoc> | null {
   return getTypedDoc<SettingsDoc>(COLLECTIONS.settings, "general");
+}
+
+// ---------------------------------------------------------------------------
+// Collection reference helpers added in Sprint 2.2
+// ---------------------------------------------------------------------------
+
+export function getHeroCollection(): CollectionReference<HeroDoc> | null {
+  return getTypedCollection<HeroDoc>(COLLECTIONS.hero);
+}
+
+export function getHomepageCollection(): CollectionReference<QuickAccessItemDoc> | null {
+  return getTypedCollection<QuickAccessItemDoc>(COLLECTIONS.homepage);
+}
+
+export function getGuideCollection(): CollectionReference<GuideSectionDoc> | null {
+  return getTypedCollection<GuideSectionDoc>(COLLECTIONS.guide);
 }

@@ -6,6 +6,56 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.10.0] — Phase 2 Sprint 2.2: Firebase Services
+
+### Added
+
+**Query Helpers (`src/lib/firebase/query-helpers.ts`):**
+- `buildQuery()` — composes ordering (`OrderOption`), filtering (`FilterOption[]`), and pagination (`pageSize`/`startAfterDoc`) into a single typed Firestore `Query`.
+- `timestampToDate()` / `dateToTimestamp()` — Firestore Timestamp ⇄ JS Date conversions.
+
+**Storage Helper (`src/lib/firebase/storage.ts`):**
+- `uploadImage(path, file)`, `deleteImage(path)`, `getDownloadURL(path)` — every function takes `path` as a caller-supplied parameter; no hardcoded Storage paths anywhere in this file.
+
+**Generic CRUD Factory (`src/lib/firebase/services/createFirestoreService.ts`):**
+- `createFirestoreService<T>(getCollectionRef)` → `{ getAll, getById, create, update, remove }`. `getAll` accepts optional `QueryOptions` and delegates to `buildQuery`. This single generic implementation is reused by all 7 domain services — no CRUD logic duplicated per collection.
+
+**7 Domain Services (`src/lib/firebase/services/*.service.ts`):**
+- `heroService`, `homepageService` — back 2 new collections (`hero`, `homepage`) added to `collections.ts` this sprint.
+- `announcementsService`, `eventsService`, `systemsService` — reuse the existing Sprint 2.1 `announcements`/`events`/`systems` collection references directly, unchanged.
+- `unionService` — reuses the existing Sprint 2.1 `committees` collection reference (see Architecture Decisions below for why).
+- `guideService` — backs a new `guide` collection added this sprint.
+- `services/index.ts` — barrel export of all 7 services plus the factory.
+
+### Changed (Additive Only — No Existing Exports Modified)
+
+- `src/lib/firebase/collections.ts` — appended 3 new collection name constants (`hero`, `homepage`, `guide`), 3 new document types (`HeroDoc`, `QuickAccessItemDoc`, `GuideSectionDoc`), and 3 new reference getters. All 8 of Sprint 2.1's original exports (types, getters, `COLLECTIONS` entries) are untouched.
+- `src/lib/firebase/index.ts` — added re-exports for `query-helpers.ts`, `storage.ts`, and `services/`. Sprint 2.1's 2 original exports (`config.ts`, `collections.ts`) are untouched.
+
+### Architecture Decisions
+
+- **Why `hero`/`homepage`/`guide` are new collections, not shoehorned into existing ones:** `CURRENT_SPRINT.md` names 7 services, but Sprint 2.1's schema only covered 8 collections from the original Phase 0 spec — which predates Phase 1's actual Guide/Union/About/Contact pages and has no concept of "hero" or "homepage" content. Rather than force these into an ill-fitting existing collection, 3 new ones were added, mirroring the equivalent local data files (`home.ts`, `guide.ts`) field-for-field so a future migration sprint can map them 1:1.
+- **Why the "Student Union" service maps to `committees`, not `leadership`:** the Student Union domain spans two existing Sprint 2.1 collections (`committees`: 7 records, `leadership`: 2 records). `committees` is the clearer fit for generic multi-document CRUD; `leadership`'s own collection reference remains available for a separate, more granular service in a future sprint if ever needed. This is a documented judgment call, not an ambiguous gap — see the comment in `union.service.ts`.
+- **`getAll`/`getById` degrade gracefully; writes don't:** every service function checks Firebase configuration first. `getAll` returns `[]` and `getById` returns `null` when unconfigured (safe to call from anywhere, ever), while `create`/`update`/`remove` throw a clear, explicit error — silently no-op'ing a write the caller believes succeeded would be actively misleading.
+- **Getter functions, not resolved references:** `createFirestoreService` takes `() => CollectionReference | null` rather than a resolved reference, so every service stays safe to import before `.env.local` exists — re-resolved on each call, matching Sprint 2.1's established `null`-safe pattern exactly.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; all 8 existing public routes generate exactly as before this sprint — zero UI changes, as required by `CURRENT_SPRINT.md`.
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 2.1 export was modified, renamed, or removed, and no public page was touched.
+
+### Known Issues
+
+- The entire service layer is built but not yet used anywhere — no public page has been migrated from local data to Firebase (explicitly out of scope for this sprint). All 8 routes continue running on local static data.
+- No real Firebase project exists yet, so every service function still resolves to the safe "not configured" paths (`[]`/`null`/thrown error) at runtime until `.env.local` is populated.
+
+---
+
 ## [v0.9.0] — Phase 2 Sprint 2.1: Firebase Foundation
 
 ### Added
@@ -518,4 +568,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 2.2 — Firebase Services (generic CRUD, upload service, query/pagination helpers) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.
+Sprint 2.3 — Security Foundation (Firestore/Storage security rules, auth roles, permission helpers) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.
