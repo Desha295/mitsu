@@ -6,6 +6,61 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.11.0] — Phase 2 Sprint 2.3: Security Foundation
+
+### Added
+
+**Firestore Security Rules (`firestore.rules`):**
+- All 11 collections (Sprint 2.1's original 8 + Sprint 2.2's hero/homepage/guide): public read when `isPublished`/`isActive` is `true`, admin-only write.
+- `/settings/general`: always publicly readable (site-wide config, no publish flag), admin-writable.
+- `/admins/{uid}`: self-read allowed (required for the `isAdmin()` helper function itself to work — it calls `exists()` on this same path), full read for `super_admin`s, write restricted to `super_admin`s only.
+- Default-deny fallback (`match /{document=**} { allow read, write: if false; }`) for anything not explicitly matched.
+
+**Firebase Storage Security Rules (`storage.rules`):**
+- `/images/**` — public read; admin write up to 5MB, JPEG/PNG/WebP/SVG only.
+- `/documents/**` — public read; admin write up to 10MB.
+- Admin status resolved via Storage's documented `firestore.exists()` cross-service rules feature, checking the same `/admins/{uid}` collection as the Firestore rules.
+
+**Auth Foundation (`src/lib/auth/`, 9 files):**
+- `types.ts` — `UserRole`, `AuthenticatedAdmin`, `AuthGuardState`.
+- `constants.ts` — `ROLES`, `PERMISSIONS`, `ROLE_PERMISSIONS` role→permission mapping, and file-validation size/type constants shared with `storage.rules`.
+- `roles.ts` — `isValidRole` (type guard), `roleMeetsMinimum`, `isSuperAdmin`.
+- `permissions.ts` — `hasPermission`, `hasAnyPermission`, `hasAllPermissions`, `getPermissionsForRole`.
+- `validation.ts` — `isValidImageFile`, `isValidDocumentFile` (client-side pre-checks only; `storage.rules` remains the real security boundary).
+- `session.ts` — `signInWithEmail`, `signOutUser`, `getCurrentUser`, `subscribeToAuthState` — Firebase Auth wrappers, no login form.
+- `adminAuth.ts` — `getAdminForUser(user)`, bridging a signed-in Firebase Auth user to their `/admins/{uid}` document and role.
+- `routeGuard.ts` — `useAuthGuard()` hook + `canAccess()` helper, reusable client-side guard logic for a future protected admin layout.
+- `index.ts` — barrel export.
+
+**Documentation:**
+- `SECURITY.md` (project root) — role/permission model, admin-resolution flow diagram, rules summary, deployment checklist, and an explicit list of what this sprint deliberately did not build.
+
+### Architecture Decisions
+
+- **Rules and TypeScript constants are duplicated, not shared:** `.rules` files can't import TypeScript, so `MAX_IMAGE_SIZE_BYTES`/`MAX_DOCUMENT_SIZE_BYTES`/`ALLOWED_IMAGE_TYPES` exist in both `constants.ts` (for client-side validation) and `storage.rules` (the actual enforcement). Documented explicitly in both files' comments and in `SECURITY.md` as needing manual sync.
+- **`isAdmin()` reads its own collection — the admins rule must allow self-read:** the Firestore rule's `isAdmin()` helper calls `exists()` on `/admins/{request.auth.uid}`, which itself goes through the `admins` collection's own security rule. Without an explicit self-read allowance there, every `isAdmin()` check would fail closed. Documented inline in `firestore.rules`.
+- **Granting admin access is a higher bar than managing content:** only `super_admin`s may write to `/admins/{uid}` (create/promote/revoke other admins), while regular `admin`s can manage all content collections. This mirrors `06_FIREBASE_SCHEMA.md` #12's two-tier role model.
+- **Utility functions, not UI:** `signInWithEmail`, `useAuthGuard`, etc. are the reusable functions a future login page/admin layout would call — exactly parallel to how Sprint 2.2 built CRUD functions before any UI called them. No login form, protected layout, or dashboard page was built this sprint.
+- **Fail closed on malformed data:** `getAdminForUser` returns `null` (not a guess) if an admin document's `role` field doesn't match a known `UserRole` — never grants access based on uncertain data.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; all 8 existing public routes generate exactly as before this sprint — zero UI changes.
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 2.1 or Sprint 2.2 file was modified.
+
+### Known Issues
+
+- `firestore.rules` and `storage.rules` are **not yet deployed** and have not been validated against a live Firebase project or the Firebase Emulator Suite — `.rules` syntax isn't checked by this project's lint/tsc/build pipeline. Flagged as a required pre-deploy step in `SECURITY.md`.
+- No real Firebase project exists yet, so the entire auth foundation resolves to its safe "not configured" paths at runtime until `.env.local` is populated.
+- There is no self-service admin sign-up by design — the first `super_admin` document must be created manually once a project exists.
+
+---
+
 ## [v0.10.0] — Phase 2 Sprint 2.2: Firebase Services
 
 ### Added
@@ -568,4 +623,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 2.3 — Security Foundation (Firestore/Storage security rules, auth roles, permission helpers) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.
+Sprint 2.4 — scope not yet defined/approved. Likely candidates: Admin Dashboard Foundation (login page, protected layout using this sprint's useAuthGuard) or beginning public page migration to the Sprint 2.2 services. See `PROJECT_STATE.md` Next Actions.

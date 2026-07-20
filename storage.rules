@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// MITSU Firebase Storage Security Rules (Sprint 2.3 — Security Foundation)
+//
+// Model: uploaded assets are publicly readable (they're rendered on
+// public pages), writable only by signed-in admins, subject to size and
+// content-type limits. These limits MUST match
+// src/lib/auth/constants.ts (MAX_IMAGE_SIZE_BYTES, MAX_DOCUMENT_SIZE_BYTES,
+// ALLOWED_IMAGE_TYPES) — Storage rules can't import TypeScript, so the
+// two are kept in sync manually. The TS constants give a future upload
+// UI fast client-side feedback; these rules are the actual security
+// boundary regardless of what the client checked.
+//
+// Admin status is resolved by checking Firestore's /admins/{uid}
+// collection (Sprint 2.1) via Storage's documented cross-service
+// firestore.exists()/firestore.get() rules feature.
+//
+// NOT YET DEPLOYED — see the note in firestore.rules; validate against a
+// live project or the Firebase Emulator Suite before first deploy.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    // Images: logos, campus/union photos, committee/event/announcement
+    // images, etc. 5MB limit, common web image types only — matches
+    // MAX_IMAGE_SIZE_BYTES / ALLOWED_IMAGE_TYPES in constants.ts.
+    match /images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|svg\\+xml)');
+    }
+
+    // Documents: study plans, regulations, downloadable PDFs
+    // (06_FIREBASE_SCHEMA.md #11). 10MB limit — matches
+    // MAX_DOCUMENT_SIZE_BYTES in constants.ts.
+    match /documents/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // Deny everything else by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

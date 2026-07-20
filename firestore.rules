@@ -1,0 +1,124 @@
+rules_version = '2';
+
+// MITSU Firestore Security Rules (Sprint 2.3 — Security Foundation)
+//
+// Model: every public-facing collection is readable by anyone (published/
+// active content only) and writable only by signed-in admins. The
+// `admins` collection itself is the source of truth for who is an admin
+// — see 06_FIREBASE_SCHEMA.md #12 for its shape (email, role, createdAt).
+//
+// NOT YET DEPLOYED: no real Firebase project exists yet (see
+// PROJECT_STATE.md). These rules have not been validated against a live
+// project or the Firebase Emulator Suite — do so before first deploy.
+//
+// Out of scope this sprint: no admin dashboard/login page exists to
+// exercise the write paths yet; these rules define the boundary ahead of
+// that work, per CURRENT_SPRINT.md.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------
+    // Helper functions
+    // -------------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // NOTE: this itself reads /admins/{uid}, which is why the admins
+    // collection's own rule below must allow a user to read their own
+    // document (otherwise this exists() check would always fail).
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isSuperAdmin() {
+      return isAdmin() &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    // -------------------------------------------------------------------
+    // Public content collections: publicly readable when published/
+    // active, admin-writable. Mirrors 06_FIREBASE_SCHEMA.md #5-9 plus the
+    // 3 collections added in Sprint 2.2 (hero, homepage, guide).
+    // -------------------------------------------------------------------
+
+    match /announcements/{id} {
+      allow read: if resource.data.isPublished == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /events/{id} {
+      allow read: if resource.data.isPublished == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /systems/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /committees/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /leadership/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /documents/{id} {
+      allow read: if resource.data.isPublished == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /hero/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /homepage/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /guide/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------
+    // Settings: single public document (/settings/general), no
+    // isPublished/isActive gate — it's site-wide config, always public.
+    // -------------------------------------------------------------------
+
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // -------------------------------------------------------------------
+    // Admins: a user may read their OWN document (required for the
+    // isAdmin()/isSuperAdmin() checks above to work at all) or any
+    // document if they're a super_admin. Only super_admins may write —
+    // granting/revoking admin access is deliberately a higher bar than
+    // managing content.
+    // -------------------------------------------------------------------
+
+    match /admins/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    // -------------------------------------------------------------------
+    // Deny everything else by default.
+    // -------------------------------------------------------------------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
