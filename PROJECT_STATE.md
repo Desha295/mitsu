@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 2 — Dynamic Platform
-**Current Sprint:** Sprint 2.3 — Security Foundation
+**Current Sprint:** Sprint 2.4 — Authentication Integration
 **Status:** Complete
-**Version:** v0.11.0
+**Version:** v0.12.0
 
 ---
 
@@ -29,72 +29,69 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ### Phase 2 — Sprint 2.1: Firebase Foundation (v0.9.0)
 
-- `src/lib/firebase/` folder (`config.ts`, `collections.ts`, `index.ts`) — typed document interfaces + collection reference helpers for the original 8 Firestore collections.
+- `src/lib/firebase/` — typed document interfaces + collection reference helpers for the original 8 Firestore collections.
 
 ### Phase 2 — Sprint 2.2: Firebase Services (v0.10.0)
 
-- Generic CRUD factory (`createFirestoreService`), 7 domain services (hero, homepage, announcements, events, union, systems, guide), query helpers (ordering/filtering/pagination), Storage helper (upload/delete/getDownloadURL).
-- 3 new collections added (hero, homepage, guide), 8 Sprint 2.1 collections reused unchanged.
+- Generic CRUD factory, 7 domain services, query helpers, Storage helper.
 
 ### Phase 2 — Sprint 2.3: Security Foundation (v0.11.0)
 
-**Objective:** build the authorization/security foundation — rules, roles, permissions, session/route-guard utilities — with zero UI, zero admin dashboard, zero login page (per `CURRENT_SPRINT.md`).
+- `firestore.rules`, `storage.rules`, `src/lib/auth/` (roles, permissions, session helpers, admin authorization, route guard scaffolding), `SECURITY.md`.
 
-**Firestore Security Rules (`firestore.rules`, project root):**
-- All 11 collections (the original 8 from Sprint 2.1 plus hero/homepage/guide from Sprint 2.2): public read when `isPublished`/`isActive` is `true`, admin-only write.
-- `/settings/general`: always publicly readable (site-wide config, no publish flag), admin-writable.
-- `/admins/{uid}`: a user may read their own document (required for the `isAdmin()` check itself to function) or any document if `super_admin`; only `super_admin`s may write — granting admin access is a deliberately higher bar than managing content.
-- Default-deny fallback for anything not explicitly matched.
+### Phase 2 — Sprint 2.4: Authentication Integration (v0.12.0)
 
-**Firebase Storage Security Rules (`storage.rules`, project root):**
-- `/images/**`: public read, admin write, 5MB limit, JPEG/PNG/WebP/SVG only.
-- `/documents/**`: public read, admin write, 10MB limit.
-- Admin status resolved via Storage's `firestore.exists()` cross-service rules feature against the same `/admins/{uid}` collection.
-- Size/type limits deliberately duplicated in `src/lib/auth/constants.ts` for client-side validation — `.rules` files can't import TypeScript, so the two are documented as needing to stay in sync manually.
+**Objective:** build the complete reusable authentication layer using Firebase Authentication — no Admin Dashboard yet (per `CURRENT_SPRINT.md`).
 
-**New: `src/lib/auth/` module (9 files):**
-- `types.ts` — `UserRole`, `AuthenticatedAdmin`, `AuthGuardState`.
-- `constants.ts` — `ROLES`, `PERMISSIONS`, `ROLE_PERMISSIONS` mapping, file-validation size/type constants (kept in sync with `storage.rules`).
-- `roles.ts` — `isValidRole`, `roleMeetsMinimum`, `isSuperAdmin`.
-- `permissions.ts` — `hasPermission`, `hasAnyPermission`, `hasAllPermissions`, `getPermissionsForRole`.
-- `validation.ts` — `isValidImageFile`, `isValidDocumentFile` (client-side pre-checks; the Storage rules remain the actual security boundary).
-- `session.ts` — `signInWithEmail`, `signOutUser`, `getCurrentUser`, `subscribeToAuthState` (Firebase Auth wrappers; no login form built).
-- `adminAuth.ts` — `getAdminForUser` (bridges a Firebase Auth user to their `/admins/{uid}` Firestore document and role).
-- `routeGuard.ts` — `useAuthGuard` hook + `canAccess` helper (reusable client-side guard logic for a future protected admin layout; no layout/page uses it yet).
-- `index.ts` — barrel export.
+**New: `src/context/AuthContext.tsx` (`AuthProvider` + `AuthContext`):**
+- Follows the exact same Context+hook pattern as `ThemeContext`/`LanguageContext` (Phase 0) — no external state library.
+- Exposes `{ user, loading, loginWithGoogle, loginWithEmail, logout }`. `loading` starts `true` and only resolves once Firebase's first `onAuthStateChanged` callback fires, since (unlike theme/language's synchronous `localStorage` reads) Firebase Auth session restoration is inherently asynchronous.
+- Delegates every method to Sprint 2.3's `session.ts` helpers (`signInWithEmail`, `signOutUser`) rather than reimplementing Firebase calls — thin wrapper, not a duplicate.
 
-**New: `SECURITY.md` (project root)** — documents the role/permission model, how admin status is resolved, a summary of both rules files, deployment steps/checklist, and an explicit list of what this sprint deliberately did not build.
+**New: `src/hooks/useAuth.ts`** — mirrors `useTheme.ts`/`useLanguage.ts` exactly.
+
+**New: `src/components/shared/RequireAuth.tsx`** — gates children behind authentication: loading state while resolving, redirect to `/login` if signed out, renders children once authenticated. Not used by any page yet (no Admin Dashboard this sprint) — the reusable primitive a future protected layout will wrap itself in.
+
+**New: `src/components/sections/LoginSection.tsx` + `src/app/login/page.tsx`** — real, working login form (email/password + Google Sign-In button), calling `useAuth()`'s methods directly. No registration, no password reset (out of scope). Not linked from main navigation (admin-facing utility page). `robots: noindex` set in page metadata.
+
+**Extended `src/lib/auth/session.ts` (additive):**
+- Added `signInWithGoogle()` (`GoogleAuthProvider` + `signInWithPopup`). All Sprint 2.3 exports (`signInWithEmail`, `signOutUser`, `getCurrentUser`, `subscribeToAuthState`) unchanged.
+
+**Refactored `src/lib/auth/routeGuard.ts` (required, not gratuitous):**
+- `useAuthGuard()` previously ran its own independent `subscribeToAuthState` subscription (Sprint 2.3, before `useAuth()` existed). Now consumes the new `useAuth()` hook instead, so there's exactly one Firebase Auth subscription shared by both — directly satisfies this sprint's explicit "do not duplicate logic" requirement. Public return shape (`AuthGuardState`) unchanged; verified zero existing consumers before making this change, so nothing broke.
+- Along the way, fixed a real `react-hooks/set-state-in-effect` lint error (calling `setState` synchronously in an effect body) by deriving the loading flag instead of setting it directly — the same category of fix already applied to `ThemeContext`/`LanguageContext` in Sprint 1.1.
+
+**Extended `src/context/Providers.tsx` (additive):** now wraps `<AuthProvider>` around `Navbar`/`main`/`Footer`, inside `ThemeProvider`/`LanguageProvider`. `useAuth()` is available anywhere in the tree, including the new login page.
+
+**Localization:** added `login.*` keys to `en.json`/`ar.json` (heading, labels, submit states, Google sign-in, generic error message). Reused the existing `common.loading` key for `RequireAuth`'s loading state.
 
 **Verification:**
-- `npm run lint` → passes, zero errors.
-- `tsc --noEmit` → passes, zero TypeScript errors (confirms the entire auth module is fully type-safe with no barrel-export collisions).
-- `npm run build` → succeeds; all 8 existing public routes generate exactly as before — zero UI changes, as required.
+- `npm run lint` → passes, zero errors (after fixing the set-state-in-effect issue above).
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; all 8 prior public routes generate unchanged, plus the new `/login` route — 9 total.
 
 **Constraints honored (per `CURRENT_SPRINT.md`):**
-- No login page, no admin dashboard, no CRUD screens, no public page migration, no dynamic homepage/announcements/events.
-- No Sprint 2.1/2.2 file modified — Sprint 2.3 only added new files.
-- `.rules` files are **not yet deployed** — no real Firebase project exists; documented explicitly in `SECURITY.md` as a pre-deploy checklist item, since `.rules` syntax isn't validated by this project's lint/tsc/build pipeline.
+- No Admin Dashboard, no CRUD, no Firestore content editing, no media management, no role management UI, no registration, no password reset, no analytics.
+- No placeholder implementations — the login form genuinely calls Firebase Authentication and works end-to-end (once a real project is configured).
 
 ---
 
 ## Current Sprint
 
-**Sprint 2.3: Security Foundation** — CLOSED
+**Sprint 2.4: Authentication Integration** — CLOSED
 
 Tasks completed:
-- [x] Recovery audit (PROJECT_STATE.md, CURRENT_SPRINT.md, Sprint 2.2 verification, workspace/commit inspection)
-- [x] `firestore.rules` — 11 collections + settings + admins, default-deny fallback
-- [x] `storage.rules` — images/documents paths, size/type limits, cross-service admin check
-- [x] Role definitions (`src/lib/auth/constants.ts`, `roles.ts`)
-- [x] Permission helpers (`src/lib/auth/permissions.ts`)
-- [x] Admin authorization foundation (`src/lib/auth/adminAuth.ts`)
-- [x] Session helpers (`src/lib/auth/session.ts`)
-- [x] Route guard utilities (`src/lib/auth/routeGuard.ts`)
-- [x] Shared auth/permission constants and types (`constants.ts`, `types.ts`)
-- [x] File-validation helpers (`validation.ts`)
-- [x] Barrel export (`src/lib/auth/index.ts`)
-- [x] `SECURITY.md` documentation
-- [x] Verification: lint passes, TypeScript passes, build succeeds (8 routes unaffected)
+- [x] Firebase Authentication integration (email/password + Google, via Sprint 2.3/2.4 `session.ts`)
+- [x] `AuthProvider` / `AuthContext`
+- [x] `useAuth()` hook
+- [x] `loginWithGoogle()`, `loginWithEmail()`, `logout()`
+- [x] Session persistence (Firebase's default persistence, surfaced via `subscribeToAuthState`)
+- [x] Current user helper (`getCurrentUser`, reused from Sprint 2.3)
+- [x] Authentication loading state
+- [x] `RequireAuth` component
+- [x] Login page (`/login`, real working form)
+- [x] Refactored `useAuthGuard` to eliminate duplicated Firebase Auth subscription
+- [x] Verification: lint passes (after a real fix), TypeScript passes, build succeeds (9 routes)
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
 - [x] Git commit created
@@ -102,11 +99,11 @@ Tasks completed:
 
 ---
 
-## Next Actions (Sprint 2.4+ — not yet scoped/approved)
+## Next Actions (Sprint 2.5+ — not yet scoped/approved)
 
-Phase 2's backend foundation (Firebase config, services, security) is now complete across Sprints 2.1–2.3. Likely next candidates:
-- **Admin Dashboard Foundation:** login page, protected layout (using this sprint's `useAuthGuard`), dashboard shell.
-- **Public page migration:** begin moving one or more of the 8 public pages from local data to the Sprint 2.2 services.
+Per the Phase 2/3 roadmap:
+- **Sprint 2.5 — Dynamic Content Integration:** begin migrating public pages from local data to the Sprint 2.2 services.
+- **Sprint 3.1 — Admin Dashboard Foundation:** the first consumer of this sprint's `RequireAuth`/`useAuthGuard`/login page.
 
 **Not yet started — awaiting explicit sprint scope approval before any implementation.**
 
@@ -114,38 +111,33 @@ Phase 2's backend foundation (Firebase config, services, security) is now comple
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated. The entire Sprint 2.1–2.3 backend/security foundation is built but unused until a migration sprint.
-- **New this sprint:** `firestore.rules`/`storage.rules` have not been deployed or validated against a live project or the Firebase Emulator Suite — flagged as a required pre-deploy step in `SECURITY.md`.
-- **New this sprint:** the first `super_admin` document must be created manually in `/admins/{uid}` once a project exists — there is no self-service sign-up by design.
-- All prior outstanding items remain (official brand colors/photos, sample announcement content, unused Phase 0 `committees.ts` local data file, static-only search/filter on `/announcements`, unconfirmed Student Union office details).
+- No real Firebase project exists yet — `.env.local` is not populated. The entire auth layer resolves to its safe "not configured" paths at runtime until then.
+- No admin account exists to actually sign in with yet — the first `super_admin` document must be created manually in `/admins/{uid}` (per `SECURITY.md`), and Firebase Console must have Email/Password and Google sign-in providers enabled.
+- All prior outstanding items remain (official brand colors/photos, sample announcement content, unused Phase 0 `committees.ts` local data file, static-only search/filter on `/announcements`, unconfirmed Student Union office details, undeployed `firestore.rules`/`storage.rules`).
 
 ---
 
 ## File Summary
 
-### New in Sprint 2.3
+### New in Sprint 2.4
 
-**Security rules (2 files, project root):**
-- `firestore.rules`
-- `storage.rules`
+**Context & hooks (2 files):**
+- `src/context/AuthContext.tsx`
+- `src/hooks/useAuth.ts`
 
-**Documentation (1 file, project root):**
-- `SECURITY.md`
+**Components (2 files):**
+- `src/components/shared/RequireAuth.tsx`
+- `src/components/sections/LoginSection.tsx`
 
-**Auth foundation (9 files):**
-- `src/lib/auth/types.ts`
-- `src/lib/auth/constants.ts`
-- `src/lib/auth/roles.ts`
-- `src/lib/auth/permissions.ts`
-- `src/lib/auth/validation.ts`
-- `src/lib/auth/session.ts`
-- `src/lib/auth/adminAuth.ts`
-- `src/lib/auth/routeGuard.ts`
-- `src/lib/auth/index.ts`
+**Routes (1 file):**
+- `src/app/login/page.tsx`
 
-### Modified in Sprint 2.3
+### Modified in Sprint 2.4
 
-None — Sprint 2.3 only added new files; no Sprint 2.1/2.2 file was touched.
+- `src/lib/auth/session.ts` — added `signInWithGoogle()` (additive; Sprint 2.3 exports unchanged)
+- `src/lib/auth/routeGuard.ts` — refactored to consume `useAuth()`, eliminating duplicated subscription; fixed a real set-state-in-effect lint error
+- `src/context/Providers.tsx` — added `AuthProvider` to the tree
+- `src/locales/en.json` / `ar.json` — added `login.*` section
 
 ---
 

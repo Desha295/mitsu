@@ -6,6 +6,56 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.12.0] — Phase 2 Sprint 2.4: Authentication Integration
+
+### Added
+
+**Auth Context (`src/context/AuthContext.tsx`):**
+- `AuthProvider` + `AuthContext`, following the exact same Context+custom-hook pattern as `ThemeContext`/`LanguageContext` (Phase 0) — no external state library.
+- Exposes `{ user, loading, loginWithGoogle, loginWithEmail, logout }`. `loading` starts `true` and only resolves once Firebase's first `onAuthStateChanged` callback fires — unlike theme/language's synchronous `localStorage` reads, Firebase Auth session restoration is inherently asynchronous.
+- Every method delegates to Sprint 2.3's `session.ts` helpers rather than reimplementing Firebase calls.
+
+**`src/hooks/useAuth.ts`** — mirrors `useTheme.ts`/`useLanguage.ts` exactly.
+
+**`src/components/shared/RequireAuth.tsx`** — gates children behind authentication: shows a loading state while resolving, redirects to `/login` if signed out, renders children once authenticated. Not consumed by any page yet — the reusable primitive a future protected admin layout (Sprint 3.1) will wrap itself in.
+
+**`src/components/sections/LoginSection.tsx` + `src/app/login/page.tsx`** — a real, working login form: email/password fields plus a Google Sign-In button, both calling `useAuth()`'s methods directly and handling loading/error/redirect states. No registration or password-reset UI (out of scope). `robots: noindex` set on the page metadata since this is an admin-facing utility page, not student-facing content, and it isn't linked from main navigation.
+
+### Changed
+
+- **`src/lib/auth/session.ts`** (additive) — added `signInWithGoogle()` using `GoogleAuthProvider` + `signInWithPopup`. All Sprint 2.3 exports (`signInWithEmail`, `signOutUser`, `getCurrentUser`, `subscribeToAuthState`) unchanged.
+- **`src/lib/auth/routeGuard.ts`** (required refactor) — `useAuthGuard()` previously ran its own independent `subscribeToAuthState` subscription (necessarily, since `useAuth()` didn't exist in Sprint 2.3). Now consumes the new `useAuth()` hook instead, so there's exactly one Firebase Auth subscription shared by both, directly satisfying this sprint's "do not duplicate logic" requirement. Public return shape (`AuthGuardState`) is unchanged; verified zero existing consumers before making the change, so nothing broke.
+- **`src/context/Providers.tsx`** (additive) — wraps `<AuthProvider>` around `Navbar`/`main`/`Footer`, inside `ThemeProvider`/`LanguageProvider`, so `useAuth()` is available anywhere, including the new login page.
+- **`src/locales/en.json` / `ar.json`** — added a `login` section (heading, field labels, submit states, Google sign-in label, generic error message). Reused the existing `common.loading` key for `RequireAuth`'s loading state rather than adding a duplicate.
+
+### Fixed
+
+- A real `react-hooks/set-state-in-effect` lint error surfaced while refactoring `useAuthGuard` (calling `setState` synchronously in an effect body). Fixed by deriving the loading flag from a comparison instead of setting it directly — the same category of fix already applied to `ThemeContext`/`LanguageContext` back in Sprint 1.1.
+
+### Architecture Decisions
+
+- **Context method names match the sprint's requested API, not the lower-level helper names:** Sprint 2.3 named its session helpers `signInWithEmail`/`signOutUser` (a `signIn*`/`signOut*` convention); this sprint's `CURRENT_SPRINT.md` asks for `loginWithEmail()`/`logout()` on the hook. `AuthContext`'s public methods use the sprint-requested names as thin wrappers delegating to the Sprint 2.3 implementations — satisfies both "match the requested API" and "reuse Sprint 2.3, don't duplicate logic" simultaneously.
+- **Async-aware loading state:** `AuthContext.loading` exists specifically because Firebase Auth state is never synchronously known on first render, unlike the theme/language Contexts. This is a deliberate, necessary difference from that established pattern, not an inconsistency.
+- **Utility-first, UI only where explicitly required:** everything in Sprint 2.1–2.3 was pure backend/utility work with zero UI. This sprint is different — `CURRENT_SPRINT.md` explicitly requires a real login page — so a genuine, fully working form was built (not a placeholder), while `RequireAuth`/`useAuthGuard` remain unused utility layers until a future dashboard consumes them.
+- **No dashboard redirect target yet:** a successful login currently redirects to `/` (homepage) rather than a dashboard, since no dashboard exists yet (explicitly out of scope this sprint) — this will change once Sprint 3.1 builds one.
+
+### Verification
+
+- `npm run lint` — passes, zero errors (after fixing the set-state-in-effect issue above).
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; all 8 prior public routes generate unchanged, plus the new `/login` route (9 total).
+
+### Breaking Changes
+
+None for existing consumers. `useAuthGuard`'s internal implementation changed, but its public return shape (`AuthGuardState`) did not, and it had zero consumers before this sprint.
+
+### Known Issues
+
+- No real Firebase project exists yet, so the login form cannot actually authenticate anyone until `.env.local` is populated and Email/Password + Google providers are enabled in the Firebase Console.
+- No admin account exists yet — the first `super_admin` document must still be created manually in `/admins/{uid}` per `SECURITY.md`.
+
+---
+
 ## [v0.11.0] — Phase 2 Sprint 2.3: Security Foundation
 
 ### Added
@@ -623,4 +673,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 2.4 — scope not yet defined/approved. Likely candidates: Admin Dashboard Foundation (login page, protected layout using this sprint's useAuthGuard) or beginning public page migration to the Sprint 2.2 services. See `PROJECT_STATE.md` Next Actions.
+Sprint 2.5 — scope not yet defined/approved. Likely candidates: Admin Dashboard Foundation (protected layout using this sprint's RequireAuth/useAuthGuard and login page) or beginning public page migration to the Sprint 2.2 services. See `PROJECT_STATE.md` Next Actions.

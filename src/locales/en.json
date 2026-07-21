@@ -454,6 +454,19 @@
       }
     }
   },
+  "login": {
+    "heading": "Admin Sign In",
+    "subheading": "Sign in to manage MITSU content.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submit": "Sign In",
+    "submitting": "Signing in...",
+    "or": "or",
+    "googleSignIn": "Sign in with Google",
+    "error": {
+      "generic": "We couldn't sign you in. Please check your details and try again."
+    }
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",

@@ -1,14 +1,21 @@
 /**
- * Authentication & session helpers (Sprint 2.3 — Security Foundation).
+ * Authentication & session helpers.
  *
- * Thin wrappers around Firebase Auth. No login page or form exists yet
- * (explicitly out of scope this sprint) — these are the reusable
- * functions a future login page would call, exactly parallel to how
- * Sprint 2.2 built create()/update() functions before any UI called them.
+ * Originally created in Sprint 2.3 — Security Foundation with email/
+ * password sign-in, sign-out, current-user, and auth-state-subscription
+ * helpers. Extended in Sprint 2.4 — Authentication Integration with
+ * Google Sign-In. All Sprint 2.3 exports are unchanged; this file was
+ * only appended to.
+ *
+ * Thin wrappers around Firebase Auth — these are the reusable functions
+ * AuthContext (Sprint 2.4) calls, exactly parallel to how Sprint 2.2
+ * built create()/update() functions before any UI called them.
  */
 import {
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   type Unsubscribe,
   type User,
@@ -39,6 +46,18 @@ export async function signInWithEmail(
   return credential.user;
 }
 
+const googleProvider = new GoogleAuthProvider();
+
+/**
+ * Signs in with a Google account via a popup and returns the
+ * authenticated user (Sprint 2.4).
+ */
+export async function signInWithGoogle(): Promise<User> {
+  const authInstance = requireAuth();
+  const credential = await signInWithPopup(authInstance, googleProvider);
+  return credential.user;
+}
+
 /** Signs the current user out. */
 export async function signOutUser(): Promise<void> {
   const authInstance = requireAuth();
@@ -52,8 +71,8 @@ export function getCurrentUser(): User | null {
 
 /**
  * Subscribes to Firebase Auth state changes. Returns an unsubscribe
- * function — callers (e.g. a future `useAuthGuard` hook) are responsible
- * for calling it on cleanup.
+ * function — callers (e.g. AuthProvider, Sprint 2.4) are responsible for
+ * calling it on cleanup.
  */
 export function subscribeToAuthState(
   callback: (user: User | null) => void
