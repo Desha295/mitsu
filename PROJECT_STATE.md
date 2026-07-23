@@ -9,10 +9,10 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ## Current Status
 
-**Phase:** Phase 2 — Dynamic Platform
-**Current Sprint:** Sprint 2.4 — Authentication Integration
+**Phase:** Phase 3 — Admin Dashboard
+**Current Sprint:** Sprint 3.1 — Admin Dashboard Foundation
 **Status:** Complete
-**Version:** v0.12.0
+**Version:** v0.13.0
 
 ---
 
@@ -27,117 +27,123 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - 7 sprints delivered: Layout Foundation, Homepage, University Systems, Freshman Guide, Student Union, Announcements & Events, About & Contact.
 - 8 total public routes, fully bilingual (EN/AR), dark mode, RTL/LTR, accessible, 100% data-driven.
 
-### Phase 2 — Sprint 2.1: Firebase Foundation (v0.9.0)
+### Phase 2 — Dynamic Platform (v0.9.0 – v0.12.0)
 
-- `src/lib/firebase/` — typed document interfaces + collection reference helpers for the original 8 Firestore collections.
+- **Sprint 2.1 — Firebase Foundation:** `src/lib/firebase/` (config, typed collections for 8 Firestore collections).
+- **Sprint 2.2 — Firebase Services:** generic CRUD factory, 7 domain services, query helpers, Storage helper.
+- **Sprint 2.3 — Security Foundation:** `firestore.rules`, `storage.rules`, `src/lib/auth/` (roles, permissions, session, admin authorization, route guard scaffolding), `SECURITY.md`.
+- **Sprint 2.4 — Authentication Integration:** `AuthProvider`/`useAuth`, `RequireAuth`, real login page (email/password + Google), `useAuthGuard` refactored to share one Firebase Auth subscription.
 
-### Phase 2 — Sprint 2.2: Firebase Services (v0.10.0)
+### Phase 3 — Sprint 3.1: Admin Dashboard Foundation (v0.13.0)
 
-- Generic CRUD factory, 7 domain services, query helpers, Storage helper.
+**Objective:** build the reusable Admin Dashboard UI foundation — layout, navigation, placeholder dashboard home, protected routing — with zero CRUD, zero forms, zero Firestore reads/writes (per `CURRENT_SPRINT.md`).
 
-### Phase 2 — Sprint 2.3: Security Foundation (v0.11.0)
+**New: `src/components/admin/` (13 components):**
+- `AdminLayout` — shell composing Sidebar + Topbar + content, owns collapsed/mobile-open state.
+- `AdminSidebar` — 11 nav items (`data/adminNavigation.ts`); only "Dashboard" is a real link this sprint, the other 10 render as non-interactive "Coming soon" items rather than linking to routes that don't exist yet. Collapsible on desktop (icon-only width), off-canvas on mobile with the same accessible pattern as `MobileMenu` (Sprint 1.1): Escape-to-close, scroll lock, backdrop click.
+- `AdminTopbar` — mobile menu toggle, desktop collapse toggle, reused `ThemeSwitcher`/`LanguageSwitcher`, User Profile Area (real Firebase user info), Logout button calling `useAuth().logout()` directly.
+- `AdminHeader` — page-level breadcrumb + title + description + actions slot.
+- `Breadcrumb` — generic trail component, RTL-aware separator (`rtl:rotate-180`).
+- `PageContainer` — admin content-width wrapper, mirrors the public `Container`.
+- `SectionHeader` — small heading for individual sections within a page.
+- `AdminCard` — base card primitive; `StatCard` and `QuickActionCard` build on it.
+- `StatCard` — icon + label + value; dashboard passes a translated "Coming soon" placeholder value, never a fabricated number.
+- `QuickActionCard` — rendered disabled/"coming soon" this sprint, since its target management pages don't exist yet — avoids dead links.
+- `EmptyState` — generic reusable "nothing here yet" placeholder.
+- `Unauthorized` — 403 state for signed-in users who aren't registered admins.
+- `LoadingDashboard` — loading state shown while auth/admin status resolves.
 
-- `firestore.rules`, `storage.rules`, `src/lib/auth/` (roles, permissions, session helpers, admin authorization, route guard scaffolding), `SECURITY.md`.
+**New: `src/data/adminNavigation.ts`, `src/data/adminDashboard.ts`** — sidebar nav items and dashboard stats/quick-actions data, fully data-driven per project convention (zero hardcoded content in components).
 
-### Phase 2 — Sprint 2.4: Authentication Integration (v0.12.0)
+**New routes:**
+- `src/app/admin/layout.tsx` — protects the entire `/admin` segment (and every future nested route under it) by layering `RequireAuth` (Sprint 2.4: not signed in → redirect to `/login`) around `useAuthGuard` (Sprint 2.3/2.4: signed in but not an admin → `Unauthorized`). Neither piece was reimplemented.
+- `src/app/admin/page.tsx` — Dashboard Home: welcome section with real logged-in user info, placeholder stat cards, disabled quick-action cards, empty-state Recent Activity, and a genuinely accurate (not fabricated) System Status check via `isFirebaseConfigured`.
 
-**Objective:** build the complete reusable authentication layer using Firebase Authentication — no Admin Dashboard yet (per `CURRENT_SPRINT.md`).
+**Localization:** added a full `admin.*` section to `en.json`/`ar.json` (nav labels, sidebar/topbar strings, breadcrumb root, dashboard headings, stat/quick-action labels, unauthorized copy, loading message).
 
-**New: `src/context/AuthContext.tsx` (`AuthProvider` + `AuthContext`):**
-- Follows the exact same Context+hook pattern as `ThemeContext`/`LanguageContext` (Phase 0) — no external state library.
-- Exposes `{ user, loading, loginWithGoogle, loginWithEmail, logout }`. `loading` starts `true` and only resolves once Firebase's first `onAuthStateChanged` callback fires, since (unlike theme/language's synchronous `localStorage` reads) Firebase Auth session restoration is inherently asynchronous.
-- Delegates every method to Sprint 2.3's `session.ts` helpers (`signInWithEmail`, `signOutUser`) rather than reimplementing Firebase calls — thin wrapper, not a duplicate.
-
-**New: `src/hooks/useAuth.ts`** — mirrors `useTheme.ts`/`useLanguage.ts` exactly.
-
-**New: `src/components/shared/RequireAuth.tsx`** — gates children behind authentication: loading state while resolving, redirect to `/login` if signed out, renders children once authenticated. Not used by any page yet (no Admin Dashboard this sprint) — the reusable primitive a future protected layout will wrap itself in.
-
-**New: `src/components/sections/LoginSection.tsx` + `src/app/login/page.tsx`** — real, working login form (email/password + Google Sign-In button), calling `useAuth()`'s methods directly. No registration, no password reset (out of scope). Not linked from main navigation (admin-facing utility page). `robots: noindex` set in page metadata.
-
-**Extended `src/lib/auth/session.ts` (additive):**
-- Added `signInWithGoogle()` (`GoogleAuthProvider` + `signInWithPopup`). All Sprint 2.3 exports (`signInWithEmail`, `signOutUser`, `getCurrentUser`, `subscribeToAuthState`) unchanged.
-
-**Refactored `src/lib/auth/routeGuard.ts` (required, not gratuitous):**
-- `useAuthGuard()` previously ran its own independent `subscribeToAuthState` subscription (Sprint 2.3, before `useAuth()` existed). Now consumes the new `useAuth()` hook instead, so there's exactly one Firebase Auth subscription shared by both — directly satisfies this sprint's explicit "do not duplicate logic" requirement. Public return shape (`AuthGuardState`) unchanged; verified zero existing consumers before making this change, so nothing broke.
-- Along the way, fixed a real `react-hooks/set-state-in-effect` lint error (calling `setState` synchronously in an effect body) by deriving the loading flag instead of setting it directly — the same category of fix already applied to `ThemeContext`/`LanguageContext` in Sprint 1.1.
-
-**Extended `src/context/Providers.tsx` (additive):** now wraps `<AuthProvider>` around `Navbar`/`main`/`Footer`, inside `ThemeProvider`/`LanguageProvider`. `useAuth()` is available anywhere in the tree, including the new login page.
-
-**Localization:** added `login.*` keys to `en.json`/`ar.json` (heading, labels, submit states, Google sign-in, generic error message). Reused the existing `common.loading` key for `RequireAuth`'s loading state.
+**New: `CURRENT_SPRINT.md`** (project root) — didn't previously exist in the working repository; created to track the active sprint alongside `PROJECT_STATE.md`/`CHANGELOG.md`.
 
 **Verification:**
-- `npm run lint` → passes, zero errors (after fixing the set-state-in-effect issue above).
-- `tsc --noEmit` → passes, zero TypeScript errors.
-- `npm run build` → succeeds; all 8 prior public routes generate unchanged, plus the new `/login` route — 9 total.
+- `npm run lint` → passes, zero errors.
+- `tsc --noEmit` → passes, zero TypeScript errors (all 13 components, the layout, and the page were type-safe on the first pass).
+- `npm run build` → succeeds; `/admin` now included as a static route alongside all 9 prior routes (10 total).
 
 **Constraints honored (per `CURRENT_SPRINT.md`):**
-- No Admin Dashboard, no CRUD, no Firestore content editing, no media management, no role management UI, no registration, no password reset, no analytics.
-- No placeholder implementations — the login form genuinely calls Firebase Authentication and works end-to-end (once a real project is configured).
+- No CRUD, no forms, no Firestore reads/writes anywhere in this sprint's code.
+- No Sprint 1.x page or Sprint 2.x backend/auth file was modified — Sprint 3.1 only added new files.
+- Reused `AuthProvider`/`useAuth`/`RequireAuth`/`useAuthGuard` exactly as built in Sprint 2.3/2.4 — no duplicated authentication logic.
+
+**Known architectural tradeoff (flagged for follow-up, not fixed this sprint):**
+- `/admin` currently renders **nested inside** the public root layout's `Navbar`/`Footer` (from `src/context/Providers.tsx`), rather than replacing them with dedicated full-page admin chrome. Giving `/admin` its own separate root layout would require restructuring routing into Next.js route groups (e.g. moving every existing public page into a `(public)` segment) — a structural change to every Sprint 1.x route's file location, which this sprint's explicit "do not modify Sprint 1.x/2.x" constraint rules out. The dashboard is fully functional as built; this is a visual/UX cleanup candidate for an explicitly-scoped future sprint, not a functional gap.
 
 ---
 
 ## Current Sprint
 
-**Sprint 2.4: Authentication Integration** — CLOSED
+**Sprint 3.1: Admin Dashboard Foundation** — CLOSED
 
 Tasks completed:
-- [x] Firebase Authentication integration (email/password + Google, via Sprint 2.3/2.4 `session.ts`)
-- [x] `AuthProvider` / `AuthContext`
-- [x] `useAuth()` hook
-- [x] `loginWithGoogle()`, `loginWithEmail()`, `logout()`
-- [x] Session persistence (Firebase's default persistence, surfaced via `subscribeToAuthState`)
-- [x] Current user helper (`getCurrentUser`, reused from Sprint 2.3)
-- [x] Authentication loading state
-- [x] `RequireAuth` component
-- [x] Login page (`/login`, real working form)
-- [x] Refactored `useAuthGuard` to eliminate duplicated Firebase Auth subscription
-- [x] Verification: lint passes (after a real fix), TypeScript passes, build succeeds (9 routes)
+- [x] 13 reusable admin components (`components/admin/`)
+- [x] `data/adminNavigation.ts`, `data/adminDashboard.ts`
+- [x] `admin.*` localization (EN/AR)
+- [x] `/admin` protected layout (`RequireAuth` + `useAuthGuard`, no duplicated auth logic)
+- [x] `/admin` Dashboard Home page (welcome, stats, quick actions, recent activity, system status — all static placeholders)
+- [x] Loading / Unauthorized / Empty states wired correctly
+- [x] Verification: lint passes, TypeScript passes, build succeeds (10 routes)
+- [x] Production fonts restored
+- [x] `CURRENT_SPRINT.md` created
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
 - [x] Git commit created
-- [x] Project archive created
 
 ---
 
-## Next Actions (Sprint 2.5+ — not yet scoped/approved)
+## Next Actions — Sprint 3.2 (current, not yet implemented)
 
-Per the Phase 2/3 roadmap:
-- **Sprint 2.5 — Dynamic Content Integration:** begin migrating public pages from local data to the Sprint 2.2 services.
-- **Sprint 3.1 — Admin Dashboard Foundation:** the first consumer of this sprint's `RequireAuth`/`useAuthGuard`/login page.
+**Phase:** Phase 3 — Admin Dashboard
+**Sprint:** Sprint 3.2 — Hero Management (per the original Phase 3 roadmap naming)
+**Status:** READY TO START
 
-**Not yet started — awaiting explicit sprint scope approval before any implementation.**
+Likely scope (pending explicit approval before implementation):
+- First real CRUD management page under `/admin`, backed by Sprint 2.2's `heroService`.
+- Would be the first sprint to actually exercise Sprint 2.1's Firestore collections and Sprint 2.2's services against real data.
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated. The entire auth layer resolves to its safe "not configured" paths at runtime until then.
-- No admin account exists to actually sign in with yet — the first `super_admin` document must be created manually in `/admins/{uid}` (per `SECURITY.md`), and Firebase Console must have Email/Password and Google sign-in providers enabled.
+- No real Firebase project exists yet — `.env.local` is not populated. The dashboard is fully built but shows only placeholders until then.
+- No admin account exists yet — the first `super_admin` document must still be created manually in `/admins/{uid}` per `SECURITY.md`, and Email/Password + Google providers must be enabled in the Firebase Console.
+- **New this sprint:** `/admin` nests inside the public Navbar/Footer rather than having dedicated admin-only page chrome — see the architectural tradeoff note above.
 - All prior outstanding items remain (official brand colors/photos, sample announcement content, unused Phase 0 `committees.ts` local data file, static-only search/filter on `/announcements`, unconfirmed Student Union office details, undeployed `firestore.rules`/`storage.rules`).
 
 ---
 
 ## File Summary
 
-### New in Sprint 2.4
+### New in Sprint 3.1
 
-**Context & hooks (2 files):**
-- `src/context/AuthContext.tsx`
-- `src/hooks/useAuth.ts`
+**Components (13 files, `src/components/admin/`):**
+AdminLayout, AdminSidebar, AdminTopbar, AdminHeader, AdminCard, StatCard, QuickActionCard, Breadcrumb, PageContainer, SectionHeader, EmptyState, Unauthorized, LoadingDashboard.
 
-**Components (2 files):**
-- `src/components/shared/RequireAuth.tsx`
-- `src/components/sections/LoginSection.tsx`
+**Data (2 files):**
+- `src/data/adminNavigation.ts`
+- `src/data/adminDashboard.ts`
 
-**Routes (1 file):**
-- `src/app/login/page.tsx`
+**Routes (2 files):**
+- `src/app/admin/layout.tsx`
+- `src/app/admin/page.tsx`
 
-### Modified in Sprint 2.4
+**Project docs (1 file):**
+- `CURRENT_SPRINT.md` (new to the working repository)
 
-- `src/lib/auth/session.ts` — added `signInWithGoogle()` (additive; Sprint 2.3 exports unchanged)
-- `src/lib/auth/routeGuard.ts` — refactored to consume `useAuth()`, eliminating duplicated subscription; fixed a real set-state-in-effect lint error
-- `src/context/Providers.tsx` — added `AuthProvider` to the tree
-- `src/locales/en.json` / `ar.json` — added `login.*` section
+### Modified in Sprint 3.1
+
+- `src/locales/en.json` / `ar.json` — added `admin.*` section
+
+### Removed in Sprint 3.1
+
+- `src/app/admin/.gitkeep` — superseded by real `layout.tsx`/`page.tsx`
 
 ---
 

@@ -467,6 +467,69 @@
       "generic": "تعذّر تسجيل دخولك. يرجى التحقق من بياناتك والمحاولة مرة أخرى."
     }
   },
+  "admin": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "hero": "القسم الرئيسي",
+      "announcements": "الإعلانات",
+      "events": "الفعاليات",
+      "union": "اتحاد الطلاب",
+      "systems": "أنظمة الجامعة",
+      "guide": "دليل الطالب المستجد",
+      "studyPlans": "الخطط الدراسية",
+      "contact": "تواصل معنا",
+      "about": "عن MITSU",
+      "settings": "الإعدادات"
+    },
+    "sidebar": {
+      "collapse": "طي القائمة الجانبية",
+      "expand": "توسيع القائمة الجانبية",
+      "comingSoon": "قريباً"
+    },
+    "topbar": {
+      "openMenu": "فتح قائمة الإدارة",
+      "closeMenu": "إغلاق قائمة الإدارة",
+      "signedInAs": "مسجل الدخول باسم"
+    },
+    "breadcrumb": {
+      "root": "الإدارة"
+    },
+    "logout": "تسجيل الخروج",
+    "dashboard": {
+      "heading": "لوحة التحكم",
+      "welcomeHeading": "مرحباً بعودتك",
+      "welcomeSubheading": "إليك نظرة عامة على منصة MITSU.",
+      "statsHeading": "نظرة عامة",
+      "quickActionsHeading": "إجراءات سريعة",
+      "recentActivityHeading": "النشاط الأخير",
+      "recentActivityEmpty": "لا يوجد نشاط حديث بعد.",
+      "systemStatusHeading": "حالة النظام",
+      "systemStatus": {
+        "firebase": "Firebase",
+        "connected": "متصل",
+        "notConnected": "غير متصل"
+      }
+    },
+    "stats": {
+      "announcements": "الإعلانات",
+      "events": "الفعاليات",
+      "committees": "اللجان",
+      "systems": "أنظمة الجامعة",
+      "placeholderValue": "قريباً"
+    },
+    "quickActions": {
+      "announcements": "إدارة الإعلانات",
+      "events": "إدارة الفعاليات",
+      "hero": "تعديل القسم الرئيسي",
+      "settings": "إعدادات المنصة"
+    },
+    "unauthorized": {
+      "heading": "الوصول مقيّد",
+      "description": "حسابك مسجل الدخول، لكنه غير مسجل كمسؤول في MITSU. إذا كنت تعتقد أن هذا خطأ، تواصل مع أحد المسؤولين الرئيسيين.",
+      "backHome": "العودة إلى الصفحة الرئيسية"
+    },
+    "loading": "جاري تحميل لوحة التحكم..."
+  },
   "foundation": {
     "title": "الأساس البرمجي لـ MITSU جاهز",
     "description": "تم إنجاز المرحلة صفر. الوضع الليلي واللغة وهيكل المشروع تعمل بنجاح.",

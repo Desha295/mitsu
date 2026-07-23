@@ -467,6 +467,69 @@
       "generic": "We couldn't sign you in. Please check your details and try again."
     }
   },
+  "admin": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "hero": "Hero",
+      "announcements": "Announcements",
+      "events": "Events",
+      "union": "Student Union",
+      "systems": "University Systems",
+      "guide": "Freshman Guide",
+      "studyPlans": "Study Plans",
+      "contact": "Contact",
+      "about": "About",
+      "settings": "Settings"
+    },
+    "sidebar": {
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "comingSoon": "Coming soon"
+    },
+    "topbar": {
+      "openMenu": "Open admin menu",
+      "closeMenu": "Close admin menu",
+      "signedInAs": "Signed in as"
+    },
+    "breadcrumb": {
+      "root": "Admin"
+    },
+    "logout": "Log out",
+    "dashboard": {
+      "heading": "Dashboard",
+      "welcomeHeading": "Welcome back",
+      "welcomeSubheading": "Here's an overview of the MITSU platform.",
+      "statsHeading": "Overview",
+      "quickActionsHeading": "Quick Actions",
+      "recentActivityHeading": "Recent Activity",
+      "recentActivityEmpty": "No recent activity yet.",
+      "systemStatusHeading": "System Status",
+      "systemStatus": {
+        "firebase": "Firebase",
+        "connected": "Connected",
+        "notConnected": "Not connected"
+      }
+    },
+    "stats": {
+      "announcements": "Announcements",
+      "events": "Events",
+      "committees": "Committees",
+      "systems": "University Systems",
+      "placeholderValue": "Coming soon"
+    },
+    "quickActions": {
+      "announcements": "Manage Announcements",
+      "events": "Manage Events",
+      "hero": "Edit Hero Section",
+      "settings": "Platform Settings"
+    },
+    "unauthorized": {
+      "heading": "Access Restricted",
+      "description": "Your account is signed in, but isn't registered as a MITSU administrator. If you believe this is a mistake, contact a super admin.",
+      "backHome": "Back to Homepage"
+    },
+    "loading": "Loading your dashboard..."
+  },
   "foundation": {
     "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",

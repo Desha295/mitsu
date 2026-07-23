@@ -6,6 +6,62 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.13.0] — Phase 3 Sprint 3.1: Admin Dashboard Foundation
+
+### Added
+
+**Admin Components (`src/components/admin/`, 13 files):**
+- `AdminLayout` — dashboard shell composing Sidebar + Topbar + content, owns collapsed/mobile-open state.
+- `AdminSidebar` — 11 nav items; only "Dashboard" is a real link this sprint, the rest render as non-interactive "Coming soon" items. Collapsible on desktop, off-canvas on mobile with the same accessible pattern as `MobileMenu` (Escape-to-close, scroll lock, backdrop click).
+- `AdminTopbar` — mobile/desktop toggles, reused `ThemeSwitcher`/`LanguageSwitcher`, User Profile Area, Logout button calling `useAuth().logout()` directly.
+- `AdminHeader` — page-level breadcrumb + title + description + actions slot.
+- `Breadcrumb` — generic trail component, RTL-aware separator.
+- `PageContainer` — admin content-width wrapper, mirrors the public `Container`.
+- `SectionHeader` — heading for individual sections within a page.
+- `AdminCard` — base card primitive underlying `StatCard`/`QuickActionCard`.
+- `StatCard` — icon + label + value; value is always a translated placeholder, never a fabricated number.
+- `QuickActionCard` — disabled/"coming soon" this sprint since target pages don't exist yet.
+- `EmptyState` — generic reusable "nothing here yet" placeholder.
+- `Unauthorized` — 403 state for signed-in users who aren't registered admins.
+- `LoadingDashboard` — loading state while auth/admin status resolves.
+
+**Data:**
+- `src/data/adminNavigation.ts` — 11 sidebar items with an `isImplemented` flag.
+- `src/data/adminDashboard.ts` — placeholder stats and quick-action definitions.
+
+**Routing:**
+- `src/app/admin/layout.tsx` — protects the whole `/admin` segment by layering `RequireAuth` (Sprint 2.4) around `useAuthGuard` (Sprint 2.3/2.4): not signed in → redirect to `/login`; signed in but not an admin → `Unauthorized`; admin confirmed → real dashboard shell. Neither piece reimplemented.
+- `src/app/admin/page.tsx` — Dashboard Home: welcome section with real logged-in user info, placeholder stats, disabled quick actions, empty-state Recent Activity, and an accurate (not fabricated) System Status check via `isFirebaseConfigured`.
+
+**Localization:** full `admin.*` section added to `en.json`/`ar.json`.
+
+**Project docs:** `CURRENT_SPRINT.md` created in the working repository (didn't previously exist there).
+
+### Architecture Decisions
+
+- **No CRUD, no Firestore reads/writes anywhere:** every stat/quick-action/activity item is a static, clearly-labeled placeholder, exactly matching this sprint's explicit scope boundary.
+- **Two-layer protection, zero duplicated auth logic:** `RequireAuth` handles "signed out" (redirect); `useAuthGuard` handles "signed in but not admin" (403) — both reused exactly as built in Sprint 2.3/2.4.
+- **Sidebar items without a real page yet are visually distinct, not dead links:** `isImplemented: false` items render as muted, non-interactive rows with a "Coming soon" badge instead of linking to routes that 404.
+- **Known tradeoff, flagged not fixed:** `/admin` renders nested inside the public Navbar/Footer rather than owning dedicated full-page chrome, since separating them would require restructuring every existing route into Next.js route groups — out of bounds for this sprint's "do not modify Sprint 1.x/2.x" constraint. Documented in `PROJECT_STATE.md` as a follow-up candidate.
+
+### Verification
+
+- `npm run lint` — passes, zero errors.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin` now generated as a static route alongside all 9 prior routes (10 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page or Sprint 2.x backend/auth file was modified.
+
+### Known Issues
+
+- No real Firebase project exists yet, so the dashboard shows only placeholders until `.env.local` is populated.
+- No admin account exists yet — the first `super_admin` document must still be created manually per `SECURITY.md`.
+- `/admin` nests inside public site chrome rather than having its own dedicated layout (see Architecture Decisions above).
+
+---
+
 ## [v0.12.0] — Phase 2 Sprint 2.4: Authentication Integration
 
 ### Added
@@ -673,4 +729,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 2.5 — scope not yet defined/approved. Likely candidates: Admin Dashboard Foundation (protected layout using this sprint's RequireAuth/useAuthGuard and login page) or beginning public page migration to the Sprint 2.2 services. See `PROJECT_STATE.md` Next Actions.
+Sprint 3.2 — Hero Management (first real CRUD admin page, backed by Sprint 2.2's heroService) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.
