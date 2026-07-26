@@ -7,34 +7,35 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.13.0
+**Version:** v0.14.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.2 — Hero Management
+**Current Sprint:** Sprint 3.3 — next content-management page
 **Status:** READY TO START
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.1 — Admin Dashboard Foundation** ✅ COMPLETE (v0.13.0)
+**Sprint 3.2 — Hero Management** ✅ COMPLETE (v0.14.0)
 
-Built the reusable Admin Dashboard UI foundation: 13 admin components,
-protected `/admin` route (reusing `RequireAuth`/`useAuthGuard`), and a
-static-placeholder Dashboard Home. No CRUD, no forms, no Firestore
-reads/writes. See `CHANGELOG.md` v0.13.0 for full detail.
+First real CRUD admin page. `/admin/hero` reads/writes through Sprint
+2.2's `heroService`, with full form validation and image upload via
+Sprint 2.2/2.3's Storage helpers. See `CHANGELOG.md` v0.14.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.2 is expected to be the first sprint to implement real CRUD
-against Firebase, likely starting with Hero content management:
+Sprint 3.3 is expected to extend the Sprint 3.2 pattern to the next
+content area — likely Announcements or Events management:
 
-- First real management page under `/admin` (e.g. `/admin/hero`).
-- Backed by Sprint 2.2's `heroService` (already built, unused until now).
-- Real Firestore reads/writes, form UI, validation.
-- Would need a real Firebase project + `.env.local` populated + a
-  `super_admin` document to actually exercise end-to-end.
+- New management page under `/admin` (e.g. `/admin/announcements`).
+- Backed by Sprint 2.2's `announcementsService`/`eventsService`
+  (already built, unused until now).
+- List view + create/edit form + validation, following the same
+  structure as `HeroForm`/`/admin/hero`.
+- Corresponding sidebar item and dashboard quick action to be marked
+  `isImplemented: true` once built.
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 

@@ -6,6 +6,48 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.14.0] — Phase 3 Sprint 3.2: Hero Management
+
+### Added
+
+- `src/app/admin/hero/page.tsx` — first real CRUD admin page, backed entirely by Sprint 2.2's `heroService`. Fetches existing content via `getAll()`, preferring the `isActive: true` document over others (falls back to the first if none is active) so exactly one document is treated as "the" hero content, without new query infrastructure. Shows `EmptyState` + creation form when nothing exists yet, or the populated edit form otherwise.
+- `src/components/admin/HeroForm.tsx` — reusable create/edit form: full field validation (required fields, href/URL format accepting both relative paths and absolute URLs) with inline per-field errors; image upload wired to Sprint 2.2's `uploadImage()` and Sprint 2.3's `isValidImageFile()`, with its own loading/error state, auto-filling the `imageUrl` field on success; success/error/saving states throughout.
+
+### Changed (Additive)
+
+- `src/lib/auth/constants.ts` — added `manageHero` permission, granted to `admin` and `super_admin`. All other Sprint 2.3 permissions unchanged.
+- `src/components/admin/QuickActionCard.tsx` — now supports a real linked state (`href`) alongside the existing disabled/"coming soon" state.
+- `src/data/adminNavigation.ts` — Hero sidebar item marked `isImplemented: true`.
+- `src/app/admin/page.tsx` — Hero quick-action card now passes a real `href`; all others remain disabled pending their own sprints.
+- `src/locales/en.json` / `ar.json` — added `admin.hero.*` (heading, empty state, all form labels, upload/validation messages).
+
+### Fixed
+
+- A real `react-hooks/set-state-in-effect` error in the Hero page's data-fetch effect (calling `setState` synchronously for the "not allowed" early-return path). Fixed by deriving `loadingHero` from a comparison instead — the same fix category applied in Sprint 1.1 (Theme/Language contexts) and Sprint 2.4 (`useAuthGuard`).
+
+### Architecture Decisions
+
+- **Single active document without new query machinery:** rather than adding a new "singleton document" concept to the service layer, the page fetches all hero documents (already supported) and selects the active one client-side — reuses `getAll()` exactly as built in Sprint 2.2.
+- **Validation accepts both relative paths and absolute URLs:** hero CTAs link to both internal pages (`/guide`) and external ones (WhatsApp), so href validation checks for either a leading `/` or a well-formed `URL`, rather than requiring one format.
+- **No duplicated storage or CRUD logic:** the form calls `uploadImage`/`isValidImageFile` and the page calls `heroService.create`/`.update` directly — no new wrapper functions reimplementing what Sprint 2.2/2.3 already built.
+
+### Verification
+
+- `npm run lint` — passes, zero errors (after the fix above).
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/hero` now generated as a static route alongside all 10 prior routes (11 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Hero management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+
+---
+
 ## [v0.13.0] — Phase 3 Sprint 3.1: Admin Dashboard Foundation
 
 ### Added
@@ -729,4 +771,4 @@ None.
 
 ## [Unreleased]
 
-Sprint 3.2 — Hero Management (first real CRUD admin page, backed by Sprint 2.2's heroService) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.
+Sprint 3.3 — next admin content-management page (likely Announcements or Events, following the Sprint 3.2 pattern) — scope not yet defined/approved. See `PROJECT_STATE.md` Next Actions.

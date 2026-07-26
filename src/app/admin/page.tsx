@@ -73,6 +73,7 @@ export default function AdminDashboardPage() {
               icon={action.icon}
               label={translate(action.labelKey)}
               comingSoonLabel={translate("admin.sidebar.comingSoon")}
+              href={action.id === "hero" ? action.href : undefined}
             />
           ))}
         </div>

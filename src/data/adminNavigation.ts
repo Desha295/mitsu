@@ -29,7 +29,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Image",
     labelKey: "admin.nav.hero",
     href: "/admin/hero",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "announcements",

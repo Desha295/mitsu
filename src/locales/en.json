@@ -528,10 +528,39 @@
       "description": "Your account is signed in, but isn't registered as a MITSU administrator. If you believe this is a mistake, contact a super admin.",
       "backHome": "Back to Homepage"
     },
-    "loading": "Loading your dashboard..."
+    "loading": "Loading your dashboard...",
+    "hero": {
+      "heading": "Hero Section",
+      "subheading": "Manage the homepage hero content.",
+      "empty": {
+        "title": "No hero content yet",
+        "description": "Create the initial hero content below. It will appear on the homepage once published."
+      },
+      "form": {
+        "heading": "Heading",
+        "description": "Description",
+        "primaryCtaLabel": "Primary Button Label",
+        "primaryCtaHref": "Primary Button Link",
+        "secondaryCtaLabel": "Secondary Button Label",
+        "secondaryCtaHref": "Secondary Button Link",
+        "imageUrl": "Image URL",
+        "uploadImage": "Hero Image",
+        "chooseImage": "Choose Image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPEG, PNG, WebP, or SVG under 5MB.",
+        "imageUploadError": "Image upload failed. Please try again.",
+        "required": "This field is required.",
+        "invalidUrl": "Enter a valid link (e.g. /guide or https://example.com).",
+        "isActive": "Active (visible on homepage)",
+        "create": "Create Hero Content",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Saved successfully.",
+        "error": "Something went wrong. Please try again."
+      }
+    }
   },
   "foundation": {
-    "title": "MITSU foundation is ready",
     "description": "Phase 0 complete. Theme, language, and project structure are working.",
     "themeLabel": "Theme",
     "languageLabel": "Language"
