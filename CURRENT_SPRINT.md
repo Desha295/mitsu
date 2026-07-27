@@ -7,41 +7,44 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.18.0
+**Version:** v0.19.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.7 — Freshman Guide Management
-**Status:** READY TO START
+**Current Sprint:** Sprint 3.8 — TBD (scope needs explicit confirmation)
+**Status:** NOT YET SCOPED
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.6 — University Systems Management** ✅ COMPLETE (v0.18.0)
+**Sprint 3.7 — Freshman Guide Management** ✅ COMPLETE (v0.19.0)
 
-Fifth real CRUD admin page. `/admin/systems` reads/writes through
-Sprint 2.2's `systemsService`, extending Sprint 3.3/3.4/3.5's list
-pattern, reusing `ConfirmDialog` unchanged for a third sprint. No new
-Firestore collections — `systems` already existed. See `CHANGELOG.md`
-v0.18.0 for detail.
+Sixth real CRUD admin page. `/admin/guide` reads/writes through
+Sprint 2.2's `guideService`, extending Sprint 3.3–3.6's list pattern,
+reusing `ConfirmDialog` unchanged for a fourth sprint. First schema
+with array fields (`facts`, `stats`), handled with inline add/remove
+list editors in `GuideForm`. No new Firestore collections — `guide`
+already existed. See `CHANGELOG.md` v0.19.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.7 is expected to extend the established list/CRUD pattern to
-the Freshman Guide:
+Both CMS candidates identified after Sprint 3.5 (Systems, Guide) are
+now complete. Remaining unimplemented sidebar items: Study Plans,
+Contact, About, Settings. None has confirmed scope yet. Candidates,
+in no particular priority:
 
-- New management page under `/admin` (e.g. `/admin/guide`).
-- Backed by Sprint 2.2's `guideService` (already built, unused until
-  now).
-- List view + create/edit form + validation + delete, following the
-  same structure as `SystemForm`/`SystemListItem`/`/admin/systems`,
-  reusing `ConfirmDialog` as-is.
-- Corresponding sidebar item to be marked `isImplemented: true` once
-  built.
-
-This would close out the two CMS candidates identified after Sprint
-3.5 (Systems now done in Sprint 3.6, Guide remains).
+- **Study Plans** (`/admin/study-plans`) — per `guideService`'s own
+  Sprint 2.2 comment, a natural fit for the existing `documents`
+  collection ("downloadable resources" per `06_FIREBASE_SCHEMA.md`
+  #11) rather than a new collection. However, no `documentsService`
+  exists yet — this sprint would need to create one first (small,
+  same `createFirestoreService` factory), not just an admin page.
+- **Contact / About** (`/admin/contact`, `/admin/about`) — likely
+  singleton-style pages (like Hero), scope and backing collection not
+  yet confirmed.
+- **Settings** (`/admin/settings`) — maps to `06_FIREBASE_SCHEMA.md`
+  #10's `/settings/general` document; no service exists yet either.
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 

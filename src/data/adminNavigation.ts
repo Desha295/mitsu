@@ -64,7 +64,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Compass",
     labelKey: "admin.nav.guide",
     href: "/admin/guide",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "studyPlans",

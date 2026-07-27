@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.6 — University Systems Management
+**Current Sprint:** Sprint 3.7 — Freshman Guide Management
 **Status:** Complete
-**Version:** v0.18.0
+**Version:** v0.19.0
 
 ---
 
@@ -217,60 +217,103 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.5 component was redesigned — only additive extensions (navigation, locales).
 - Reused `systemsService`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
 
+### Phase 3 — Sprint 3.7: Freshman Guide Management (v0.19.0)
+
+**Objective:** sixth real CRUD admin page, extending Sprint 3.3–3.6's list pattern to the Freshman Guide, backed entirely by Sprint 2.2's `guideService` — no new backend architecture, and fourth sprint running to reuse `ConfirmDialog` with zero modifications. First schema with array fields (`facts`, `stats`).
+
+**New: `src/app/admin/guide/page.tsx`**
+- Fetches all guide sections via `guideService.getAll()`, ordered by `order` ascending.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3–3.6.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a fourth sprint.
+- Gated by the existing `manageGuide` permission (defined in Sprint 2.3, unused until now).
+
+**New: `src/components/admin/GuideForm.tsx`**
+- Same create/edit shape as `SystemForm`/`CommitteeForm`, extended with dynamic add/remove-row editors for `facts` (string bullets) and `stats` (label/value pairs) — the first schema needing array-field UI.
+- Blank rows silently dropped on submit rather than validated — matches the fields' own optionality.
+- `icon` required (unlike `SystemDoc`'s optional icon); `highlight` tracked separately from `isActive`, same isolate-boolean pattern used throughout.
+
+**New: `src/components/admin/GuideListItem.tsx`**
+- Mirrors `SystemListItem`'s icon/active/order badges; adds a "Highlighted" badge and fact/stat counts.
+
+**Extended `src/data/adminNavigation.ts`:** Freshman Guide sidebar item marked `isImplemented: true`.
+
+**Localization:** added `admin.guide.*` to `en.json`/`ar.json`.
+
+**Deliberately not touched:** `src/app/admin/page.tsx` / `src/data/adminDashboard.ts` — same reasoning as Sprint 3.5/3.6, no existing "Guide" quick-action card to link.
+
+**No new Firestore collections:** `guide` already existed in `COLLECTIONS` from Sprint 2.1.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/guide` now included as a static route alongside all 15 prior routes (16 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.6 component was redesigned — only additive extensions (navigation, locales).
+- Reused `guideService`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
+- No speculative "generic list editor" component extracted for facts/stats — kept inline since there's only one consumer so far.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.6: University Systems Management** — CLOSED
+**Sprint 3.7: Freshman Guide Management** — CLOSED
 
 Tasks completed:
-- [x] University Systems management page (`/admin/systems`) using `systemsService`
-- [x] `SystemForm` — create/edit, field validation, icon preview, no upload control (schema has none)
-- [x] `SystemListItem` — list row, active/inactive + order badges, official-site link/"Coming soon"
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (third sprint running)
-- [x] Sidebar updated to reflect University Systems as implemented
+- [x] Freshman Guide management page (`/admin/guide`) using `guideService`
+- [x] `GuideForm` — create/edit, field validation, dynamic facts/stats list editors
+- [x] `GuideListItem` — list row, active/inactive/highlighted + order badges, fact/stat counts
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (fourth sprint running)
+- [x] Sidebar updated to reflect Freshman Guide as implemented
 - [x] Localization (EN/AR)
-- [x] Verification: lint, TypeScript, build all pass (15 routes)
+- [x] Verification: lint, TypeScript, build all pass (16 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.7
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.8
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.7 (current, not yet implemented)
+## Next Actions — Sprint 3.8 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
-**Status:** READY TO START
+**Status:** READY TO START — scope needs explicit confirmation
 
-Likely scope (pending explicit approval): Freshman Guide management under `/admin/guide`, backed by Sprint 2.2's `guideService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3–3.6 — including reuse of `ConfirmDialog`. This would close out the remaining CMS candidates identified after Sprint 3.5 (Systems now done, Guide remains).
+Both CMS candidates identified after Sprint 3.5 (Systems, Guide) are now complete. Remaining unimplemented sidebar items: Study Plans, Contact, About, Settings. Candidates for Sprint 3.8, in no particular priority:
+
+- **Study Plans** (`/admin/study-plans`) — per `guideService`'s own Sprint 2.2 comment, a natural fit for the existing `documents` collection ("downloadable resources" per `06_FIREBASE_SCHEMA.md` #11) rather than a new collection. However, no `documentsService` exists yet — this sprint would need to create one first (small, same `createFirestoreService` factory), not just an admin page.
+- **Contact / About** (`/admin/contact`, `/admin/about`) — likely singleton-style pages (like Hero), scope and backing collection not yet confirmed.
+- **Settings** (`/admin/settings`) — maps to `06_FIREBASE_SCHEMA.md` #10's `/settings/general` document; no service exists yet either.
+
+None of these has confirmed scope yet — needs explicit direction before starting.
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, Student Union, and University Systems management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, Student Union, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
-- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union and University Systems (and any future CMS page) have no quick-action card unless one is deliberately added.
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, University Systems, and Freshman Guide (and any future CMS page) have no quick-action card unless one is deliberately added.
 - Leadership (President/Vice President) still has no dedicated management UI or service.
+- No `documentsService` exists yet for Study Plans or other downloadable-resource use cases.
 - All other prior outstanding items remain unchanged.
 
 ---
 
 ## File Summary
 
-### New in Sprint 3.6
+### New in Sprint 3.7
 
-- `src/app/admin/systems/page.tsx`
-- `src/components/admin/SystemForm.tsx`
-- `src/components/admin/SystemListItem.tsx`
+- `src/app/admin/guide/page.tsx`
+- `src/components/admin/GuideForm.tsx`
+- `src/components/admin/GuideListItem.tsx`
 
-### Modified in Sprint 3.6
+### Modified in Sprint 3.7
 
-- `src/data/adminNavigation.ts` — University Systems marked implemented
-- `src/locales/en.json` / `ar.json` — added `admin.systems.*`
+- `src/data/adminNavigation.ts` — Freshman Guide marked implemented
+- `src/locales/en.json` / `ar.json` — added `admin.guide.*`
 
 ---
 

@@ -783,6 +783,70 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "guide": {
+      "heading": "Freshman Guide",
+      "subheading": "Create, edit, and reorder the step-by-step Freshman Guide sections.",
+      "newButton": "New Section",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No guide sections yet.",
+        "description": "Create your first section to get started."
+      },
+      "list": {
+        "edit": "Edit section",
+        "delete": "Delete section",
+        "orderLabel": "Order",
+        "factsCount": "Facts:",
+        "statsCount": "Stats:"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "highlighted": "Highlighted"
+      },
+      "feedback": {
+        "created": "Section created.",
+        "updated": "Section updated.",
+        "deleted": "Section deleted."
+      },
+      "form": {
+        "createHeading": "New Section",
+        "editHeading": "Edit Section",
+        "title": "Title",
+        "description": "Description",
+        "icon": "Icon name",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first, as step 1, 2, 3...",
+        "facts": "Facts",
+        "factsHint": "Short bullet points shown when a student expands this step.",
+        "addFact": "Add fact",
+        "removeFact": "Remove fact",
+        "stats": "Stats",
+        "statsHint": "Label/value pairs shown as stat chips (e.g. \"Year 1\" / \"36\").",
+        "addStat": "Add stat",
+        "removeStat": "Remove stat",
+        "statLabelPlaceholder": "Label",
+        "statValuePlaceholder": "Value",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "isActive": "Active (visible to students)",
+        "highlight": "Highlight this section (e.g. Important Notes)",
+        "create": "Create Section",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this section. Please try again."
+      },
+      "delete": {
+        "title": "Delete this section?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

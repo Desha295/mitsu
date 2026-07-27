@@ -6,6 +6,45 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.19.0] — Phase 3 Sprint 3.7: Freshman Guide Management
+
+### Added
+
+- `src/app/admin/guide/page.tsx` — sixth real CRUD admin page, backed entirely by Sprint 2.2's `guideService`. Extends Sprint 3.3–3.6's list pattern: fetches all guide sections via `getAll()` ordered by `order` ascending, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete via one shared `GuideForm`; delete reuses the same `ConfirmDialog` component unchanged for a fourth sprint running. Gated by the existing `manageGuide` permission (defined in Sprint 2.3, unused until now).
+- `src/components/admin/GuideForm.tsx` — the most complex form so far. Same create/edit shape as `SystemForm`/`CommitteeForm`, extended with two dynamic list editors for `GuideSectionDoc`'s optional `facts` (string bullets) and `stats` (label/value pairs) — the first schema with array fields. Each list is plain add/remove-row local state rather than a new shared component, since no other form needs this yet. Blank rows are silently filtered out on submit rather than validated as errors, since both arrays are entirely optional at the schema level. `icon` is required here (unlike `SystemDoc`'s optional icon), so it's validated like `title`/`description`. `highlight` is tracked separately from `isActive`, the same isolate-boolean-state approach used in every prior form.
+- `src/components/admin/GuideListItem.tsx` — single list row; mirrors `SystemListItem`'s icon/active/order badges, adds a "Highlighted" badge (matching `GuideCard`'s own visual emphasis for Important Notes) and small fact/stat counts.
+
+### Changed (Additive)
+
+- `src/data/adminNavigation.ts` — Freshman Guide sidebar item marked `isImplemented: true`.
+- `src/locales/en.json` / `ar.json` — added `admin.guide.*` (heading, empty state, list actions, active/inactive/highlighted status, feedback messages, all form field labels including facts/stats editors, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **`ConfirmDialog` reused unchanged for a fourth sprint:** no modification needed to support a fifth resource type.
+- **Dynamic array fields handled inline, not as a new shared component:** `facts`/`stats` editors live directly in `GuideForm` since this is the only schema needing them so far; extracting a generic "list editor" component now would be speculative reuse ahead of an actual second consumer.
+- **Optional array validation kept light:** rather than mechanically requiring every fact/stat row to be filled, blank entries are silently dropped on submit — matches the schema's own optionality and avoids frustrating validation for freeform, non-required content.
+- **Dashboard quick actions again left untouched:** same reasoning as Sprint 3.5/3.6 — no existing "Guide" quick-action card to link.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/guide` now included as a static route alongside all 15 prior routes (16 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.6 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Freshman Guide management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+- No new Firestore collections were introduced this sprint — `guide` already existed.
+- This closes both CMS candidates identified after Sprint 3.5 (Systems in 3.6, Guide in 3.7). Remaining unimplemented sidebar items are Study Plans, Contact, About, and Settings.
+
+---
+
 ## [v0.18.0] — Phase 3 Sprint 3.6: University Systems Management
 
 ### Added
