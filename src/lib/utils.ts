@@ -16,6 +16,22 @@ export const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 /**
+ * Validates a href/URL field the same way for every admin form: accepts
+ * relative paths (e.g. "/guide") as well as absolute URLs. Extracted
+ * from Sprint 3.2's HeroForm (which keeps its own inline copy, unchanged)
+ * so Sprint 3.3+ forms share one implementation instead of re-declaring it.
+ */
+export function isValidHref(value: string): boolean {
+  if (value.startsWith("/")) return true;
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Formats an ISO date string as a localized, human-readable date (e.g.
  * "July 15, 2026" / "١٥ يوليو ٢٠٢٦" → forced to Western digits below for
  * consistency with the rest of the app's number display, e.g. Sprint 1.4's

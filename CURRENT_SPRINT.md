@@ -7,33 +7,34 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.14.0
+**Version:** v0.15.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.3 — next content-management page
+**Current Sprint:** Sprint 3.4 — Events Management
 **Status:** READY TO START
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.2 — Hero Management** ✅ COMPLETE (v0.14.0)
+**Sprint 3.3 — Announcements Management** ✅ COMPLETE (v0.15.0)
 
-First real CRUD admin page. `/admin/hero` reads/writes through Sprint
-2.2's `heroService`, with full form validation and image upload via
-Sprint 2.2/2.3's Storage helpers. See `CHANGELOG.md` v0.14.0 for detail.
+Second real CRUD admin page. `/admin/announcements` reads/writes through
+Sprint 2.2's `announcementsService`, extending Sprint 3.2's Hero pattern
+from a singleton document to a true list (create/edit/delete), plus a
+new reusable `ConfirmDialog`. See `CHANGELOG.md` v0.15.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.3 is expected to extend the Sprint 3.2 pattern to the next
-content area — likely Announcements or Events management:
+Sprint 3.4 is expected to extend the Sprint 3.3 pattern to Events:
 
-- New management page under `/admin` (e.g. `/admin/announcements`).
-- Backed by Sprint 2.2's `announcementsService`/`eventsService`
-  (already built, unused until now).
-- List view + create/edit form + validation, following the same
-  structure as `HeroForm`/`/admin/hero`.
+- New management page under `/admin` (e.g. `/admin/events`).
+- Backed by Sprint 2.2's `eventsService` (already built, unused until
+  now).
+- List view + create/edit form + validation + delete, following the
+  same structure as `AnnouncementForm`/`AnnouncementListItem`/
+  `/admin/announcements`, reusing `ConfirmDialog` as-is.
 - Corresponding sidebar item and dashboard quick action to be marked
   `isImplemented: true` once built.
 

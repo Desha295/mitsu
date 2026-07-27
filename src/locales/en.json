@@ -558,6 +558,60 @@
         "saved": "Saved successfully.",
         "error": "Something went wrong. Please try again."
       }
+    },
+    "announcements": {
+      "heading": "Announcements",
+      "subheading": "Create, edit, and publish official Student Union announcements.",
+      "newButton": "New Announcement",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No announcements yet.",
+        "description": "Create your first announcement to get started."
+      },
+      "list": {
+        "edit": "Edit announcement",
+        "delete": "Delete announcement"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "feedback": {
+        "created": "Announcement created.",
+        "updated": "Announcement updated.",
+        "deleted": "Announcement deleted."
+      },
+      "form": {
+        "createHeading": "New Announcement",
+        "editHeading": "Edit Announcement",
+        "title": "Title",
+        "description": "Description",
+        "category": "Category",
+        "priority": "Priority",
+        "imageUrl": "Image URL",
+        "uploadImage": "Announcement image",
+        "chooseImage": "Choose image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPG, PNG, WEBP, or SVG image under 5MB.",
+        "imageUploadError": "Something went wrong uploading the image. Please try again.",
+        "required": "This field is required.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isPublished": "Published (visible to students)",
+        "create": "Create Announcement",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this announcement. Please try again."
+      },
+      "delete": {
+        "title": "Delete this announcement?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

@@ -36,7 +36,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Megaphone",
     labelKey: "admin.nav.announcements",
     href: "/admin/announcements",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "events",

@@ -6,6 +6,46 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.15.0] — Phase 3 Sprint 3.3: Announcements Management
+
+### Added
+
+- `src/app/admin/announcements/page.tsx` — second real CRUD admin page, backed entirely by Sprint 2.2's `announcementsService`. Unlike Sprint 3.2's Hero (a singleton document), this is a true list: fetches all announcements via `getAll()` ordered by `createdAt` descending, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete. Create and edit reuse one `AnnouncementForm` component; delete goes through a confirmation dialog before calling `.remove()`. Gated by the existing `manageAnnouncements` permission (defined in Sprint 2.3, unused until now).
+- `src/components/admin/AnnouncementForm.tsx` — reusable create/edit form, same shape as Sprint 3.2's `HeroForm`: required-field + href/URL validation with inline errors, image upload wired to Sprint 2.2's `uploadImage()` and Sprint 2.3's `isValidImageFile()`. Category and priority are `<select>` fields reusing the public site's own taxonomy (`src/data/announcements.ts` types, `announcements.filters.*`/`announcements.priority.*` translation keys) rather than a separate admin vocabulary.
+- `src/components/admin/AnnouncementListItem.tsx` — single list row; reuses the public `AnnouncementCard`'s badge vocabulary (same category icons/labels, same priority emphasis — urgent = solid primary, important = secondary-light, normal = neutral) so admins see the same visual language they're managing.
+- `src/components/admin/ConfirmDialog.tsx` — generic confirmation dialog for destructive actions. Built without any Announcements-specific text so future list pages (Events, Union, Systems, etc.) can reuse it instead of each rolling their own. Reuses the existing `bg-overlay`/`animate-fade-in` tokens already established by `MobileMenu`, rather than introducing new ones.
+
+### Changed (Additive)
+
+- `src/lib/utils.ts` — added a shared `isValidHref()` export, extracted from Sprint 3.2's `HeroForm` (which keeps its own inline copy, unchanged) so this and future forms share one implementation.
+- `src/data/adminNavigation.ts` — Announcements sidebar item marked `isImplemented: true`.
+- `src/app/admin/page.tsx` — Announcements quick-action card now passes a real `href`, alongside Hero's from Sprint 3.2. All other quick actions remain disabled pending their own sprints.
+- `src/locales/en.json` / `ar.json` — added `admin.announcements.*` (heading, empty state, list actions, published/draft status, feedback messages, all form field labels, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **List pattern distinct from Hero's singleton pattern:** Hero (Sprint 3.2) treats one document as "the" content; Announcements is a genuine collection, so the page tracks a `formTarget` of `WithId<AnnouncementDoc> | "new" | null` to switch between list, create, and edit views, instead of forcing the singleton pattern onto a multi-document resource.
+- **`ConfirmDialog` built generic from the start:** rather than a one-off "delete announcement?" component, the dialog takes only generic title/description/label props — the first reusable Modal-category component per `07_COMPONENT_RULES.md`'s own example list.
+- **Category/priority reuse the public taxonomy:** no separate admin-only category list was invented; the `<select>` options and their labels come directly from `src/data/announcements.ts` and the existing `announcements.filters.*`/`announcements.priority.*` translation keys already shipped in Sprint 1.6.
+- **Timestamps handled explicitly:** `AnnouncementDoc.createdAt`/`updatedAt` are non-optional, so the page sets both via `Timestamp.now()` on create, and only `updatedAt` on edit (preserving the original `createdAt`) — done directly in the page, not inside the reusable form.
+
+### Verification
+
+- `npm run lint` — passes, zero errors (one real unused-variable warning found and fixed during development).
+- `tsc --noEmit` — passes, zero TypeScript errors (one real duplicate-key diagnostic found and fixed during development).
+- `npm run build` — succeeds; `/admin/announcements` now included as a static route alongside all 11 prior routes (12 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1/3.2 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Announcements management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+
+---
+
 ## [v0.14.0] — Phase 3 Sprint 3.2: Hero Management
 
 ### Added
