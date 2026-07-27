@@ -74,7 +74,9 @@ export default function AdminDashboardPage() {
               label={translate(action.labelKey)}
               comingSoonLabel={translate("admin.sidebar.comingSoon")}
               href={
-                action.id === "hero" || action.id === "announcements"
+                action.id === "hero" ||
+                action.id === "announcements" ||
+                action.id === "events"
                   ? action.href
                   : undefined
               }

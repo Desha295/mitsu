@@ -26,6 +26,33 @@ const FIELD_KEYS: Array<{ name: keyof HeroDoc; labelKey: string; type: "text" | 
 ];
 
 /**
+ * Guarantees every HeroDoc field has a defined value before it's ever
+ * handed to useState. Firestore documents are schemaless at runtime —
+ * an existing document can be missing a field (e.g. it predates that
+ * field, or was written by hand) even though HeroDoc types it as
+ * required. Without this, an input's `value` prop could start as
+ * `undefined` and later become a string once the user types, which is
+ * exactly what triggers React's "component is changing an uncontrolled
+ * input to be controlled" warning. Normalizing up front means every
+ * input is controlled from its very first render, for its entire
+ * lifecycle — no functional change, values are identical to whatever
+ * was passed in whenever they're actually present.
+ */
+function normalizeHeroValues(values: HeroDoc): HeroDoc {
+  return {
+    heading: values.heading ?? "",
+    description: values.description ?? "",
+    primaryCtaLabel: values.primaryCtaLabel ?? "",
+    primaryCtaHref: values.primaryCtaHref ?? "",
+    secondaryCtaLabel: values.secondaryCtaLabel ?? "",
+    secondaryCtaHref: values.secondaryCtaHref ?? "",
+    imageUrl: values.imageUrl ?? "",
+    isActive: values.isActive ?? false,
+    updatedAt: values.updatedAt,
+  };
+}
+
+/**
  * Hero content form (components/admin). Reused for both creating the
  * first hero document and editing an existing one — the caller decides
  * which by passing the right `onSubmit` (heroService.create vs .update).
@@ -37,8 +64,10 @@ export function HeroForm({
   submittingLabel,
 }: HeroFormProps) {
   const { translate } = useLanguage();
-  const [values, setValues] = useState<HeroDoc>(initialValues);
-  const [isActive, setIsActive] = useState(initialValues.isActive);
+  const [values, setValues] = useState<HeroDoc>(() =>
+    normalizeHeroValues(initialValues)
+  );
+  const [isActive, setIsActive] = useState(initialValues.isActive ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);

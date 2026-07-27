@@ -6,6 +6,47 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.16.0] — Phase 3 Sprint 3.4: Events Management
+
+### Added
+
+- `src/app/admin/events/page.tsx` — third real CRUD admin page, backed entirely by Sprint 2.2's `eventsService`. Extends Sprint 3.3's Announcements list pattern: fetches all events via `getAll()`, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete via one shared `EventForm`; delete reuses the same `ConfirmDialog` component from Sprint 3.3 as-is. Gated by the existing `manageEvents` permission (defined in Sprint 2.3, unused until now). Ordered by `date` ascending (soonest first) rather than `createdAt` descending — matches how the public `EventsSection` already sorts events, and is the more useful order for managing upcoming activities.
+- `src/components/admin/EventForm.tsx` — reusable create/edit form, same shape as `AnnouncementForm`. `EventDoc.date` (a Firestore `Timestamp`) is tracked as its own `dateInput` string state — the same way `isActive`/`isPublished` are already tracked outside the generic `values` object in `HeroForm`/`AnnouncementForm` — and converted back via the existing `dateToTimestamp()` query helper only on submit. Category is optional (unlike Announcement's), so a "no category" option is offered alongside the public site's own `EventCategory` values (`src/data/announcements.ts`, `events.categories.*` translation keys).
+- `src/components/admin/EventListItem.tsx` — single list row; reuses the public `EventCard`'s category icons/labels and mirrors `AnnouncementListItem`'s published/draft badge and edit/delete button style. Always shows the event date (the primary fact for an event, not just metadata) and location when present.
+
+### Fixed
+
+- **`src/components/admin/HeroForm.tsx`** — a real "component is changing an uncontrolled input to be controlled" React warning. Firestore documents are schemaless at runtime, so an existing hero document missing a field (even though `HeroDoc` types it as required) could leave an input's `value` as `undefined` on first render, only becoming a string once the user typed. Fixed by normalizing every field to an empty-string/`false` fallback (`normalizeHeroValues()`) before the initial `useState` call, so every input is controlled for its entire lifecycle. No functional change — an internal quality fix, folded into this sprint rather than given its own entry.
+
+### Changed (Additive)
+
+- `src/data/adminNavigation.ts` — Events sidebar item marked `isImplemented: true`.
+- `src/app/admin/page.tsx` — Events quick-action card now passes a real `href`, alongside Hero's and Announcements'.
+- `src/locales/en.json` / `ar.json` — added `admin.events.*` (heading, empty state, list actions, published/draft status, feedback messages, all form field labels including date/location/no-category, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **`ConfirmDialog` reused unchanged:** built generic in Sprint 3.3 specifically so a second list page wouldn't need its own — Events is the first sprint to prove that out, with zero modifications to the component.
+- **Date handled outside the generic form-values object:** rather than adding date-string-to-Timestamp conversion machinery to the generic `values` state, `EventForm` keeps `dateInput` as an isolated string, converting only at submit time — consistent with how boolean toggles (`isActive`/`isPublished`) are already handled outside the generic object in the two prior forms.
+- **List ordering follows the resource, not a house style:** Announcements orders by `createdAt` (newest first, since recency is what matters for a feed); Events orders by `date` (soonest first, since upcoming-ness is what matters for planning) — same `getAll({ orderByField })` mechanism, different field, chosen deliberately per resource rather than copied blindly.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/events` now included as a static route alongside all 12 prior routes (13 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1/3.2/3.3 component was redesigned. The HeroForm fix changes internal state initialization only, not its props, behavior, or output.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Events management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+
+---
+
 ## [v0.15.0] — Phase 3 Sprint 3.3: Announcements Management
 
 ### Added

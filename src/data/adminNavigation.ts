@@ -43,7 +43,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "CalendarDays",
     labelKey: "admin.nav.events",
     href: "/admin/events",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "union",

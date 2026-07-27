@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.3 — Announcements Management
+**Current Sprint:** Sprint 3.4 — Events Management
 **Status:** Complete
-**Version:** v0.15.0
+**Version:** v0.16.0
 
 ---
 
@@ -111,41 +111,77 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1/3.2 component was redesigned — only additive extensions (navigation, quick actions, shared util, locales).
 - Reused `announcementsService`, `uploadImage`, `isValidImageFile`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or storage logic.
 
+### Phase 3 — Sprint 3.4: Events Management (v0.16.0)
+
+**Objective:** third real CRUD admin page, extending Sprint 3.3's list pattern to Events, backed entirely by Sprint 2.2's `eventsService` — no new backend architecture, and the first sprint to prove out `ConfirmDialog`'s reusability by using it unchanged.
+
+**New: `src/app/admin/events/page.tsx`**
+- Fetches all events via `eventsService.getAll()`, ordered by `date` ascending (soonest first) — matches the public `EventsSection`'s own sort, and is more useful for managing upcoming activities than `createdAt`.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3's Announcements page.
+- Delete routes through the existing `ConfirmDialog` — reused with zero modifications.
+- Gated by the existing `manageEvents` permission (defined in Sprint 2.3, unused until now).
+
+**New: `src/components/admin/EventForm.tsx`**
+- Same create/edit shape as `AnnouncementForm`. `EventDoc.date` (`Timestamp`) is tracked as an isolated `dateInput` string, converted via the existing `dateToTimestamp()` query helper only on submit — consistent with how `isActive`/`isPublished` are handled outside the generic values object in the two prior forms.
+- Category is optional (unlike Announcement's), so a "no category" option is offered alongside the public site's `EventCategory` values and `events.categories.*` translation keys.
+- Image upload wired to the same `uploadImage()`/`isValidImageFile()` as the prior two forms.
+
+**New: `src/components/admin/EventListItem.tsx`**
+- Reuses the public `EventCard`'s category icons/labels; mirrors `AnnouncementListItem`'s published/draft badge and edit/delete buttons. Always shows the event date and location (when present).
+
+**Extended `src/data/adminNavigation.ts`:** Events sidebar item marked `isImplemented: true`.
+
+**Extended `src/app/admin/page.tsx`:** Events quick-action card now passes a real `href`, alongside Hero's and Announcements'.
+
+**Localization:** added `admin.events.*` to `en.json`/`ar.json`.
+
+**Also included — HeroForm hotfix (internal quality fix, no separate version bump):**
+- `src/components/admin/HeroForm.tsx` — fixed a real "uncontrolled input becoming controlled" React warning. An existing hero document fetched from Firestore could be missing a field at runtime (schemaless storage) even though `HeroDoc` types it as required, leaving an input's `value` as `undefined` until the user typed into it. Fixed via `normalizeHeroValues()`, which coalesces every field to an empty-string/`false` fallback before the initial `useState` call. No functional change.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/events` now included as a static route alongside all 12 prior routes (13 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1/3.2/3.3 component was redesigned — only additive extensions (navigation, quick actions, locales) plus the contained HeroForm state-initialization fix.
+- Reused `eventsService`, `uploadImage`, `isValidImageFile`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD, storage, or dialog logic.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.3: Announcements Management** — CLOSED
+**Sprint 3.4: Events Management** — CLOSED
 
 Tasks completed:
-- [x] Announcements management page (`/admin/announcements`) using `announcementsService`
-- [x] `AnnouncementForm` — create/edit, field validation, image upload
-- [x] `AnnouncementListItem` — list row, reuses public `AnnouncementCard` badge vocabulary
-- [x] `ConfirmDialog` — generic reusable delete confirmation
-- [x] Shared `isValidHref()` extracted to `lib/utils.ts`
-- [x] Sidebar/dashboard quick-action updated to reflect Announcements as implemented
+- [x] Events management page (`/admin/events`) using `eventsService`
+- [x] `EventForm` — create/edit, field validation, date handling, image upload
+- [x] `EventListItem` — list row, reuses public `EventCard` category vocabulary
+- [x] `ConfirmDialog` reused unchanged for delete confirmation
+- [x] Sidebar/dashboard quick-action updated to reflect Events as implemented
 - [x] Localization (EN/AR)
-- [x] Verification: lint, TypeScript, build all pass (12 routes)
+- [x] HeroForm controlled-input hotfix folded in (no separate changelog entry)
+- [x] Verification: lint, TypeScript, build all pass (13 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.4
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.5
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.4 (current, not yet implemented)
+## Next Actions — Sprint 3.5 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START
 
-Likely scope (pending explicit approval): Events management under `/admin/events`, backed by Sprint 2.2's `eventsService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3 — including reuse of `ConfirmDialog`.
+Likely scope (pending explicit approval): Student Union content management under `/admin/union` (Leadership/Committees), backed by Sprint 2.2's `unionService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3/3.4 — including reuse of `ConfirmDialog`.
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero and Announcements management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, and Events management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
 - All other prior outstanding items remain unchanged.
@@ -154,19 +190,18 @@ Likely scope (pending explicit approval): Events management under `/admin/events
 
 ## File Summary
 
-### New in Sprint 3.3
+### New in Sprint 3.4
 
-- `src/app/admin/announcements/page.tsx`
-- `src/components/admin/AnnouncementForm.tsx`
-- `src/components/admin/AnnouncementListItem.tsx`
-- `src/components/admin/ConfirmDialog.tsx`
+- `src/app/admin/events/page.tsx`
+- `src/components/admin/EventForm.tsx`
+- `src/components/admin/EventListItem.tsx`
 
-### Modified in Sprint 3.3
+### Modified in Sprint 3.4
 
-- `src/lib/utils.ts` — added shared `isValidHref()`
-- `src/data/adminNavigation.ts` — Announcements marked implemented
-- `src/app/admin/page.tsx` — Announcements quick action now links to real page
-- `src/locales/en.json` / `ar.json` — added `admin.announcements.*`
+- `src/data/adminNavigation.ts` — Events marked implemented
+- `src/app/admin/page.tsx` — Events quick action now links to real page
+- `src/locales/en.json` / `ar.json` — added `admin.events.*`
+- `src/components/admin/HeroForm.tsx` — controlled-input hotfix (folded in, no separate entry)
 
 ---
 

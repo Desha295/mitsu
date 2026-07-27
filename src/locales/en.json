@@ -612,6 +612,63 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "events": {
+      "heading": "Events",
+      "subheading": "Create, edit, and publish Student Union events.",
+      "newButton": "New Event",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No events yet.",
+        "description": "Create your first event to get started."
+      },
+      "list": {
+        "edit": "Edit event",
+        "delete": "Delete event"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "feedback": {
+        "created": "Event created.",
+        "updated": "Event updated.",
+        "deleted": "Event deleted."
+      },
+      "form": {
+        "createHeading": "New Event",
+        "editHeading": "Edit Event",
+        "title": "Title",
+        "description": "Description",
+        "date": "Date",
+        "location": "Location",
+        "category": "Category",
+        "noCategory": "No category",
+        "imageUrl": "Image URL",
+        "uploadImage": "Event image",
+        "chooseImage": "Choose image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPG, PNG, WEBP, or SVG image under 5MB.",
+        "imageUploadError": "Something went wrong uploading the image. Please try again.",
+        "required": "This field is required.",
+        "invalidDate": "Enter a valid date.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isPublished": "Published (visible to students)",
+        "create": "Create Event",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this event. Please try again."
+      },
+      "delete": {
+        "title": "Delete this event?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

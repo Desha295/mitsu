@@ -7,34 +7,37 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.15.0
+**Version:** v0.16.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.4 — Events Management
+**Current Sprint:** Sprint 3.5 — Student Union Management
 **Status:** READY TO START
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.3 — Announcements Management** ✅ COMPLETE (v0.15.0)
+**Sprint 3.4 — Events Management** ✅ COMPLETE (v0.16.0)
 
-Second real CRUD admin page. `/admin/announcements` reads/writes through
-Sprint 2.2's `announcementsService`, extending Sprint 3.2's Hero pattern
-from a singleton document to a true list (create/edit/delete), plus a
-new reusable `ConfirmDialog`. See `CHANGELOG.md` v0.15.0 for detail.
+Third real CRUD admin page. `/admin/events` reads/writes through
+Sprint 2.2's `eventsService`, extending Sprint 3.3's Announcements list
+pattern, reusing `ConfirmDialog` unchanged. Also folded in a hotfix to
+`HeroForm`'s controlled-input state initialization (no functional
+change, no separate version). See `CHANGELOG.md` v0.16.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.4 is expected to extend the Sprint 3.3 pattern to Events:
+Sprint 3.5 is expected to extend the established list/CRUD pattern to
+Student Union content:
 
-- New management page under `/admin` (e.g. `/admin/events`).
-- Backed by Sprint 2.2's `eventsService` (already built, unused until
+- New management page(s) under `/admin` (e.g. `/admin/union`) covering
+  Leadership and/or Committees.
+- Backed by Sprint 2.2's `unionService` (already built, unused until
   now).
 - List view + create/edit form + validation + delete, following the
-  same structure as `AnnouncementForm`/`AnnouncementListItem`/
-  `/admin/announcements`, reusing `ConfirmDialog` as-is.
+  same structure as `EventForm`/`EventListItem`/`/admin/events`,
+  reusing `ConfirmDialog` as-is.
 - Corresponding sidebar item and dashboard quick action to be marked
   `isImplemented: true` once built.
 
