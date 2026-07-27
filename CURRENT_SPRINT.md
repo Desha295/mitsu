@@ -7,39 +7,42 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.16.0
+**Version:** v0.17.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.5 — Student Union Management
+**Current Sprint:** Sprint 3.6 — University Systems Management
 **Status:** READY TO START
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.4 — Events Management** ✅ COMPLETE (v0.16.0)
+**Sprint 3.5 — Student Union (Committees) Management** ✅ COMPLETE (v0.17.0)
 
-Third real CRUD admin page. `/admin/events` reads/writes through
-Sprint 2.2's `eventsService`, extending Sprint 3.3's Announcements list
-pattern, reusing `ConfirmDialog` unchanged. Also folded in a hotfix to
-`HeroForm`'s controlled-input state initialization (no functional
-change, no separate version). See `CHANGELOG.md` v0.16.0 for detail.
+Fourth real CRUD admin page. `/admin/union` reads/writes through
+Sprint 2.2's `unionService` (the `committees` collection), extending
+Sprint 3.3/3.4's list pattern, reusing `ConfirmDialog` unchanged for a
+second sprint. Leadership remains out of scope — `unionService` only
+wraps Committees. See `CHANGELOG.md` v0.17.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.5 is expected to extend the established list/CRUD pattern to
-Student Union content:
+Sprint 3.6 is expected to extend the established list/CRUD pattern to
+University Systems:
 
-- New management page(s) under `/admin` (e.g. `/admin/union`) covering
-  Leadership and/or Committees.
-- Backed by Sprint 2.2's `unionService` (already built, unused until
+- New management page under `/admin` (e.g. `/admin/systems`).
+- Backed by Sprint 2.2's `systemsService` (already built, unused until
   now).
 - List view + create/edit form + validation + delete, following the
-  same structure as `EventForm`/`EventListItem`/`/admin/events`,
+  same structure as `CommitteeForm`/`CommitteeListItem`/`/admin/union`,
   reusing `ConfirmDialog` as-is.
-- Corresponding sidebar item and dashboard quick action to be marked
-  `isImplemented: true` once built.
+- Corresponding sidebar item to be marked `isImplemented: true` once
+  built.
+
+Freshman Guide management (`/admin/guide`, backed by `guideService`,
+also already built) is the other remaining CMS candidate and may be
+folded in or done as its own sprint — needs explicit scoping.
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 

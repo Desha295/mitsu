@@ -6,6 +6,44 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.17.0] — Phase 3 Sprint 3.5: Student Union (Committees) Management
+
+### Added
+
+- `src/app/admin/union/page.tsx` — fourth real CRUD admin page, backed entirely by Sprint 2.2's `unionService` (bound specifically to the `committees` collection — see that service file's own comment on why Leadership isn't included). Extends Sprint 3.3/3.4's list pattern: fetches all committees via `getAll()` ordered by `order` ascending, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete via one shared `CommitteeForm`; delete reuses the same `ConfirmDialog` component unchanged for a second sprint running. Gated by the existing `manageUnion` permission (defined in Sprint 2.3, unused until now).
+- `src/components/admin/CommitteeForm.tsx` — reusable create/edit form, same shape as `AnnouncementForm`/`EventForm`. `CommitteeDoc` is the simplest schema so far — no category, priority, or date — but reuses `isActive` (like Hero, not `isPublished` like Announcement/Event) and adds `order`, a plain number tracked as its own `orderInput` string (the same isolate-non-string-field approach `EventForm` used for `date`), parsed back to a number only on submit. A "next available order" default is computed from the current list whenever "New Committee" is opened.
+- `src/components/admin/CommitteeListItem.tsx` — single list row; mirrors `AnnouncementListItem`/`EventListItem`'s structure with an active/inactive badge and the committee's display-order shown alongside it.
+
+### Changed (Additive)
+
+- `src/data/adminNavigation.ts` — Student Union sidebar item marked `isImplemented: true`.
+- `src/locales/en.json` / `ar.json` — added `admin.union.*` (heading, empty state, list actions, active/inactive status, feedback messages, all form field labels including order/order-hint, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **`ConfirmDialog` reused unchanged for a second sprint:** no modification needed to support a third resource type, confirming the generic-from-the-start design decision made in Sprint 3.3.
+- **List ordering follows the resource, again:** committees order by `order` ascending (the field this schema defines specifically for display sequence), continuing the precedent set in Sprint 3.4 of choosing the field that matches the resource's own meaning rather than defaulting to `createdAt`.
+- **Dashboard quick actions deliberately left untouched:** the Quick Actions section (Sprint 3.1) never included a "Student Union" card — only Announcements/Events/Hero/Settings — so unlike Hero/Announcements/Events, there was no existing quick-action entry to link a real `href` onto. Adding one would be introducing new dashboard content, not linking an existing item, so it was left for a future decision rather than assumed in scope.
+- **Leadership intentionally out of scope:** `unionService` wraps the `committees` collection only; Leadership has its own collection reference (`getLeadershipCollection`) but no service yet, per Sprint 2.2's own documented deferral. This sprint didn't introduce one.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/union` now included as a static route alongside all 13 prior routes (14 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.4 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Student Union management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+- Leadership (President/Vice President) still has no dedicated management UI or service.
+
+---
+
 ## [v0.16.0] — Phase 3 Sprint 3.4: Events Management
 
 ### Added

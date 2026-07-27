@@ -50,7 +50,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Users",
     labelKey: "admin.nav.union",
     href: "/admin/union",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "systems",

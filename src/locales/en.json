@@ -669,6 +669,62 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "union": {
+      "heading": "Student Union",
+      "subheading": "Create, edit, and reorder committees shown on the Student Union page.",
+      "newButton": "New Committee",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No committees yet.",
+        "description": "Create your first committee to get started."
+      },
+      "list": {
+        "edit": "Edit committee",
+        "delete": "Delete committee",
+        "orderLabel": "Order"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "feedback": {
+        "created": "Committee created.",
+        "updated": "Committee updated.",
+        "deleted": "Committee deleted."
+      },
+      "form": {
+        "createHeading": "New Committee",
+        "editHeading": "Edit Committee",
+        "name": "Name",
+        "description": "Description",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first.",
+        "imageUrl": "Image URL",
+        "uploadImage": "Committee image",
+        "chooseImage": "Choose image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPG, PNG, WEBP, or SVG image under 5MB.",
+        "imageUploadError": "Something went wrong uploading the image. Please try again.",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isActive": "Active (visible to students)",
+        "create": "Create Committee",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this committee. Please try again."
+      },
+      "delete": {
+        "title": "Delete this committee?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

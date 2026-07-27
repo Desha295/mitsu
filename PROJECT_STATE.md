@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.4 — Events Management
+**Current Sprint:** Sprint 3.5 — Student Union (Committees) Management
 **Status:** Complete
-**Version:** v0.16.0
+**Version:** v0.17.0
 
 ---
 
@@ -147,61 +147,96 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1/3.2/3.3 component was redesigned — only additive extensions (navigation, quick actions, locales) plus the contained HeroForm state-initialization fix.
 - Reused `eventsService`, `uploadImage`, `isValidImageFile`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD, storage, or dialog logic.
 
+### Phase 3 — Sprint 3.5: Student Union (Committees) Management (v0.17.0)
+
+**Objective:** fourth real CRUD admin page, extending Sprint 3.3/3.4's list pattern to Student Union committees, backed entirely by Sprint 2.2's `unionService` — no new backend architecture, and second sprint running to reuse `ConfirmDialog` with zero modifications.
+
+**New: `src/app/admin/union/page.tsx`**
+- Fetches all committees via `unionService.getAll()`, ordered by `order` ascending — the field `CommitteeDoc` defines specifically for display sequence.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3/3.4.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a second sprint.
+- Gated by the existing `manageUnion` permission (defined in Sprint 2.3, unused until now).
+- Computes a sensible next `order` value from the current list whenever "New Committee" is opened.
+
+**New: `src/components/admin/CommitteeForm.tsx`**
+- Same create/edit shape as `AnnouncementForm`/`EventForm`. Simplest schema so far — no category, priority, or date.
+- Reuses `isActive` (like Hero, not `isPublished` like Announcement/Event) and adds `order`, tracked as an isolated `orderInput` string (same approach `EventForm` used for `date`), parsed back to a number only on submit.
+- Image upload wired to the same `uploadImage()`/`isValidImageFile()` as the prior three forms.
+
+**New: `src/components/admin/CommitteeListItem.tsx`**
+- Mirrors `AnnouncementListItem`/`EventListItem`'s structure; shows an active/inactive badge and the committee's display order.
+
+**Extended `src/data/adminNavigation.ts`:** Student Union sidebar item marked `isImplemented: true`.
+
+**Localization:** added `admin.union.*` to `en.json`/`ar.json`.
+
+**Deliberately not touched:** `src/app/admin/page.tsx` / `src/data/adminDashboard.ts` — the dashboard's Quick Actions list (Sprint 3.1) never included a "Student Union" card, so there was no existing quick-action entry to link, unlike Hero/Announcements/Events. Adding one would introduce new dashboard content beyond this sprint's scope.
+
+**Also confirmed, no code change:** `unionService` manages the `committees` collection only, not Leadership — Leadership has its own collection reference but no service yet, per Sprint 2.2's documented deferral.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/union` now included as a static route alongside all 13 prior routes (14 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.4 component was redesigned — only additive extensions (navigation, locales).
+- Reused `unionService`, `uploadImage`, `isValidImageFile`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD, storage, or dialog logic.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.4: Events Management** — CLOSED
+**Sprint 3.5: Student Union (Committees) Management** — CLOSED
 
 Tasks completed:
-- [x] Events management page (`/admin/events`) using `eventsService`
-- [x] `EventForm` — create/edit, field validation, date handling, image upload
-- [x] `EventListItem` — list row, reuses public `EventCard` category vocabulary
-- [x] `ConfirmDialog` reused unchanged for delete confirmation
-- [x] Sidebar/dashboard quick-action updated to reflect Events as implemented
+- [x] Student Union management page (`/admin/union`) using `unionService`
+- [x] `CommitteeForm` — create/edit, field validation, order handling, image upload
+- [x] `CommitteeListItem` — list row, active/inactive + order badges
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (second sprint running)
+- [x] Sidebar updated to reflect Student Union as implemented
 - [x] Localization (EN/AR)
-- [x] HeroForm controlled-input hotfix folded in (no separate changelog entry)
-- [x] Verification: lint, TypeScript, build all pass (13 routes)
+- [x] Verification: lint, TypeScript, build all pass (14 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.5
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.6
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.5 (current, not yet implemented)
+## Next Actions — Sprint 3.6 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START
 
-Likely scope (pending explicit approval): Student Union content management under `/admin/union` (Leadership/Committees), backed by Sprint 2.2's `unionService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3/3.4 — including reuse of `ConfirmDialog`.
+Likely scope (pending explicit approval): University Systems management under `/admin/systems`, backed by Sprint 2.2's `systemsService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3/3.4/3.5 — including reuse of `ConfirmDialog`. Freshman Guide management (`/admin/guide`, backed by `guideService`, also already built) is the other remaining CMS candidate — `adminNavigation.ts` currently lists Systems before Guide, so Systems is the more likely next scope, but this needs explicit confirmation before starting.
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, and Events management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, and Student Union management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union (and any future CMS page) has no quick-action card unless one is deliberately added.
+- Leadership (President/Vice President) still has no dedicated management UI or service.
 - All other prior outstanding items remain unchanged.
 
 ---
 
 ## File Summary
 
-### New in Sprint 3.4
+### New in Sprint 3.5
 
-- `src/app/admin/events/page.tsx`
-- `src/components/admin/EventForm.tsx`
-- `src/components/admin/EventListItem.tsx`
+- `src/app/admin/union/page.tsx`
+- `src/components/admin/CommitteeForm.tsx`
+- `src/components/admin/CommitteeListItem.tsx`
 
-### Modified in Sprint 3.4
+### Modified in Sprint 3.5
 
-- `src/data/adminNavigation.ts` — Events marked implemented
-- `src/app/admin/page.tsx` — Events quick action now links to real page
-- `src/locales/en.json` / `ar.json` — added `admin.events.*`
-- `src/components/admin/HeroForm.tsx` — controlled-input hotfix (folded in, no separate entry)
+- `src/data/adminNavigation.ts` — Student Union marked implemented
+- `src/locales/en.json` / `ar.json` — added `admin.union.*`
 
 ---
 
