@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.5 — Student Union (Committees) Management
+**Current Sprint:** Sprint 3.6 — University Systems Management
 **Status:** Complete
-**Version:** v0.17.0
+**Version:** v0.18.0
 
 ---
 
@@ -183,43 +183,77 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.4 component was redesigned — only additive extensions (navigation, locales).
 - Reused `unionService`, `uploadImage`, `isValidImageFile`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD, storage, or dialog logic.
 
+### Phase 3 — Sprint 3.6: University Systems Management (v0.18.0)
+
+**Objective:** fifth real CRUD admin page, extending Sprint 3.3/3.4/3.5's list pattern to University Systems, backed entirely by Sprint 2.2's `systemsService` — no new backend architecture, and third sprint running to reuse `ConfirmDialog` with zero modifications.
+
+**New: `src/app/admin/systems/page.tsx`**
+- Fetches all systems via `systemsService.getAll()`, ordered by `order` ascending.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3/3.4/3.5.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a third sprint.
+- Gated by the existing `manageSystems` permission (defined in Sprint 2.3, unused until now).
+
+**New: `src/components/admin/SystemForm.tsx`**
+- Same create/edit shape as `CommitteeForm`. `SystemDoc` has no image field — `icon` is a plain Lucide icon-name string, matching the public `SystemCard`'s own lookup, so this form shows a small live icon preview instead of an upload control.
+- `officialUrl` is required by the schema's type but validated as effectively optional (format-checked only when non-empty), matching the public `data/systems.ts`'s real usage where MUSTER's `officialUrl` is an empty string meaning "no portal yet" — `SystemCard` already treats that as a legitimate "Coming soon" state.
+
+**New: `src/components/admin/SystemListItem.tsx`**
+- Mirrors `CommitteeListItem`'s active/inactive + order badges; shows a "Visit official site" link or "Coming soon" label depending on `officialUrl`.
+
+**Extended `src/data/adminNavigation.ts`:** University Systems sidebar item marked `isImplemented: true`.
+
+**Localization:** added `admin.systems.*` to `en.json`/`ar.json`.
+
+**Deliberately not touched:** `src/app/admin/page.tsx` / `src/data/adminDashboard.ts` — same reasoning as Sprint 3.5, no existing "Systems" quick-action card to link.
+
+**No new Firestore collections:** `systems` already existed in `COLLECTIONS` from Sprint 2.1 — nothing new to create manually.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/systems` now included as a static route alongside all 14 prior routes (15 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.5 component was redesigned — only additive extensions (navigation, locales).
+- Reused `systemsService`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.5: Student Union (Committees) Management** — CLOSED
+**Sprint 3.6: University Systems Management** — CLOSED
 
 Tasks completed:
-- [x] Student Union management page (`/admin/union`) using `unionService`
-- [x] `CommitteeForm` — create/edit, field validation, order handling, image upload
-- [x] `CommitteeListItem` — list row, active/inactive + order badges
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (second sprint running)
-- [x] Sidebar updated to reflect Student Union as implemented
+- [x] University Systems management page (`/admin/systems`) using `systemsService`
+- [x] `SystemForm` — create/edit, field validation, icon preview, no upload control (schema has none)
+- [x] `SystemListItem` — list row, active/inactive + order badges, official-site link/"Coming soon"
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (third sprint running)
+- [x] Sidebar updated to reflect University Systems as implemented
 - [x] Localization (EN/AR)
-- [x] Verification: lint, TypeScript, build all pass (14 routes)
+- [x] Verification: lint, TypeScript, build all pass (15 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.6
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.7
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.6 (current, not yet implemented)
+## Next Actions — Sprint 3.7 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START
 
-Likely scope (pending explicit approval): University Systems management under `/admin/systems`, backed by Sprint 2.2's `systemsService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3/3.4/3.5 — including reuse of `ConfirmDialog`. Freshman Guide management (`/admin/guide`, backed by `guideService`, also already built) is the other remaining CMS candidate — `adminNavigation.ts` currently lists Systems before Guide, so Systems is the more likely next scope, but this needs explicit confirmation before starting.
+Likely scope (pending explicit approval): Freshman Guide management under `/admin/guide`, backed by Sprint 2.2's `guideService` (already built, unused until now), following the same list/create/edit/delete pattern established in Sprint 3.3–3.6 — including reuse of `ConfirmDialog`. This would close out the remaining CMS candidates identified after Sprint 3.5 (Systems now done, Guide remains).
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, and Student Union management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, Student Union, and University Systems management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
-- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union (and any future CMS page) has no quick-action card unless one is deliberately added.
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union and University Systems (and any future CMS page) have no quick-action card unless one is deliberately added.
 - Leadership (President/Vice President) still has no dedicated management UI or service.
 - All other prior outstanding items remain unchanged.
 
@@ -227,16 +261,16 @@ Likely scope (pending explicit approval): University Systems management under `/
 
 ## File Summary
 
-### New in Sprint 3.5
+### New in Sprint 3.6
 
-- `src/app/admin/union/page.tsx`
-- `src/components/admin/CommitteeForm.tsx`
-- `src/components/admin/CommitteeListItem.tsx`
+- `src/app/admin/systems/page.tsx`
+- `src/components/admin/SystemForm.tsx`
+- `src/components/admin/SystemListItem.tsx`
 
-### Modified in Sprint 3.5
+### Modified in Sprint 3.6
 
-- `src/data/adminNavigation.ts` — Student Union marked implemented
-- `src/locales/en.json` / `ar.json` — added `admin.union.*`
+- `src/data/adminNavigation.ts` — University Systems marked implemented
+- `src/locales/en.json` / `ar.json` — added `admin.systems.*`
 
 ---
 

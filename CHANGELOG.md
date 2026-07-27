@@ -6,6 +6,44 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.18.0] — Phase 3 Sprint 3.6: University Systems Management
+
+### Added
+
+- `src/app/admin/systems/page.tsx` — fifth real CRUD admin page, backed entirely by Sprint 2.2's `systemsService`. Extends Sprint 3.3/3.4/3.5's list pattern: fetches all systems via `getAll()` ordered by `order` ascending, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete via one shared `SystemForm`; delete reuses the same `ConfirmDialog` component unchanged for a third sprint running. Gated by the existing `manageSystems` permission (defined in Sprint 2.3, unused until now).
+- `src/components/admin/SystemForm.tsx` — reusable create/edit form, same shape as `CommitteeForm`. `SystemDoc` has no image field at all — `icon` is a plain Lucide icon-name string matching the public `SystemCard`'s own lookup convention, so this form renders a small live icon preview next to a text input instead of an upload control. `officialUrl` is typed as a required string in the schema, but the public `data/systems.ts` already stores an empty string for MUSTER ("no official web portal yet, mobile app only") and `SystemCard` treats that as a legitimate "Coming soon" state — so validation checks format only when non-empty, same as the optional href fields in prior forms, rather than forcing it non-empty.
+- `src/components/admin/SystemListItem.tsx` — single list row; mirrors `CommitteeListItem`'s active/inactive + order badges, plus a "Visit official site" link or "Coming soon" label depending on whether `officialUrl` is set — reusing the same language `SystemCard` already shows publicly.
+
+### Changed (Additive)
+
+- `src/data/adminNavigation.ts` — University Systems sidebar item marked `isImplemented: true`.
+- `src/locales/en.json` / `ar.json` — added `admin.systems.*` (heading, empty state, list actions, active/inactive status, feedback messages, all form field labels including icon/instructions/official-URL hints, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **`ConfirmDialog` reused unchanged for a third sprint:** no modification needed to support a fourth resource type.
+- **No upload control where the schema doesn't call for one:** rather than force an `imageUrl` field onto a schema that doesn't have one, `SystemForm` matches `SystemDoc` exactly — a text input plus live preview for `icon`, nothing more.
+- **Required-in-type doesn't always mean required-in-form:** `officialUrl`'s validation follows the resource's actual real-world usage (an empty official URL is meaningful, not an error) rather than mechanically enforcing the TypeScript type's non-optionality.
+- **Dashboard quick actions again left untouched:** same reasoning as Sprint 3.5 — no existing "Systems" quick-action card to link.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/systems` now included as a static route alongside all 14 prior routes (15 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.5 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so University Systems management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+- No new Firestore collections were introduced this sprint — `systems` already existed from Sprint 2.1.
+
+---
+
 ## [v0.17.0] — Phase 3 Sprint 3.5: Student Union (Committees) Management
 
 ### Added

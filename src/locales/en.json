@@ -725,6 +725,64 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "systems": {
+      "heading": "University Systems",
+      "subheading": "Create, edit, and reorder the official university systems directory.",
+      "newButton": "New System",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No systems yet.",
+        "description": "Create your first system to get started."
+      },
+      "list": {
+        "edit": "Edit system",
+        "delete": "Delete system",
+        "orderLabel": "Order",
+        "visitLink": "Visit official site"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "feedback": {
+        "created": "System created.",
+        "updated": "System updated.",
+        "deleted": "System deleted."
+      },
+      "form": {
+        "createHeading": "New System",
+        "editHeading": "Edit System",
+        "name": "Name",
+        "description": "Description",
+        "purpose": "Purpose",
+        "instructions": "Usage instructions",
+        "instructionsHint": "Optional step-by-step guidance shown in the \"How to Use\" panel.",
+        "officialUrl": "Official URL",
+        "officialUrlHint": "Leave blank if there's no official web portal yet (shown as \"Coming soon\").",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first.",
+        "icon": "Icon name",
+        "iconHint": "A Lucide icon name (e.g. \"ClipboardList\", \"BookOpen\").",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isActive": "Active (visible to students)",
+        "create": "Create System",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this system. Please try again."
+      },
+      "delete": {
+        "title": "Delete this system?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

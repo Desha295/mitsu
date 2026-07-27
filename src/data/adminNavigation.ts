@@ -57,7 +57,7 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Laptop",
     labelKey: "admin.nav.systems",
     href: "/admin/systems",
-    isImplemented: false,
+    isImplemented: true,
   },
   {
     id: "guide",

@@ -7,42 +7,41 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.17.0
+**Version:** v0.18.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.6 — University Systems Management
+**Current Sprint:** Sprint 3.7 — Freshman Guide Management
 **Status:** READY TO START
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.5 — Student Union (Committees) Management** ✅ COMPLETE (v0.17.0)
+**Sprint 3.6 — University Systems Management** ✅ COMPLETE (v0.18.0)
 
-Fourth real CRUD admin page. `/admin/union` reads/writes through
-Sprint 2.2's `unionService` (the `committees` collection), extending
-Sprint 3.3/3.4's list pattern, reusing `ConfirmDialog` unchanged for a
-second sprint. Leadership remains out of scope — `unionService` only
-wraps Committees. See `CHANGELOG.md` v0.17.0 for detail.
+Fifth real CRUD admin page. `/admin/systems` reads/writes through
+Sprint 2.2's `systemsService`, extending Sprint 3.3/3.4/3.5's list
+pattern, reusing `ConfirmDialog` unchanged for a third sprint. No new
+Firestore collections — `systems` already existed. See `CHANGELOG.md`
+v0.18.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Sprint 3.6 is expected to extend the established list/CRUD pattern to
-University Systems:
+Sprint 3.7 is expected to extend the established list/CRUD pattern to
+the Freshman Guide:
 
-- New management page under `/admin` (e.g. `/admin/systems`).
-- Backed by Sprint 2.2's `systemsService` (already built, unused until
+- New management page under `/admin` (e.g. `/admin/guide`).
+- Backed by Sprint 2.2's `guideService` (already built, unused until
   now).
 - List view + create/edit form + validation + delete, following the
-  same structure as `CommitteeForm`/`CommitteeListItem`/`/admin/union`,
+  same structure as `SystemForm`/`SystemListItem`/`/admin/systems`,
   reusing `ConfirmDialog` as-is.
 - Corresponding sidebar item to be marked `isImplemented: true` once
   built.
 
-Freshman Guide management (`/admin/guide`, backed by `guideService`,
-also already built) is the other remaining CMS candidate and may be
-folded in or done as its own sprint — needs explicit scoping.
+This would close out the two CMS candidates identified after Sprint
+3.5 (Systems now done in Sprint 3.6, Guide remains).
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 
