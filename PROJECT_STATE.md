@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.7 — Freshman Guide Management
+**Current Sprint:** Sprint 3.8 — Quick Access Management
 **Status:** Complete
-**Version:** v0.19.0
+**Version:** v0.20.0
 
 ---
 
@@ -253,67 +253,107 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - Reused `guideService`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
 - No speculative "generic list editor" component extracted for facts/stats — kept inline since there's only one consumer so far.
 
+### Phase 3 — Sprint 3.8: Quick Access Management (v0.20.0)
+
+**Objective:** seventh real CRUD admin page, extending Sprint 3.3–3.7's list pattern to the homepage's Quick Access cards, backed entirely by Sprint 2.2's `homepageService` — a service that has existed fully wired since Sprint 2.2 but was never used until this sprint. Preceded by a dedicated Sprint 3.8 scoping pass reconciling `ROADMAP.md` against `PROJECT_STATE.md`/`CURRENT_SPRINT.md`/the actual codebase.
+
+**New: `src/app/admin/quick-access/page.tsx`**
+- Fetches all Quick Access cards via `homepageService.getAll()`, ordered by `order` ascending.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3–3.7.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a fifth sprint.
+- Gated by the existing `manageHomepage` permission (defined in Sprint 2.3, unused until now).
+
+**New: `src/components/admin/QuickAccessForm.tsx`**
+- Same create/edit shape as `SystemForm`, including the live icon preview. Every field on `QuickAccessItemDoc` is required (unlike `SystemDoc`'s optional `officialUrl`/`icon`), so validation is uniform across all four text fields.
+
+**New: `src/components/admin/QuickAccessListItem.tsx`**
+- Mirrors `SystemListItem`'s icon/active/order badges; shows `href` as plain text rather than a clickable link, since it's typically an internal route.
+
+**Extended `src/data/adminNavigation.ts`:** added a **new** Quick Access sidebar entry — unlike every prior sprint, this nav item didn't already exist and need flipping; the Sprint 3.8 scoping pass specifically surfaced that gap.
+
+**Localization:** added `admin.nav.quickAccess` and `admin.quickAccess.*` to `en.json`/`ar.json`.
+
+**Deliberately not touched:** `src/app/admin/page.tsx` / `src/data/adminDashboard.ts` — same reasoning as Sprints 3.5–3.7, no existing quick-action card to link.
+
+**No new Firestore collections:** `homepage` already existed in `COLLECTIONS` from Sprint 2.1.
+
+**Completes:** the original `ROADMAP.md` Sprint 2.7 "Homepage CMS" deliverable (Hero in Sprint 3.2, Quick Access here) — except Homepage Images/Links, which the scoping pass mapped to a future Settings sprint instead (`SettingsDoc` already covers logos/campus image/social links; distinct schema from `homepage`'s Quick Access cards).
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/quick-access` now included as a static route alongside all 16 prior routes (17 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.7 component was redesigned — only additive extensions (navigation, locales).
+- Reused `homepageService`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.7: Freshman Guide Management** — CLOSED
+**Sprint 3.8: Quick Access Management** — CLOSED
 
 Tasks completed:
-- [x] Freshman Guide management page (`/admin/guide`) using `guideService`
-- [x] `GuideForm` — create/edit, field validation, dynamic facts/stats list editors
-- [x] `GuideListItem` — list row, active/inactive/highlighted + order badges, fact/stat counts
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (fourth sprint running)
-- [x] Sidebar updated to reflect Freshman Guide as implemented
-- [x] Localization (EN/AR)
-- [x] Verification: lint, TypeScript, build all pass (16 routes)
+- [x] Sprint 3.8 scoping pass (ROADMAP.md ↔ PROJECT_STATE.md ↔ CURRENT_SPRINT.md ↔ codebase reconciliation)
+- [x] Quick Access management page (`/admin/quick-access`) using `homepageService`
+- [x] `QuickAccessForm` — create/edit, all-required-field validation, icon preview
+- [x] `QuickAccessListItem` — list row, active/inactive + order badges
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (fifth sprint running)
+- [x] New sidebar entry added for Quick Access (didn't exist before)
+- [x] Localization (EN/AR), including new `admin.nav.quickAccess` key
+- [x] Verification: lint, TypeScript, build all pass (17 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.8
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.9
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.8 (current, not yet implemented)
+## Next Actions — Sprint 3.9 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START — scope needs explicit confirmation
 
-Both CMS candidates identified after Sprint 3.5 (Systems, Guide) are now complete. Remaining unimplemented sidebar items: Study Plans, Contact, About, Settings. Candidates for Sprint 3.8, in no particular priority:
+Per the Sprint 3.8 scoping analysis, the reconciled remaining backlog (in recommended order):
 
-- **Study Plans** (`/admin/study-plans`) — per `guideService`'s own Sprint 2.2 comment, a natural fit for the existing `documents` collection ("downloadable resources" per `06_FIREBASE_SCHEMA.md` #11) rather than a new collection. However, no `documentsService` exists yet — this sprint would need to create one first (small, same `createFirestoreService` factory), not just an admin page.
-- **Contact / About** (`/admin/contact`, `/admin/about`) — likely singleton-style pages (like Hero), scope and backing collection not yet confirmed.
-- **Settings** (`/admin/settings`) — maps to `06_FIREBASE_SCHEMA.md` #10's `/settings/general` document; no service exists yet either.
+1. **Leadership Management** (`/admin/leadership` or similar) — closes the Student Union CMS remainder (Sprint 2.8's "Leadership Editor"). Collection exists (`leadership`), but no service wraps it yet (`unionService` was deliberately scoped to Committees only in Sprint 3.5) — needs one small new service file using the same `createFirestoreService` factory. Low complexity; schema (`LeadershipDoc`: name, position, imageUrl?, bio?, order, isActive) is nearly identical to `CommitteeDoc`.
+2. **Study Plans / PDF Management** — closes part of the Systems & Guide CMS remainder. Collection exists (`documents`), no service yet. Needs a new `documentsService` (trivial) plus a new upload helper, since the existing `uploadImage`/`isValidImageFile` are image-only, not PDF-capable. Medium complexity.
+3. **Site Settings** — maps to `06_FIREBASE_SCHEMA.md` #10's `/settings/general` (logos, campus image, social links — the "Homepage Images/Links" remainder from Sprint 2.7). No service exists; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new *singleton-document service shape*, not just an application of the existing `createFirestoreService<T>(collectionRef)` factory. Medium complexity, first real architectural decision among the remaining items.
+4. **Contact / About Management** — **no existing collection or schema at all**, and both public pages are currently 100% translation-key-driven, unlike every Firestore-backed CMS page built so far. Building these raises an unresolved question — how bilingual (EN/AR) content is represented in a Firestore-backed field — that no prior sprint has had to answer. High complexity; needs its own scoping/architecture conversation before implementation.
+5. **Security Foundation** (Sprint 2.10) — Firestore/Storage rules hardening and role-based permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
 
-None of these has confirmed scope yet — needs explicit direction before starting.
+No sprint has been approved yet — needs explicit direction before starting.
 
 ---
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Announcements, Events, Student Union, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
-- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, University Systems, and Freshman Guide (and any future CMS page) have no quick-action card unless one is deliberately added.
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, University Systems, Freshman Guide, and Quick Access (and any future CMS page) have no quick-action card unless one is deliberately added.
 - Leadership (President/Vice President) still has no dedicated management UI or service.
 - No `documentsService` exists yet for Study Plans or other downloadable-resource use cases.
+- No singleton-document service pattern exists yet for `/settings/general`.
+- Contact/About have no Firestore schema, collection, or service — and raise an unresolved bilingual-content-in-Firestore question.
 - All other prior outstanding items remain unchanged.
 
 ---
 
 ## File Summary
 
-### New in Sprint 3.7
+### New in Sprint 3.8
 
-- `src/app/admin/guide/page.tsx`
-- `src/components/admin/GuideForm.tsx`
-- `src/components/admin/GuideListItem.tsx`
+- `src/app/admin/quick-access/page.tsx`
+- `src/components/admin/QuickAccessForm.tsx`
+- `src/components/admin/QuickAccessListItem.tsx`
 
-### Modified in Sprint 3.7
+### Modified in Sprint 3.8
 
-- `src/data/adminNavigation.ts` — Freshman Guide marked implemented
-- `src/locales/en.json` / `ar.json` — added `admin.guide.*`
+- `src/data/adminNavigation.ts` — new Quick Access sidebar entry added
+- `src/locales/en.json` / `ar.json` — added `admin.nav.quickAccess` and `admin.quickAccess.*`
 
 ---
 

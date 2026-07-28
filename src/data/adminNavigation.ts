@@ -32,6 +32,13 @@ export const adminNavigation: AdminNavItem[] = [
     isImplemented: true,
   },
   {
+    id: "quickAccess",
+    icon: "LayoutGrid",
+    labelKey: "admin.nav.quickAccess",
+    href: "/admin/quick-access",
+    isImplemented: true,
+  },
+  {
     id: "announcements",
     icon: "Megaphone",
     labelKey: "admin.nav.announcements",

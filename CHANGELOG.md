@@ -6,6 +6,44 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.20.0] — Phase 3 Sprint 3.8: Quick Access Management
+
+### Added
+
+- `src/app/admin/quick-access/page.tsx` — seventh real CRUD admin page, backed entirely by Sprint 2.2's `homepageService` — a service that existed fully wired but completely unused since Sprint 2.2, the same situation Systems and Guide were in before Sprints 3.6/3.7. Extends Sprint 3.3–3.7's list pattern: fetches all Quick Access cards via `getAll()` ordered by `order` ascending, renders `EmptyState` when none exist, otherwise a list with per-item edit/delete via one shared `QuickAccessForm`; delete reuses the same `ConfirmDialog` component unchanged for a fifth sprint running. Gated by the existing `manageHomepage` permission (defined in Sprint 2.3, unused until now).
+- `src/components/admin/QuickAccessForm.tsx` — reusable create/edit form, same shape as `SystemForm`, including a live icon preview next to the icon field. Simpler validation than Systems: every `QuickAccessItemDoc` field is required (unlike `SystemDoc`'s optional `officialUrl`/`icon`), so all four text fields validate uniformly, and `href` reuses the shared `isValidHref()`.
+- `src/components/admin/QuickAccessListItem.tsx` — single list row; mirrors `SystemListItem`'s icon/active/order badges. `href` is shown as plain muted text rather than a clickable link, since Quick Access hrefs are typically internal routes and navigating away from the admin panel isn't useful here (unlike Systems' always-external `officialUrl`).
+
+### Changed (Additive)
+
+- `src/data/adminNavigation.ts` — **new** Quick Access sidebar entry (this one didn't exist before, unlike every prior sprint's nav item which was already present and just flipped to `isImplemented: true`), placed right after Hero since both complete the original Sprint 2.7 "Homepage CMS" roadmap item.
+- `src/locales/en.json` / `ar.json` — added `admin.nav.quickAccess` plus the full `admin.quickAccess.*` section (heading, empty state, list actions, active/inactive status, feedback messages, all form field labels, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **`ConfirmDialog` reused unchanged for a fifth sprint:** no modification needed to support a sixth resource type.
+- **New sidebar entry, not just a flipped flag:** Quick Access was identified during the Sprint 3.8 scoping pass as a fully-built, fully-unused service with no corresponding nav entry at all — the reconciliation between `ROADMAP.md`'s original Sprint 2.7 ("Homepage CMS") and the actual Phase 3 renumbering surfaced this gap.
+- **`href` rendered as text, not a link, in the list:** a deliberate deviation from `SystemListItem`'s clickable "Visit official site" pattern, since the resource's own meaning differs (internal navigation vs. an external system link).
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/quick-access` now included as a static route alongside all 16 prior routes (17 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.7 component was redesigned.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Quick Access management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+- No new Firestore collections were introduced this sprint — `homepage` already existed.
+- This completes the original Sprint 2.7 "Homepage CMS" roadmap item (Hero in 3.2, Quick Access in 3.8) except for Homepage Images/Links, which a Sprint 3.8 scoping pass mapped instead to a future Settings sprint (`SettingsDoc` already covers logos/campus image/social links).
+
+---
+
 ## [v0.19.0] — Phase 3 Sprint 3.7: Freshman Guide Management
 
 ### Added

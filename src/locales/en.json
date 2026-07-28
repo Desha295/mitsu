@@ -471,6 +471,7 @@
     "nav": {
       "dashboard": "Dashboard",
       "hero": "Hero",
+      "quickAccess": "Quick Access",
       "announcements": "Announcements",
       "events": "Events",
       "union": "Student Union",
@@ -557,6 +558,59 @@
         "saving": "Saving...",
         "saved": "Saved successfully.",
         "error": "Something went wrong. Please try again."
+      }
+    },
+    "quickAccess": {
+      "heading": "Quick Access",
+      "subheading": "Create, edit, and reorder the homepage's Quick Access cards.",
+      "newButton": "New Card",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No Quick Access cards yet.",
+        "description": "Create your first card to get started."
+      },
+      "list": {
+        "edit": "Edit card",
+        "delete": "Delete card",
+        "orderLabel": "Order"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "feedback": {
+        "created": "Card created.",
+        "updated": "Card updated.",
+        "deleted": "Card deleted."
+      },
+      "form": {
+        "createHeading": "New Card",
+        "editHeading": "Edit Card",
+        "title": "Title",
+        "description": "Description",
+        "href": "Link",
+        "hrefHint": "An internal path (e.g. \"/guide\") or a full external URL.",
+        "icon": "Icon name",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first.",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isActive": "Active (visible to students)",
+        "create": "Create Card",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this card. Please try again."
+      },
+      "delete": {
+        "title": "Delete this card?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
       }
     },
     "announcements": {
