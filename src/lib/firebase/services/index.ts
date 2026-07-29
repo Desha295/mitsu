@@ -12,3 +12,4 @@ export * from "./events.service";
 export * from "./union.service";
 export * from "./systems.service";
 export * from "./guide.service";
+export * from "./leadership.service";

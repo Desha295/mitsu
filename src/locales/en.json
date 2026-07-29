@@ -475,6 +475,7 @@
       "announcements": "Announcements",
       "events": "Events",
       "union": "Student Union",
+      "leadership": "Leadership",
       "systems": "University Systems",
       "guide": "Freshman Guide",
       "studyPlans": "Study Plans",
@@ -775,6 +776,64 @@
       },
       "delete": {
         "title": "Delete this committee?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
+    },
+    "leadership": {
+      "heading": "Leadership",
+      "subheading": "Create, edit, and reorder Student Union leadership members.",
+      "newButton": "New Member",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No leadership members yet.",
+        "description": "Create your first member to get started."
+      },
+      "list": {
+        "edit": "Edit member",
+        "delete": "Delete member",
+        "orderLabel": "Order"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "feedback": {
+        "created": "Member created.",
+        "updated": "Member updated.",
+        "deleted": "Member deleted."
+      },
+      "form": {
+        "createHeading": "New Member",
+        "editHeading": "Edit Member",
+        "name": "Name",
+        "position": "Position",
+        "bio": "Bio",
+        "bioHint": "Optional short biography.",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first.",
+        "imageUrl": "Image URL",
+        "uploadImage": "Member photo",
+        "chooseImage": "Choose image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPG, PNG, WEBP, or SVG image under 5MB.",
+        "imageUploadError": "Something went wrong uploading the image. Please try again.",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isActive": "Active (visible to students)",
+        "create": "Create Member",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this member. Please try again."
+      },
+      "delete": {
+        "title": "Delete this member?",
         "confirm": "Delete",
         "confirming": "Deleting...",
         "cancel": "Cancel"

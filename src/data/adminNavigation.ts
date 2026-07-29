@@ -60,6 +60,13 @@ export const adminNavigation: AdminNavItem[] = [
     isImplemented: true,
   },
   {
+    id: "leadership",
+    icon: "UserRound",
+    labelKey: "admin.nav.leadership",
+    href: "/admin/leadership",
+    isImplemented: true,
+  },
+  {
     id: "systems",
     icon: "Laptop",
     labelKey: "admin.nav.systems",

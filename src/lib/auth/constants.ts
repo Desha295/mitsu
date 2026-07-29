@@ -27,6 +27,7 @@ export const PERMISSIONS = {
   manageGuide: "manageGuide",
   manageHero: "manageHero",
   manageHomepage: "manageHomepage",
+  manageLeadership: "manageLeadership",
   manageSettings: "manageSettings",
   manageAdmins: "manageAdmins",
 } as const;
@@ -47,6 +48,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     PERMISSIONS.manageGuide,
     PERMISSIONS.manageHero,
     PERMISSIONS.manageHomepage,
+    PERMISSIONS.manageLeadership,
     PERMISSIONS.manageSettings,
   ],
   [ROLES.superAdmin]: Object.values(PERMISSIONS),

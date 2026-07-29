@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.8 — Quick Access Management
+**Current Sprint:** Sprint 3.9 — Leadership Management
 **Status:** Complete
-**Version:** v0.20.0
+**Version:** v0.21.0
 
 ---
 
@@ -288,41 +288,83 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.7 component was redesigned — only additive extensions (navigation, locales).
 - Reused `homepageService`, `isValidHref`, `ConfirmDialog`, `useAuthGuard`, `canAccess` exactly as built — no duplicated CRUD or dialog logic.
 
+### Phase 3 — Sprint 3.9: Leadership Management (v0.21.0)
+
+**Objective:** eighth real CRUD admin page, extending Sprint 3.3–3.8's list pattern to Leadership — the first sprint since 3.2 requiring a genuinely new domain service rather than wiring up one already built. Closes the deliberate deferral from Sprint 3.5, when `unionService` was scoped to Committees only.
+
+**New: `src/lib/firebase/services/leadership.service.ts`**
+- Wraps the `leadership` collection reference (existing since Sprint 2.1) with the same `createFirestoreService` factory used by all six prior domain services.
+
+**New: `src/app/admin/leadership/page.tsx`**
+- Fetches all leadership members via `leadershipService.getAll()`, ordered by `order` ascending.
+- Same `formTarget`/list/create/edit structure as Sprint 3.3–3.8.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a sixth sprint.
+- Gated by the new `manageLeadership` permission.
+
+**New: `src/components/admin/LeadershipForm.tsx`**
+- Mirrors `CommitteeForm` almost exactly. `position` replaces `description` as the second required field; a new optional `bio` textarea added. Same image upload flow as Committee/Announcement/Event, different storage path.
+
+**New: `src/components/admin/LeadershipListItem.tsx`**
+- Mirrors `CommitteeListItem`'s badges; `position` shown as a subtitle, `bio` shown only when present.
+
+**Extended `src/lib/auth/constants.ts`:** added a **new** `manageLeadership` permission — no existing permission fit Leadership as its own distinct resource, since `manageUnion` was already scoped specifically to Committees. Follows the same one-per-content-area pattern as every other permission; granted to `admin` (and `super_admin` automatically).
+
+**Extended `src/lib/firebase/services/index.ts`:** new `leadership.service` export.
+
+**Extended `src/data/adminNavigation.ts`:** added a **new** Leadership sidebar entry (didn't exist before, same situation as Sprint 3.8's Quick Access), placed right after Student Union.
+
+**Localization:** added `admin.nav.leadership` and `admin.leadership.*` to `en.json`/`ar.json`.
+
+**Verified, no change needed:** `firestore.rules` already had a matching `/leadership/{id}` rule (written ahead of any UI, same as every other collection) — Firestore rules gate on `isAdmin()` at the role level and don't reference the fine-grained `PERMISSIONS` constants, so no rules update was required.
+
+**No new Firestore collections:** `leadership` already existed in `COLLECTIONS` from Sprint 2.1.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/leadership` now included as a static route alongside all 17 prior routes (18 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.8 component was redesigned — only additive extensions (new service, new permission, navigation, locales).
+- Reused `ConfirmDialog`, `uploadImage`, `isValidImageFile`, `isValidHref`, `useAuthGuard`, `canAccess`, and the `createFirestoreService` factory exactly as built.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.8: Quick Access Management** — CLOSED
+**Sprint 3.9: Leadership Management** — CLOSED
 
 Tasks completed:
-- [x] Sprint 3.8 scoping pass (ROADMAP.md ↔ PROJECT_STATE.md ↔ CURRENT_SPRINT.md ↔ codebase reconciliation)
-- [x] Quick Access management page (`/admin/quick-access`) using `homepageService`
-- [x] `QuickAccessForm` — create/edit, all-required-field validation, icon preview
-- [x] `QuickAccessListItem` — list row, active/inactive + order badges
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (fifth sprint running)
-- [x] New sidebar entry added for Quick Access (didn't exist before)
-- [x] Localization (EN/AR), including new `admin.nav.quickAccess` key
-- [x] Verification: lint, TypeScript, build all pass (17 routes)
+- [x] New `leadershipService` created, wrapping the existing `leadership` collection reference
+- [x] Leadership management page (`/admin/leadership`) using `leadershipService`
+- [x] `LeadershipForm` — create/edit, field validation, optional bio, image upload
+- [x] `LeadershipListItem` — list row, active/inactive + order badges, position subtitle
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (sixth sprint running)
+- [x] New `manageLeadership` permission added
+- [x] New sidebar entry added for Leadership (didn't exist before)
+- [x] Localization (EN/AR), including new `admin.nav.leadership` key
+- [x] Verified `firestore.rules` already covers `/leadership/{id}` — no change needed
+- [x] Verification: lint, TypeScript, build all pass (18 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.9
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.10
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.9 (current, not yet implemented)
+## Next Actions — Sprint 3.10 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START — scope needs explicit confirmation
 
-Per the Sprint 3.8 scoping analysis, the reconciled remaining backlog (in recommended order):
+Per the Sprint 3.8 scoping analysis, updated after Sprint 3.9's completion:
 
-1. **Leadership Management** (`/admin/leadership` or similar) — closes the Student Union CMS remainder (Sprint 2.8's "Leadership Editor"). Collection exists (`leadership`), but no service wraps it yet (`unionService` was deliberately scoped to Committees only in Sprint 3.5) — needs one small new service file using the same `createFirestoreService` factory. Low complexity; schema (`LeadershipDoc`: name, position, imageUrl?, bio?, order, isActive) is nearly identical to `CommitteeDoc`.
-2. **Study Plans / PDF Management** — closes part of the Systems & Guide CMS remainder. Collection exists (`documents`), no service yet. Needs a new `documentsService` (trivial) plus a new upload helper, since the existing `uploadImage`/`isValidImageFile` are image-only, not PDF-capable. Medium complexity.
-3. **Site Settings** — maps to `06_FIREBASE_SCHEMA.md` #10's `/settings/general` (logos, campus image, social links — the "Homepage Images/Links" remainder from Sprint 2.7). No service exists; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new *singleton-document service shape*, not just an application of the existing `createFirestoreService<T>(collectionRef)` factory. Medium complexity, first real architectural decision among the remaining items.
-4. **Contact / About Management** — **no existing collection or schema at all**, and both public pages are currently 100% translation-key-driven, unlike every Firestore-backed CMS page built so far. Building these raises an unresolved question — how bilingual (EN/AR) content is represented in a Firestore-backed field — that no prior sprint has had to answer. High complexity; needs its own scoping/architecture conversation before implementation.
-5. **Security Foundation** (Sprint 2.10) — Firestore/Storage rules hardening and role-based permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
+1. **Study Plans / PDF Management** — collection exists (`documents`), no service yet. Needs a new `documentsService` (small, same `createFirestoreService` factory — same shape as this sprint's `leadershipService`) plus a new upload helper, since the existing `uploadImage`/`isValidImageFile` are image-only, not PDF-capable. Medium complexity.
+2. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape — the first real architectural decision in the remaining backlog. Medium complexity.
+3. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question no prior sprint has had to answer. High complexity — needs its own scoping conversation.
+4. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
+5. **Student Union remainder** (Vision/Mission/Social Media/President Information) — still unaddressed; President Information may already be covered once Leadership content is populated, but Vision/Mission/Social Media have no confirmed schema or collection yet.
 
 No sprint has been approved yet — needs explicit direction before starting.
 
@@ -330,30 +372,33 @@ No sprint has been approved yet — needs explicit direction before starting.
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, Leadership, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
-- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, University Systems, Freshman Guide, and Quick Access (and any future CMS page) have no quick-action card unless one is deliberately added.
-- Leadership (President/Vice President) still has no dedicated management UI or service.
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, Leadership, University Systems, Freshman Guide, and Quick Access (and any future CMS page) have no quick-action card unless one is deliberately added.
 - No `documentsService` exists yet for Study Plans or other downloadable-resource use cases.
 - No singleton-document service pattern exists yet for `/settings/general`.
 - Contact/About have no Firestore schema, collection, or service — and raise an unresolved bilingual-content-in-Firestore question.
+- Vision/Mission/Social Media (Student Union remainder) have no confirmed schema or collection.
 - All other prior outstanding items remain unchanged.
 
 ---
 
 ## File Summary
 
-### New in Sprint 3.8
+### New in Sprint 3.9
 
-- `src/app/admin/quick-access/page.tsx`
-- `src/components/admin/QuickAccessForm.tsx`
-- `src/components/admin/QuickAccessListItem.tsx`
+- `src/lib/firebase/services/leadership.service.ts`
+- `src/app/admin/leadership/page.tsx`
+- `src/components/admin/LeadershipForm.tsx`
+- `src/components/admin/LeadershipListItem.tsx`
 
-### Modified in Sprint 3.8
+### Modified in Sprint 3.9
 
-- `src/data/adminNavigation.ts` — new Quick Access sidebar entry added
-- `src/locales/en.json` / `ar.json` — added `admin.nav.quickAccess` and `admin.quickAccess.*`
+- `src/lib/auth/constants.ts` — new `manageLeadership` permission
+- `src/lib/firebase/services/index.ts` — new export added
+- `src/data/adminNavigation.ts` — new Leadership sidebar entry added
+- `src/locales/en.json` / `ar.json` — added `admin.nav.leadership` and `admin.leadership.*`
 
 ---
 
