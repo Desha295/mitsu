@@ -960,6 +960,61 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "studyPlans": {
+      "heading": "Study Plans & Documents",
+      "subheading": "Create, edit, and publish downloadable resources like study plans and regulations.",
+      "newButton": "New Document",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No documents yet.",
+        "description": "Create your first document to get started."
+      },
+      "list": {
+        "edit": "Edit document",
+        "delete": "Delete document",
+        "openFile": "Open PDF"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft"
+      },
+      "feedback": {
+        "created": "Document created.",
+        "updated": "Document updated.",
+        "deleted": "Document deleted."
+      },
+      "form": {
+        "createHeading": "New Document",
+        "editHeading": "Edit Document",
+        "title": "Title",
+        "description": "Description",
+        "category": "Category",
+        "categoryPlaceholder": "e.g. Study Plan, Regulation, Guide",
+        "fileUrl": "File URL",
+        "uploadFile": "PDF file",
+        "choosePdf": "Choose PDF",
+        "uploading": "Uploading...",
+        "fileInvalid": "Please choose a PDF file under 10MB.",
+        "fileUploadError": "Something went wrong uploading the file. Please try again.",
+        "required": "This field is required.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isPublished": "Published (visible to students)",
+        "create": "Create Document",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this document. Please try again."
+      },
+      "delete": {
+        "title": "Delete this document?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
     }
   },
   "foundation": {

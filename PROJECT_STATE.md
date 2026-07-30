@@ -10,9 +10,9 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 ## Current Status
 
 **Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.9 — Leadership Management
+**Current Sprint:** Sprint 3.10 — Study Plans / Documents Management
 **Status:** Complete
-**Version:** v0.21.0
+**Version:** v0.22.0
 
 ---
 
@@ -328,43 +328,87 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.8 component was redesigned — only additive extensions (new service, new permission, navigation, locales).
 - Reused `ConfirmDialog`, `uploadImage`, `isValidImageFile`, `isValidHref`, `useAuthGuard`, `canAccess`, and the `createFirestoreService` factory exactly as built.
 
+### Phase 3 — Sprint 3.10: Study Plans / Documents Management (v0.22.0)
+
+**Objective:** ninth real CRUD admin page, extending Sprint 3.3–3.9's list pattern to downloadable documents (study plans, regulations, PDFs) — the second sprint requiring a genuinely new domain service (`documentsService`), after Sprint 3.9's `leadershipService`.
+
+**New: `src/lib/firebase/services/documents.service.ts`**
+- Wraps the `documents` collection reference (existing since Sprint 2.1) with the same `createFirestoreService` factory used by all eight prior domain services.
+
+**New: `src/app/admin/study-plans/page.tsx`**
+- Fetches all documents via `documentsService.getAll()`, ordered by `uploadedAt` descending — this schema has no `order` field, so recency (like Announcements) is the meaningful sort, not sequence (like Committees/Systems/Guide/Quick Access).
+- Same `formTarget`/list/create/edit structure as Sprint 3.3–3.9.
+- Delete routes through the existing `ConfirmDialog` — reused unchanged for a seventh sprint.
+- Gated by the new `manageStudyPlans` permission.
+
+**New: `src/components/admin/DocumentForm.tsx`**
+- title/description/category (required) plus `fileUrl` (manual entry or PDF upload). `category` is a plain text field — no fixed vocabulary exists for it anywhere, unlike Announcement/Event's categories.
+
+**New: `src/components/admin/DocumentListItem.tsx`**
+- Published/draft badge, plain category badge, always-present "Open PDF" link, uploaded date.
+
+**New: `uploadDocument()` in `src/lib/firebase/storage.ts`**
+- Identical implementation to `uploadImage()`, added under its own name for callers' clarity. `uploadImage` untouched.
+
+**Extended `src/lib/auth/constants.ts`:** added a **new** `manageStudyPlans` permission — no existing permission fit, same situation as Sprint 3.9's `manageLeadership`.
+
+**Extended `src/lib/firebase/services/index.ts`:** new `documents.service` export.
+
+**Extended `src/data/adminNavigation.ts`:** existing Study Plans sidebar entry flipped to `isImplemented: true` (this one already existed — no new nav entry needed, unlike Sprint 3.8/3.9).
+
+**Localization:** added `admin.studyPlans.*` to `en.json`/`ar.json`.
+
+**Verified, no changes needed:** `isValidDocumentFile`/`MAX_DOCUMENT_SIZE_BYTES` already existed (Sprint 2.3, unused until now); `firestore.rules`'s `/documents/{id}` and `storage.rules`'s `/documents/{allPaths=**}` (10MB) already existed too — all pre-built ahead of this UI, same pattern found repeatedly across this project.
+
+**No new Firestore collections:** `documents` already existed in `COLLECTIONS` from Sprint 2.1.
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings.
+- `tsc --noEmit` → passes, zero TypeScript errors.
+- `npm run build` → succeeds; `/admin/study-plans` now included as a static route alongside all 18 prior routes (19 total).
+
+**Constraints honored:**
+- No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.9 component was redesigned — only additive extensions (new service, new storage helper, new permission, navigation, locales).
+- Reused `ConfirmDialog`, `isValidHref`, `formatDate`, `timestampToDate`, `useAuthGuard`, `canAccess`, and the `createFirestoreService` factory exactly as built.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.9: Leadership Management** — CLOSED
+**Sprint 3.10: Study Plans / Documents Management** — CLOSED
 
 Tasks completed:
-- [x] New `leadershipService` created, wrapping the existing `leadership` collection reference
-- [x] Leadership management page (`/admin/leadership`) using `leadershipService`
-- [x] `LeadershipForm` — create/edit, field validation, optional bio, image upload
-- [x] `LeadershipListItem` — list row, active/inactive + order badges, position subtitle
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (sixth sprint running)
-- [x] New `manageLeadership` permission added
-- [x] New sidebar entry added for Leadership (didn't exist before)
-- [x] Localization (EN/AR), including new `admin.nav.leadership` key
-- [x] Verified `firestore.rules` already covers `/leadership/{id}` — no change needed
-- [x] Verification: lint, TypeScript, build all pass (18 routes)
+- [x] New `documentsService` created, wrapping the existing `documents` collection reference
+- [x] Study Plans/Documents management page (`/admin/study-plans`) using `documentsService`
+- [x] `DocumentForm` — create/edit, field validation, free-text category, PDF upload
+- [x] `DocumentListItem` — list row, published/draft + category badges, Open PDF link
+- [x] `ConfirmDialog` reused unchanged for delete confirmation (seventh sprint running)
+- [x] New `manageStudyPlans` permission added
+- [x] New `uploadDocument()` storage helper added (uploadImage untouched)
+- [x] Existing Study Plans sidebar entry flipped to implemented (no new entry needed)
+- [x] Localization (EN/AR)
+- [x] Verified `isValidDocumentFile`/`MAX_DOCUMENT_SIZE_BYTES` and both rules files already covered documents — no changes needed
+- [x] Verification: lint, TypeScript, build all pass (19 routes)
 - [x] Production fonts restored
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.10
+- [x] CURRENT_SPRINT.md advanced to Sprint 3.11
 - [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 3.10 (current, not yet implemented)
+## Next Actions — Sprint 3.11 (current, not yet implemented)
 
 **Phase:** Phase 3 — Admin Dashboard
 **Status:** READY TO START — scope needs explicit confirmation
 
-Per the Sprint 3.8 scoping analysis, updated after Sprint 3.9's completion:
+Per the Sprint 3.8 scoping analysis, updated after Sprints 3.9 and 3.10:
 
-1. **Study Plans / PDF Management** — collection exists (`documents`), no service yet. Needs a new `documentsService` (small, same `createFirestoreService` factory — same shape as this sprint's `leadershipService`) plus a new upload helper, since the existing `uploadImage`/`isValidImageFile` are image-only, not PDF-capable. Medium complexity.
-2. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape — the first real architectural decision in the remaining backlog. Medium complexity.
-3. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question no prior sprint has had to answer. High complexity — needs its own scoping conversation.
-4. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
-5. **Student Union remainder** (Vision/Mission/Social Media/President Information) — still unaddressed; President Information may already be covered once Leadership content is populated, but Vision/Mission/Social Media have no confirmed schema or collection yet.
+1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape — the first real architectural decision in the remaining backlog. Medium complexity.
+2. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question no prior sprint has had to answer. High complexity — needs its own scoping conversation.
+3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
+4. **Student Union remainder** (Vision/Mission/Social Media/President Information) — still unaddressed; President Information may already be covered once Leadership content is populated, but Vision/Mission/Social Media have no confirmed schema or collection yet.
+5. **"External Links"** (original Sprint 2.9 remainder) — may already be partially covered by Documents' `fileUrl` supporting any valid href, not just uploaded PDFs; needs confirmation whether a distinct feature is still wanted.
 
 No sprint has been approved yet — needs explicit direction before starting.
 
@@ -372,11 +416,10 @@ No sprint has been approved yet — needs explicit direction before starting.
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, Leadership, University Systems, and Freshman Guide management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, Leadership, University Systems, Freshman Guide, and Study Plans management cannot be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
-- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, Leadership, University Systems, Freshman Guide, and Quick Access (and any future CMS page) have no quick-action card unless one is deliberately added.
-- No `documentsService` exists yet for Study Plans or other downloadable-resource use cases.
+- Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, Leadership, University Systems, Freshman Guide, Quick Access, and Study Plans (and any future CMS page) have no quick-action card unless one is deliberately added.
 - No singleton-document service pattern exists yet for `/settings/general`.
 - Contact/About have no Firestore schema, collection, or service — and raise an unresolved bilingual-content-in-Firestore question.
 - Vision/Mission/Social Media (Student Union remainder) have no confirmed schema or collection.
@@ -386,19 +429,20 @@ No sprint has been approved yet — needs explicit direction before starting.
 
 ## File Summary
 
-### New in Sprint 3.9
+### New in Sprint 3.10
 
-- `src/lib/firebase/services/leadership.service.ts`
-- `src/app/admin/leadership/page.tsx`
-- `src/components/admin/LeadershipForm.tsx`
-- `src/components/admin/LeadershipListItem.tsx`
+- `src/lib/firebase/services/documents.service.ts`
+- `src/app/admin/study-plans/page.tsx`
+- `src/components/admin/DocumentForm.tsx`
+- `src/components/admin/DocumentListItem.tsx`
 
-### Modified in Sprint 3.9
+### Modified in Sprint 3.10
 
-- `src/lib/auth/constants.ts` — new `manageLeadership` permission
+- `src/lib/firebase/storage.ts` — new `uploadDocument()` export
+- `src/lib/auth/constants.ts` — new `manageStudyPlans` permission
 - `src/lib/firebase/services/index.ts` — new export added
-- `src/data/adminNavigation.ts` — new Leadership sidebar entry added
-- `src/locales/en.json` / `ar.json` — added `admin.nav.leadership` and `admin.leadership.*`
+- `src/data/adminNavigation.ts` — Study Plans marked implemented
+- `src/locales/en.json` / `ar.json` — added `admin.studyPlans.*`
 
 ---
 

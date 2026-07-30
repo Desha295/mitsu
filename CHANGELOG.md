@@ -6,6 +6,49 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.22.0] — Phase 3 Sprint 3.10: Study Plans / Documents Management
+
+### Added
+
+- `src/lib/firebase/services/documents.service.ts` — **new** domain service, the second (after Sprint 3.9's `leadershipService`) that had to be created rather than found already built and unused. Wraps the `documents` collection reference (existing since Sprint 2.1) with the same `createFirestoreService` factory used by every other domain service.
+- `src/app/admin/study-plans/page.tsx` — ninth real CRUD admin page, extending Sprint 3.3–3.9's list pattern to `documentsService`. Ordered by `uploadedAt` descending, not an `order` field (this schema has none) — the same recency-based choice made for Announcements, since a document library is a feed of resources rather than a fixed sequence. Delete reuses the same `ConfirmDialog` unchanged for a seventh sprint running. Gated by the new `manageStudyPlans` permission.
+- `src/components/admin/DocumentForm.tsx` — reusable create/edit form: title/description/category (all required) plus `fileUrl` (manual URL entry or PDF upload, same manual-field-plus-upload pattern as `AnnouncementForm`'s `imageUrl`). `category` is a plain required text field, not a `<select>` — no fixed vocabulary exists anywhere in the schema or public site for it, unlike Announcement/Event's categories, so a free-text field avoids inventing an official taxonomy that doesn't exist.
+- `src/components/admin/DocumentListItem.tsx` — single list row; published/draft badge (matching Announcement/Event's `isPublished` naming, not Hero/Systems/Committee's `isActive`), a plain category badge, an always-present "Open PDF" link (`fileUrl` is required here, unlike Systems' optional `officialUrl`), and the uploaded date.
+- `uploadDocument()` in `src/lib/firebase/storage.ts` — new export, identical implementation to `uploadImage()` (Storage's `uploadBytes` doesn't care about content type), added under its own name so document-management code doesn't call something named "uploadImage" for a PDF. `uploadImage` itself was not modified.
+
+### Changed (Additive)
+
+- `src/lib/auth/constants.ts` — **new** `manageStudyPlans` permission added, following the same one-per-feature pattern as Sprint 3.9's `manageLeadership`; granted to `admin` (and automatically to `super_admin`).
+- `src/lib/firebase/services/index.ts` — new `documents.service` export added.
+- `src/data/adminNavigation.ts` — existing Study Plans sidebar entry flipped to `isImplemented: true` (this one already existed, unlike Sprint 3.8/3.9's brand-new Quick Access/Leadership entries).
+- `src/locales/en.json` / `ar.json` — added `admin.studyPlans.*` (heading, empty state, list actions, published/draft status, feedback messages, all form field labels including the PDF upload control, delete-confirmation copy).
+
+### Architecture Decisions
+
+- **PDF upload infrastructure was mostly already built:** `isValidDocumentFile` and `MAX_DOCUMENT_SIZE_BYTES` were created in Sprint 2.3 and sat unused — the same "pre-built ahead of the UI" pattern seen repeatedly (`homepageService`, `systemsService`, `guideService`, the `leadership`/`documents` collection refs, and both collections' Firestore/Storage rules). Only `uploadDocument()` itself was genuinely new, and it's a one-line duplicate of `uploadImage()`'s body under a clearer name — no new upload architecture, just a second named entry point into the same mechanism.
+- **PDF type-checking added at the form level, not the shared validator:** `isValidDocumentFile` intentionally checks size only (it may back non-PDF document types later), so `DocumentForm` adds its own `file.type !== "application/pdf"` check locally rather than hardening the shared function into something PDF-specific.
+- **`ConfirmDialog` reused unchanged for a seventh sprint.**
+- **No fixed category vocabulary invented:** unlike Announcement/Event, which reuse an established public taxonomy for their category `<select>`, Documents' `category` has no equivalent anywhere — a free-text field was used instead of guessing an official list.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings.
+- `tsc --noEmit` — passes, zero TypeScript errors.
+- `npm run build` — succeeds; `/admin/study-plans` now included as a static route alongside all 18 prior routes (19 total).
+
+### Breaking Changes
+
+None. Purely additive — no Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.9 component was redesigned. `uploadImage()` is untouched.
+
+### Known Issues
+
+- No real Firebase project exists yet, so Study Plans/Documents management cannot be exercised end-to-end until `.env.local` is populated.
+- No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
+- No new Firestore collections were introduced this sprint — `documents` already existed.
+- This closes the Study Plans / PDF Management portion of the original `ROADMAP.md` Sprint 2.9 remainder (Systems + Guide in 3.6–3.7, Study Plans here). "External Links" from that same roadmap item remains unaddressed and unscoped — it may already be partially covered by Documents' `fileUrl` supporting any valid href, not just uploaded PDFs.
+
+---
+
 ## [v0.21.0] — Phase 3 Sprint 3.9: Leadership Management
 
 ### Added

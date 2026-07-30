@@ -13,3 +13,4 @@ export * from "./union.service";
 export * from "./systems.service";
 export * from "./guide.service";
 export * from "./leadership.service";
+export * from "./documents.service";

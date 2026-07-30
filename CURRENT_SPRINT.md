@@ -7,57 +7,58 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.21.0
+**Version:** v0.22.0
 **Current Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.10 — TBD (scope needs explicit confirmation)
+**Current Sprint:** Sprint 3.11 — TBD (scope needs explicit confirmation)
 **Status:** NOT YET SCOPED
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 3.9 — Leadership Management** ✅ COMPLETE (v0.21.0)
+**Sprint 3.10 — Study Plans / Documents Management** ✅ COMPLETE (v0.22.0)
 
-Eighth real CRUD admin page, and the first since Sprint 3.2 requiring a
-genuinely new domain service (`leadershipService`) rather than wiring
-up one already built — every sprint from 3.3 through 3.8 found its
-service sitting unused since Sprint 2.2. Closes the deliberate
-deferral from Sprint 3.5, when `unionService` was scoped to Committees
-only. Also required a new `manageLeadership` permission (no existing
-permission fit Leadership as its own resource). `ConfirmDialog` reused
-unchanged for a sixth sprint. New sidebar entry added (didn't exist
-before, same situation as Sprint 3.8's Quick Access). No new Firestore
-collections — `leadership` already existed, and `firestore.rules`
-already had a matching rule. See `CHANGELOG.md` v0.21.0 for detail.
+Ninth real CRUD admin page, and the second (after Sprint 3.9's
+`leadershipService`) requiring a genuinely new domain service
+(`documentsService`). `/admin/study-plans` reads/writes through the new
+service, ordered by `uploadedAt` descending (no `order` field on this
+schema). Added a new `uploadDocument()` storage helper — identical to
+`uploadImage()`, added under its own name, `uploadImage` untouched —
+plus a new `manageStudyPlans` permission. `ConfirmDialog` reused
+unchanged for a seventh sprint. Existing Study Plans sidebar entry
+flipped to implemented (no new entry needed, unlike Sprint 3.8/3.9).
+No new Firestore collections — `documents` already existed, and both
+`firestore.rules`/`storage.rules` already covered it. See
+`CHANGELOG.md` v0.22.0 for detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Per the Sprint 3.8 scoping analysis, updated after Sprint 3.9:
+Per the Sprint 3.8 scoping analysis, updated after Sprints 3.9 and 3.10:
 
-1. **Study Plans / PDF Management** — collection exists (`documents`),
-   no service yet. Needs a new `documentsService` (same shape as
-   Sprint 3.9's `leadershipService`) plus a new upload helper, since
-   `uploadImage`/`isValidImageFile` are image-only. Medium complexity.
-2. **Site Settings** — maps to `/settings/general` (`SettingsDoc`).
+1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`).
    No service yet; `getSettingsDocRef` is a single `DocumentReference`,
    not a collection, so this needs a new singleton-document service
    shape — the first real architectural decision in the remaining
    backlog. Medium complexity.
-3. **Contact / About Management** — no existing collection, schema, or
+2. **Contact / About Management** — no existing collection, schema, or
    service at all, and both pages are currently 100% translation-key
    driven. Raises an unresolved bilingual-content-in-Firestore
    question no prior sprint has had to answer. High complexity —
    needs its own scoping conversation.
-4. **Security Foundation** (original Sprint 2.10) — Firestore/Storage
+3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage
    rules hardening and permission review across all collections.
    Not a CRUD feature; cross-cutting and security-critical. Medium
    complexity, best done as its own dedicated pass.
-5. **Student Union remainder** (Vision/Mission/Social Media/President
+4. **Student Union remainder** (Vision/Mission/Social Media/President
    Information) — still unaddressed; President Information may
    already be covered once Leadership content is populated, but
    Vision/Mission/Social Media have no confirmed schema or collection.
+5. **"External Links"** (original Sprint 2.9 remainder) — may already
+   be partially covered by Documents' `fileUrl` supporting any valid
+   href, not just uploaded PDFs; needs confirmation whether a distinct
+   feature is still wanted.
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 
