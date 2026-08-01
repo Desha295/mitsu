@@ -75,7 +75,13 @@ export function ContactSection() {
           </div>
 
           <div className="mx-auto mt-6 max-w-xs">
-            <LeaderCard leader={president} />
+            <LeaderCard
+              name={translate(president.nameKey)}
+              position={translate(president.positionKey)}
+              imageUrl={president.imagePath}
+              imageAlt={translate(president.imageAltKey)}
+              socialLinks={president.socialLinks}
+            />
           </div>
         </div>
 

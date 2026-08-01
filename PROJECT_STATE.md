@@ -9,10 +9,10 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ## Current Status
 
-**Phase:** Phase 3 — Admin Dashboard
-**Current Sprint:** Sprint 3.10 — Study Plans / Documents Management
+**Phase:** Phase 4 — Public Site Firebase Migration
+**Current Sprint:** Sprint 4 (Phases 4.0–4.8) — Public Site Firebase Migration
 **Status:** Complete
-**Version:** v0.22.0
+**Version:** v0.23.0
 
 ---
 
@@ -371,44 +371,109 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 - No Sprint 1.x page, Sprint 2.x backend file, or Sprint 3.1–3.9 component was redesigned — only additive extensions (new service, new storage helper, new permission, navigation, locales).
 - Reused `ConfirmDialog`, `isValidHref`, `formatDate`, `timestampToDate`, `useAuthGuard`, `canAccess`, and the `createFirestoreService` factory exactly as built.
 
+### Phase 4 — Public Site Firebase Migration: Sprint 4 (v0.23.0)
+
+**Objective:** migrate the public website's runtime data source from static `src/data/*.ts` files to Firestore, section by section, reusing the nine domain services already built in Phase 3 — no schema redesign, no admin dashboard changes, Firestore becomes the only runtime source of truth for migrated sections.
+
+**Migrated (8 of 9 public sections), each via its existing service, filtered/ordered to match the deployed security rules, with loading/empty/error states added:**
+
+| Phase | Section | Service | Query filter | Order |
+|---|---|---|---|---|
+| 4.0 | Hero | `heroService` | `isActive == true` | — |
+| 4.1 | Quick Access | `homepageService` | `isActive == true` | `order` asc |
+| 4.2 | Announcements | `announcementsService` | `isPublished == true` | `createdAt` desc |
+| 4.3 | Events | `eventsService` | `isPublished == true` | `date` asc |
+| 4.4 | University Systems | `systemsService` | `isActive == true` | `order` asc |
+| 4.5 | Freshman Guide | `guideService` | `isActive == true` | `order` asc |
+| 4.6 | Committees | `unionService` | `isActive == true` | `order` asc |
+| 4.7 | Leadership | `leadershipService` | `isActive == true` | `order` asc |
+
+**New: `src/hooks/useFirestoreList.ts`**
+- Single shared client hook wrapping any `FirestoreService.getAll()` call with loading/error/data state via `useEffect`/`useState`. The one new abstraction this sprint introduces; reused by all 8 migrated sections rather than duplicated per section.
+
+**Correctness fix (Phase 4.0):** Hero's initial query omitted the `isActive == true` filter required by the already-deployed `firestore.rules`. A filter-less `list` call fails entirely for signed-out visitors, since Firestore can't verify every possible result satisfies the rule without the constraint being part of the query itself. Caught during review and corrected before final approval; the equivalent filter was applied correctly from the start in every subsequent phase.
+
+**Business-logic correction (Phase 4.2):** an initial Announcements implementation inferred a "featured" announcement from the most recently created published item, since `AnnouncementDoc` has no `featured` field. Identified as an invented business rule not present in the schema and removed at explicit direction — all published announcements now render in a single grid, newest first, with no featured-slot inference.
+
+**Intentional exception — Study Plans / Documents (Phase 4.8, not migrated):** `StudyPlansSection` remains on `src/data/studyPlans.ts` as a live runtime source, not just historical reference. The public UI is an image gallery with a zoom viewer (raster images with required intrinsic width/height); Firestore's `documents` collection / `documentsService` models generic downloadable PDFs (`DocumentForm.tsx` enforces `accept="application/pdf"` on upload; no width/height field exists anywhere in `DocumentResourceDoc`). These are different content models, not two representations of the same data — no field-level compatibility mapping was possible without either fabricating a correspondence between unrelated items or redesigning the section into a document/download list, both ruled out for this sprint. Documented directly in `StudyPlansSection.tsx`'s file comment. Revisit once the content model itself is decided.
+
+**Temporary compatibility layers (three, each isolated to its own section file, none shared or exported):**
+
+| Section | Field(s) kept on static data | Source | Join key |
+|---|---|---|---|
+| Systems (4.4) | `category`, `required` | `src/data/systems.ts` | `order` (1–5) |
+| Committees (4.6) | `icon` | `src/data/union.ts` | `order` (1–7) |
+| Leadership (4.7) | `socialLinks` | `src/data/union.ts` | fixed convention: `order = 1` → President, `order = 2` → Vice President |
+
+None of `SystemDoc`, `CommitteeDoc`, or `LeadershipDoc` have these fields today; each was flagged and approved before implementation rather than invented. All three are clearly commented as temporary Sprint 4 shims to be removed once the corresponding schema fields exist. `PASSWORD_RESET_URL` (Systems) and `unionSocialLinks` (Committees page) remain static for a different reason — no Firestore field exists anywhere for either, not a migration gap.
+
+**Shared component contract changes:**
+- `QuickAccessCard`, `AnnouncementCard`, `EventCard`, `SystemCard`, `GuideCard`, `CommitteeCard` — each changed from accepting a whole static translation-key object to resolved primitive props, since Firestore stores plain strings, not translation keys. Each confirmed to have exactly one real consumer before its contract changed.
+- `LeaderCard` — shared by `LeadershipSection` (now Firestore-backed) and `ContactSection` (fully static, out of scope for Sprint 4). Given a single clean prop contract; `ContactSection`'s one call site was updated mechanically to match, with zero change to its behavior, data source, or content.
+
+**Modified, supporting infrastructure:**
+- `next.config.ts` — added `images.remotePatterns` for `firebasestorage.googleapis.com`, required for `next/image` to render Storage-hosted URLs now flowing through Hero/Leadership.
+- `src/locales/en.json` / `ar.json` — added loading/empty/error copy for every migrated section (most never needed empty/error states before, since static data was always non-empty).
+
+**Verification:**
+- `npm run lint` → passes, zero errors, zero warnings (checked after every phase).
+- `tsc --noEmit` → passes, zero TypeScript errors (checked after every phase).
+- `npm run build` → succeeds; still 21 routes (no new pages added — only data-source changes to existing ones). Production-font stub/restore procedure applied and confirmed reverted at every build check.
+
+**Constraints honored:**
+- No Firestore schema, admin form, or admin dashboard page was modified.
+- `src/data/*.ts` files remain in the repo — as pure historical reference for the 8 fully-migrated sections, and as live (temporary) sources for the three compatibility layers plus Study Plans.
+
+**Post-completion cleanup — Footer (treated as Phase 4.4 cleanup, not a new sprint):**
+A runtime-import audit conducted at sprint close found that `src/components/layout/Footer.tsx` independently built its own "University Systems" link column directly from static `src/data/systems.ts`, separately from `SystemsSection.tsx` — a real gap Phase 4.4 had missed, since Footer doesn't render `SystemsSection` itself. Fixed: `Footer.tsx` now reads via `useFirestoreList(systemsService, ACTIVE_SYSTEMS_ORDERED)`, reusing the exact same exported query constant `SystemsSection.tsx` defines (no duplicated query logic, no new compatibility layer — Footer only needed `name`/`officialUrl`, both already in `SystemDoc`). `PASSWORD_RESET_URL` untouched (Footer never imported it). Re-verified: `lint`/`tsc`/`build` all pass; a repeat runtime-import audit confirms `src/data/systems` now has exactly one remaining import (`SystemsSection.tsx`'s own compatibility-layer usage) anywhere in the codebase.
+
 ---
 
 ## Current Sprint
 
-**Sprint 3.10: Study Plans / Documents Management** — CLOSED
+**Sprint 4 (Phases 4.0–4.8): Public Site Firebase Migration** — CLOSED
 
 Tasks completed:
-- [x] New `documentsService` created, wrapping the existing `documents` collection reference
-- [x] Study Plans/Documents management page (`/admin/study-plans`) using `documentsService`
-- [x] `DocumentForm` — create/edit, field validation, free-text category, PDF upload
-- [x] `DocumentListItem` — list row, published/draft + category badges, Open PDF link
-- [x] `ConfirmDialog` reused unchanged for delete confirmation (seventh sprint running)
-- [x] New `manageStudyPlans` permission added
-- [x] New `uploadDocument()` storage helper added (uploadImage untouched)
-- [x] Existing Study Plans sidebar entry flipped to implemented (no new entry needed)
-- [x] Localization (EN/AR)
-- [x] Verified `isValidDocumentFile`/`MAX_DOCUMENT_SIZE_BYTES` and both rules files already covered documents — no changes needed
-- [x] Verification: lint, TypeScript, build all pass (19 routes)
-- [x] Production fonts restored
+- [x] Shared `useFirestoreList` hook created — one new abstraction, reused by all 8 migrated sections
+- [x] Phase 4.0 — Hero migrated to `heroService` (`isActive` query filter corrected after initial review)
+- [x] Phase 4.1 — Quick Access migrated to `homepageService`
+- [x] Phase 4.2 — Announcements migrated to `announcementsService` (inferred "featured" logic removed after review — not present in schema)
+- [x] Phase 4.3 — Events migrated to `eventsService`
+- [x] Phase 4.4 — University Systems migrated to `systemsService` (`category`/`required` temporarily kept on static data)
+- [x] Phase 4.5 — Freshman Guide migrated to `guideService` (no schema gap)
+- [x] Phase 4.6 — Committees migrated to `unionService` (`icon` temporarily kept on static data)
+- [x] Phase 4.7 — Leadership migrated to `leadershipService` (`socialLinks` temporarily kept on static data; `LeaderCard` given a single clean contract shared with the still-static `ContactSection`)
+- [x] Phase 4.8 — Study Plans/Documents: intentionally **not** migrated; documented exception (different content models, not a compatibility gap)
+- [x] Loading/empty/error states added to every migrated section
+- [x] `next.config.ts` updated with Firebase Storage `remotePatterns`
+- [x] Localization (EN/AR) — loading/empty/error copy for every migrated section
+- [x] Verification: lint, TypeScript, build all pass after every phase and at final close (21 routes, unchanged)
+- [x] Production fonts restored after every build check
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 3.11
-- [x] Git commit created
+- [x] CURRENT_SPRINT.md advanced to Sprint 5
+- [x] No git commit created (per explicit instruction this sprint)
 
 ---
 
-## Next Actions — Sprint 3.11 (current, not yet implemented)
+## Next Actions — Sprint 5 (not yet scoped)
 
-**Phase:** Phase 3 — Admin Dashboard
+**Phase:** Phase 5 — TBD (naming pending; candidate scope below spans both the pre-Sprint-4 backlog and new Sprint 4 follow-ups)
 **Status:** READY TO START — scope needs explicit confirmation
 
-Per the Sprint 3.8 scoping analysis, updated after Sprints 3.9 and 3.10:
+Carried forward, unchanged, from the pre-Sprint-4 backlog (nothing below was addressed by Sprint 4):
 
-1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape — the first real architectural decision in the remaining backlog. Medium complexity.
-2. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question no prior sprint has had to answer. High complexity — needs its own scoping conversation.
-3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Not a CRUD feature; cross-cutting and security-critical. Medium complexity, best done as its own dedicated pass.
-4. **Student Union remainder** (Vision/Mission/Social Media/President Information) — still unaddressed; President Information may already be covered once Leadership content is populated, but Vision/Mission/Social Media have no confirmed schema or collection yet.
-5. **"External Links"** (original Sprint 2.9 remainder) — may already be partially covered by Documents' `fileUrl` supporting any valid href, not just uploaded PDFs; needs confirmation whether a distinct feature is still wanted.
+1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape. Medium complexity.
+2. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question. High complexity — needs its own scoping conversation.
+3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Medium complexity, best done as its own dedicated pass.
+4. **Student Union remainder** (Vision/Mission/Social Media) — still unaddressed; no confirmed schema or collection.
+5. **"External Links"** (original Sprint 2.9 remainder) — may already be partially covered by Documents' `fileUrl`; needs confirmation.
+
+New follow-ups from Sprint 4:
+
+6. **Retire the three temporary compatibility layers** — add `category`/`required` to `SystemDoc`, `icon` to `CommitteeDoc`, `socialLinks` to `LeadershipDoc`; update the corresponding admin forms; remove each static overlay and its `order`-based join.
+7. **Study Plans / Documents content model** — decide whether to extend `DocumentResourceDoc` with image/dimension fields, or rework the public section into a PDF/download list backed by `documentsService` as-is.
+8. **Bilingual Firestore content** — every migrated collection still stores single-language strings; a future sprint needs to decide and implement the bilingual field strategy (deferred at the start of Sprint 4).
 
 No sprint has been approved yet — needs explicit direction before starting.
 
@@ -416,13 +481,17 @@ No sprint has been approved yet — needs explicit direction before starting.
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so Hero, Quick Access, Announcements, Events, Student Union, Leadership, University Systems, Freshman Guide, and Study Plans management cannot be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so no admin module or public section (now including the 8 Sprint-4-migrated ones) can be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
 - Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, Leadership, University Systems, Freshman Guide, Quick Access, and Study Plans (and any future CMS page) have no quick-action card unless one is deliberately added.
 - No singleton-document service pattern exists yet for `/settings/general`.
 - Contact/About have no Firestore schema, collection, or service — and raise an unresolved bilingual-content-in-Firestore question.
 - Vision/Mission/Social Media (Student Union remainder) have no confirmed schema or collection.
+- **New:** three temporary compatibility layers remain in place (Systems' `category`/`required`, Committees' `icon`, Leadership's `socialLinks`), each isolated to its own section file and clearly marked, pending future schema additions.
+- **New:** Study Plans/Documents public section intentionally remains on static data — different content model from the Firestore `documents` collection, not yet reconciled.
+- **New:** every Firestore collection migrated in Sprint 4 stores single-language content only; bilingual strategy remains undecided.
+- **Resolved during Sprint 4 close:** `Footer.tsx`'s independent static dependency on `src/data/systems.ts` (found during the runtime-import audit) was fixed as Phase 4.4 cleanup — see the Phase 4 entry above. No longer an outstanding item.
 - All other prior outstanding items remain unchanged.
 
 ---
@@ -443,6 +512,34 @@ No sprint has been approved yet — needs explicit direction before starting.
 - `src/lib/firebase/services/index.ts` — new export added
 - `src/data/adminNavigation.ts` — Study Plans marked implemented
 - `src/locales/en.json` / `ar.json` — added `admin.studyPlans.*`
+
+### New in Sprint 4
+
+- `src/hooks/useFirestoreList.ts` — the sprint's one new shared abstraction
+
+### Modified in Sprint 4
+
+- `src/components/sections/HeroSection.tsx`
+- `src/components/sections/QuickAccessSection.tsx`
+- `src/components/sections/AnnouncementsSection.tsx`
+- `src/components/sections/EventsSection.tsx`
+- `src/components/sections/SystemsSection.tsx`
+- `src/components/sections/FreshmanGuideSection.tsx`
+- `src/components/sections/CommitteesSection.tsx`
+- `src/components/sections/LeadershipSection.tsx`
+- `src/components/sections/ContactSection.tsx` — mechanical `LeaderCard` call-site adaptation only; no behavior/data-source change
+- `src/components/sections/StudyPlansSection.tsx` — comment only, documenting the intentional Sprint 4 exception; no code/behavior change
+- `src/components/shared/QuickAccessCard.tsx`
+- `src/components/shared/AnnouncementCard.tsx`
+- `src/components/shared/EventCard.tsx`
+- `src/components/shared/SystemCard.tsx`
+- `src/components/shared/GuideCard.tsx`
+- `src/components/shared/CommitteeCard.tsx`
+- `src/components/shared/LeaderCard.tsx` — prop contract cleaned up, shared by two callers
+- `next.config.ts` — Firebase Storage `remotePatterns`
+- `src/locales/en.json` / `ar.json` — loading/empty/error copy for every migrated section
+- `src/components/layout/Footer.tsx` — Phase 4.4 cleanup: University Systems column migrated to Firestore (found via runtime-import audit)
+- `src/components/sections/SystemsSection.tsx` — `ACTIVE_SYSTEMS_ORDERED` exported (no logic change) so Footer could reuse it without duplication
 
 ---
 

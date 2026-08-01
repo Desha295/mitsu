@@ -6,8 +6,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 interface QuickAccessCardProps {
-  titleKey: string;
-  descriptionKey: string;
+  title: string;
+  description: string;
   href: string;
   iconName: string;
 }
@@ -15,14 +15,18 @@ interface QuickAccessCardProps {
 /**
  * Quick Access Card (components/shared — project-specific reusable component
  * per 07_COMPONENT_RULES.md §3.4). Used by QuickAccessSection to render
- * each of the 6 quick access items (Freshman Guide, Systems, Union, etc.).
+ * each quick access item.
  *
- * All content is data-driven via props; no hardcoding. Icon names come from
- * lucide-react and are dynamically resolved.
+ * Sprint 4 — Phase 4.1: content props changed from `titleKey`/
+ * `descriptionKey` to resolved `title`/`description` strings, since the
+ * caller now reads these from Firestore's QuickAccessItemDoc (plain
+ * strings, not translation keys) instead of src/data/home.ts. Only the
+ * "explore" label below is still static UI chrome, so it's the only
+ * piece still resolved via translate() here.
  */
 export function QuickAccessCard({
-  titleKey,
-  descriptionKey,
+  title,
+  description,
   href,
   iconName,
 }: QuickAccessCardProps) {
@@ -45,12 +49,8 @@ export function QuickAccessCard({
         {icon}
       </div>
       <div>
-        <h3 className="font-semibold text-foreground">
-          {translate(titleKey)}
-        </h3>
-        <p className="mt-1 text-sm text-foreground/70">
-          {translate(descriptionKey)}
-        </p>
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        <p className="mt-1 text-sm text-foreground/70">{description}</p>
       </div>
       <div className="mt-auto pt-2 text-xs font-medium text-primary group-hover:text-primary-dark transition-colors duration-200">
         {translate("home.quickAccess.explore")} →

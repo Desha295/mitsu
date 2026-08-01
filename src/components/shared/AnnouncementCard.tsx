@@ -1,12 +1,19 @@
 "use client";
 
 import * as Icons from "lucide-react";
-import type { Announcement, AnnouncementCategory } from "@/data/announcements";
+import type { AnnouncementDoc } from "@/lib/firebase/collections";
+import type { AnnouncementCategory } from "@/data/announcements";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cx, formatDate } from "@/lib/utils";
 
 interface AnnouncementCardProps {
-  announcement: Announcement;
+  title: string;
+  description: string;
+  /** Firestore stores this as a plain string; guarded below against the known taxonomy. */
+  category: string;
+  priority: AnnouncementDoc["priority"];
+  /** ISO date string derived from Firestore's createdAt Timestamp by the caller. */
+  dateIso: string;
   /** Larger layout used for the single featured announcement slot. */
   featured?: boolean;
 }
@@ -27,10 +34,21 @@ const CATEGORY_LABEL_KEYS: Record<AnnouncementCategory, string> = {
   orientation: "announcements.filters.orientation",
 };
 
+/** Same guard as components/admin/AnnouncementListItem.tsx, reused here
+ * rather than re-invented, since AnnouncementDoc.category is a plain
+ * `string` in Firestore even though only 5 values are ever written. */
+function isKnownCategory(value: string): value is AnnouncementCategory {
+  return value in CATEGORY_ICONS;
+}
+
 /**
  * Announcement card (components/shared — feature component per
- * 07_COMPONENT_RULES.md §3.4). Receives a single Announcement via props;
- * all display text resolved through translate() — no hardcoded content.
+ * 07_COMPONENT_RULES.md §3.4).
+ *
+ * Sprint 4 — Phase 4.2: props changed from a whole static `Announcement`
+ * (translation-key based) object to resolved primitives, since the
+ * caller now reads these from Firestore's AnnouncementDoc — plain
+ * strings and a Timestamp, not translation keys.
  *
  * Priority is communicated through emphasis (fill weight + icon), not a
  * new color, since only Blue (primary) and Green (secondary) are
@@ -43,20 +61,25 @@ const CATEGORY_LABEL_KEYS: Record<AnnouncementCategory, string> = {
  *   - normal:    neutral badge, no special emphasis
  */
 export function AnnouncementCard({
-  announcement,
+  title,
+  description,
+  category,
+  priority,
+  dateIso,
   featured = false,
 }: AnnouncementCardProps) {
   const { translate, language } = useLanguage();
 
+  const knownCategory = isKnownCategory(category) ? category : "general";
   const CategoryIcon = (
     Icons as unknown as Record<
       string,
       React.ComponentType<{ className?: string }>
     >
-  )[CATEGORY_ICONS[announcement.category]];
+  )[CATEGORY_ICONS[knownCategory]];
 
-  const isUrgent = announcement.priority === "urgent";
-  const isImportant = announcement.priority === "important";
+  const isUrgent = priority === "urgent";
+  const isImportant = priority === "important";
 
   return (
     <div
@@ -82,8 +105,10 @@ export function AnnouncementCard({
           </span>
         )}
         <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
-          {CategoryIcon && <CategoryIcon className="h-3 w-3" aria-hidden="true" />}
-          {translate(CATEGORY_LABEL_KEYS[announcement.category])}
+          {CategoryIcon && (
+            <CategoryIcon className="h-3 w-3" aria-hidden="true" />
+          )}
+          {translate(CATEGORY_LABEL_KEYS[knownCategory])}
         </span>
         {featured && (
           <span className="inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-white">
@@ -98,7 +123,7 @@ export function AnnouncementCard({
           featured ? "text-xl sm:text-2xl" : "text-base"
         )}
       >
-        {translate(announcement.titleKey)}
+        {title}
       </h3>
 
       <p
@@ -107,14 +132,14 @@ export function AnnouncementCard({
           featured ? "text-base" : "text-sm"
         )}
       >
-        {translate(announcement.descriptionKey)}
+        {description}
       </p>
 
       <time
-        dateTime={announcement.date}
+        dateTime={dateIso}
         className="mt-4 text-xs font-medium text-foreground/50"
       >
-        {formatDate(announcement.date, language)}
+        {formatDate(dateIso, language)}
       </time>
     </div>
   );

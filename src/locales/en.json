@@ -47,11 +47,15 @@
       "description": "Your official digital gateway to university life. One platform, one community, one trusted start.",
       "primaryCta": "Join WhatsApp Community",
       "secondaryCta": "Explore Freshman Guide",
-      "imageAlt": "MUST Campus"
+      "imageAlt": "MUST Campus",
+      "empty": "Homepage content isn't available yet. Please check back soon.",
+      "error": "We couldn't load this section right now. Please try again later."
     },
     "quickAccess": {
       "heading": "Get Started",
       "subheading": "Quick access to the services and information you need most",
+      "empty": "No quick access items are available yet. Please check back soon.",
+      "error": "We couldn't load this section right now. Please try again later.",
       "guide": {
         "title": "Freshman Guide",
         "description": "Your step-by-step guide to starting university life"
@@ -94,6 +98,8 @@
       "label": "Forgot your university account password?",
       "linkText": "Reset it here"
     },
+    "emptyState": "No university systems are available yet.",
+    "errorState": "We couldn't load university systems right now. Please try again later.",
     "items": {
       "banner": {
         "name": "Banner",
@@ -127,6 +133,8 @@
     "subheading": "Everything you need to know to start your university journey with confidence.",
     "learnMore": "Learn more",
     "showLess": "Show less",
+    "emptyState": "No guide sections are available yet.",
+    "errorState": "We couldn't load the freshman guide right now. Please try again later.",
     "sections": {
       "introduction": {
         "title": "Introduction",
@@ -227,8 +235,12 @@
     "missionHeading": "Our Mission",
     "leadershipHeading": "Leadership",
     "leadershipSubheading": "Meet the students leading the Union this year.",
+    "leadershipEmptyState": "No leadership information is available yet.",
+    "leadershipErrorState": "We couldn't load leadership information right now. Please try again later.",
     "committeesHeading": "Committees",
     "committeesSubheading": "Seven committees, each driving a different part of student life.",
+    "committeesEmptyState": "No committees are available yet.",
+    "committeesErrorState": "We couldn't load committees right now. Please try again later.",
     "socialHeading": "Connect With Us",
     "socialSubheading": "Follow the official Student Union channels for updates and events.",
     "leadership": {
@@ -306,6 +318,7 @@
       "urgent": "Urgent"
     },
     "emptyState": "No announcements available yet.",
+    "errorState": "We couldn't load announcements right now. Please try again later.",
     "items": {
       "fallRegistrationOpen": {
         "title": "Fall Semester Registration Now Open",
@@ -355,6 +368,7 @@
       "social": "Social"
     },
     "emptyState": "No upcoming events available yet.",
+    "errorState": "We couldn't load events right now. Please try again later.",
     "items": {
       "orientationDay": {
         "title": "New Student Orientation Day",

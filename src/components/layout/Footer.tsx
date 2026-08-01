@@ -5,7 +5,9 @@ import { Logo } from "@/components/shared/Logo";
 import { FooterLinkGroup } from "@/components/layout/FooterLinkGroup";
 import { FooterSocialLinks } from "@/components/layout/FooterSocialLinks";
 import { mainNavigation } from "@/data/navigation";
-import { systems } from "@/data/systems";
+import { useFirestoreList } from "@/hooks/useFirestoreList";
+import { ACTIVE_SYSTEMS_ORDERED } from "@/components/sections/SystemsSection";
+import { systemsService } from "@/lib/firebase/services";
 import { useLanguage } from "@/hooks/useLanguage";
 import { BRAND_NAME } from "@/constants/brand";
 
@@ -13,10 +15,22 @@ import { BRAND_NAME } from "@/constants/brand";
  * Global footer (components/layout). Includes MITSU branding, quick links,
  * university systems directory, and social placeholder section. Link content
  * is sourced from data files (no hardcoding per Sprint 1.1 requirements).
+ *
+ * Sprint 4.4 cleanup: the University Systems column now reads from
+ * Firestore via systemsService, using the exact same query
+ * (ACTIVE_SYSTEMS_ORDERED, imported from SystemsSection rather than
+ * redefined) that powers the /systems page itself — this was found
+ * during the Sprint 4 runtime-import audit as an independent static
+ * dependency Phase 4.4 had missed, since the Footer builds its own list
+ * rather than rendering SystemsSection.
  */
 export function Footer() {
   const { translate } = useLanguage();
   const year = new Date().getFullYear();
+  const { data: activeSystems } = useFirestoreList(
+    systemsService,
+    ACTIVE_SYSTEMS_ORDERED
+  );
 
   // Convert mainNavigation to FooterLinkGroup format
   const quickLinks = mainNavigation.map((item) => ({
@@ -24,15 +38,15 @@ export function Footer() {
     href: item.href,
   }));
 
-  // Convert systems to FooterLinkGroup format — now using real officialUrl
-  // where available (Sprint 1.3 populated official data); empty href still
-  // renders as a "coming soon" placeholder (e.g. MUSTER has no web portal).
-  const systemLinks = systems
-    .filter((s) => s.isActive)
-    .map((s) => ({
-      label: translate(s.nameKey),
-      href: s.officialUrl || undefined,
-    }));
+  // Convert systems to FooterLinkGroup format — name/officialUrl come
+  // directly from Firestore now (plain strings, not translation keys);
+  // empty href still renders as a "coming soon" placeholder (e.g. MUSTER
+  // has no web portal). The query already filters isActive and orders
+  // by `order`, so no client-side filter/sort is needed here.
+  const systemLinks = activeSystems.map((s) => ({
+    label: s.name,
+    href: s.officialUrl || undefined,
+  }));
 
   return (
     <footer className="border-t border-border bg-surface">

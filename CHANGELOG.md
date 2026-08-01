@@ -6,6 +6,75 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.23.0] — Phase 4, Sprint 4 (Phases 4.0–4.8): Public Site Firebase Migration
+
+### Added
+
+- `src/hooks/useFirestoreList.ts` — **new** shared client hook wrapping any existing `FirestoreService.getAll()` call with loading/error/data state via `useEffect`/`useState`. The only new abstraction this sprint introduces; every migrated section reuses this one hook rather than each hand-rolling its own fetch boilerplate.
+
+### Changed — Public sections migrated from static data to Firestore (Additive to backend, no schema changes)
+
+- `src/components/sections/HeroSection.tsx` — reads from `heroService` (filtered `isActive == true`) instead of `src/data/home.ts`'s `heroData`. Selection logic (prefer `isActive` doc, fall back to first) mirrors the admin Hero page unchanged.
+- `src/components/sections/QuickAccessSection.tsx` — reads from `homepageService` (`isActive == true`, ordered `order` asc) instead of `quickAccessItems`.
+- `src/components/sections/AnnouncementsSection.tsx` — reads from `announcementsService` (`isPublished == true`, ordered `createdAt` desc) instead of the static `announcements` array. Search input and category filter chips remain fully interactive but non-functional, exactly as before this sprint (unchanged, documented static-UI scope from Sprint 1.6).
+- `src/components/sections/EventsSection.tsx` — reads from `eventsService` (`isPublished == true`, ordered `date` asc) instead of the static `events` array. No date-based "future only" filtering added — the original section never filtered by date either.
+- `src/components/sections/SystemsSection.tsx` — reads from `systemsService` (`isActive == true`, ordered `order` asc) for name/description/instructions/officialUrl/icon. `category`/`required`/`PASSWORD_RESET_URL` remain temporarily sourced from `src/data/systems.ts` (see Known Issues).
+- `src/components/sections/FreshmanGuideSection.tsx` — reads from `guideService` (`isActive == true`, ordered `order` asc) instead of `guideSections`. No schema gap found — `GuideSectionDoc` already covers every field the UI needs.
+- `src/components/sections/CommitteesSection.tsx` — reads from `unionService` (`isActive == true`, ordered `order` asc) for name/description. `icon`/`unionSocialLinks` remain temporarily/permanently sourced from `src/data/union.ts` (see Known Issues).
+- `src/components/sections/LeadershipSection.tsx` — reads from `leadershipService` (`isActive == true`, ordered `order` asc) for name/position/imageUrl. `socialLinks` remains temporarily sourced from `src/data/union.ts` (see Known Issues).
+
+### Changed — Shared component contract updates
+
+- `src/components/shared/QuickAccessCard.tsx`, `AnnouncementCard.tsx`, `EventCard.tsx`, `SystemCard.tsx`, `GuideCard.tsx`, `CommitteeCard.tsx` — each changed from accepting a whole static object with translation-key fields (`titleKey`/`descriptionKey`/etc.) to resolved primitive props, since Firestore stores plain strings. Each component was confirmed to have exactly one real consumer (the corresponding section) before its contract changed.
+- `src/components/shared/LeaderCard.tsx` — prop contract changed from a whole `UnionLeader` object to resolved primitives (`name`, `position`, `imageUrl?`, `imageAlt`, `socialLinks?`), since this component is shared by `LeadershipSection` (now Firestore-backed) and `ContactSection` (fully static, out of scope this sprint). Added a graceful placeholder for a missing `imageUrl` (Firestore's is optional; static data's was always present).
+- `src/components/sections/ContactSection.tsx` — **mechanical only**: its single `LeaderCard` call updated to the new prop shape, resolving the exact same static `president` data it always has. No logic, data source, loading/error states, or content changed.
+- `src/components/sections/StudyPlansSection.tsx` — **comment only**: documents the intentional Sprint 4 exception (see below). No code or behavior change.
+
+### Changed — Supporting infrastructure
+
+- `next.config.ts` — added `images.remotePatterns` for `firebasestorage.googleapis.com`, required for `next/image` to render Firebase Storage download URLs now flowing through Hero and Leadership's `imageUrl` fields. Local `/public/images/...` paths (used elsewhere, e.g. Study Plans) are unaffected.
+- `src/locales/en.json` / `ar.json` — added loading/empty/error copy for every migrated section. Most of these sections never needed empty/error states before this sprint, since static data was always synchronously available and non-empty.
+
+### Architecture Decisions
+
+- **Firestore is the only runtime source of truth for all 8 migrated sections** — `src/data/*.ts` files are never imported for their content at runtime anymore (only for types, and for the three compatibility layers/Study Plans below). They remain in the repo as historical reference.
+- **No bilingual Firestore fields introduced this sprint** — an earlier, more ambitious Sprint 4 plan proposed a per-collection bilingual schema migration; this was explicitly descoped in favor of a simpler goal (connect existing sections to existing services, reuse the schema exactly as-is) with bilingual content deferred to a future sprint.
+- **Security-rule correctness fix (Phase 4.0):** Hero's initial query omitted the `isActive == true` filter required by the already-deployed `firestore.rules`. A filter-less `list` call fails entirely for a signed-out visitor, since Firestore can't verify every possible result satisfies the rule without the constraint being part of the query itself. Caught during Phase 4.1 review and corrected retroactively; every subsequent phase applied the equivalent filter (`isActive`/`isPublished`) from the start.
+- **Business-logic correction (Phase 4.2):** an initial Announcements implementation inferred a "featured" announcement from the most recently created published item, since `AnnouncementDoc` has no `featured` field. This was identified as an invented business rule not present in the schema and removed — all published announcements now render in a single grid, newest first, with no featured-slot inference.
+- **Temporary compatibility layers, three total** — approved case by case, each isolated to its own section file, none shared or exported, all clearly commented as temporary:
+  - Systems (`category`, `required`) — joined to Firestore docs by `order` (1–5).
+  - Committees (`icon`) — joined to Firestore docs by `order` (1–7).
+  - Leadership (`socialLinks`) — joined by a fixed convention (`order = 1` → President, `order = 2` → Vice President), since the static data has no `order` field of its own to read directly.
+- **Study Plans / Documents intentionally not migrated (Phase 4.8):** the public UI is an image gallery with a zoom viewer (raster images with required intrinsic width/height); Firestore's `documents` collection / `documentsService` models generic downloadable PDFs (`DocumentForm.tsx` enforces `accept="application/pdf"` on upload; no width/height field exists anywhere in the schema). These are different content models, not two representations of the same data — no field-level compatibility mapping was possible without either fabricating a correspondence between unrelated items or redesigning the section into a document/download list. Both were ruled out; this stays on `src/data/studyPlans.ts` as a live runtime source until a future sprint decides the content model.
+
+### Verification
+
+- `npm run lint` — passes, zero errors, zero warnings (checked after every phase).
+- `tsc --noEmit` — passes, zero TypeScript errors (checked after every phase).
+- `npm run build` — succeeds; still 21 routes (no new pages — only data-source changes to existing ones). Font stub/restore procedure applied and confirmed reverted at every build check.
+
+### Post-Completion Cleanup — Footer (Phase 4.4)
+
+A runtime-import audit conducted at sprint close (per explicit request, checking for remaining imports of the five migrated `src/data/*` files) found `src/components/layout/Footer.tsx` independently built its sitewide "University Systems" link column directly from static `src/data/systems.ts`, separate from `SystemsSection.tsx` — a gap Phase 4.4 had missed since Footer doesn't render that section directly. Fixed as Phase 4.4 cleanup, not a new sprint:
+
+- `src/components/layout/Footer.tsx` — now reads via `useFirestoreList(systemsService, ACTIVE_SYSTEMS_ORDERED)`.
+- `src/components/sections/SystemsSection.tsx` — `ACTIVE_SYSTEMS_ORDERED` given an `export` keyword (no logic change) so Footer reuses the identical query rather than duplicating it. No new compatibility layer introduced — Footer only needed `name`/`officialUrl`, both already in `SystemDoc`.
+- Re-verified: lint/tsc/build all pass. A repeat runtime-import audit confirms `src/data/systems` now has exactly one remaining import anywhere in the codebase (`SystemsSection.tsx`'s own compatibility-layer usage, listed above).
+
+### Breaking Changes
+
+None to the public-facing site. No Firestore schema, admin form, admin dashboard page, or Firestore/Storage rules file was modified anywhere in this sprint.
+
+### Known Issues
+
+- Three temporary compatibility layers remain (Systems' `category`/`required`, Committees' `icon`, Leadership's `socialLinks`) — each still reads from a static `src/data` file, to be retired once the corresponding Firestore schema is extended.
+- `PASSWORD_RESET_URL` (Systems) and `unionSocialLinks` (Committees page) remain static permanently for now — no Firestore field exists anywhere for either, unrelated to the compatibility layers above.
+- Study Plans/Documents public section intentionally remains fully static — see Architecture Decisions.
+- Every collection migrated this sprint (and every collection already backing the admin dashboard) stores single-language content only — bilingual strategy remains undecided.
+- No real Firebase project exists yet, so none of this sprint's migrated sections can be exercised end-to-end against live data until `.env.local` is populated.
+
+---
+
 ## [v0.22.0] — Phase 3 Sprint 3.10: Study Plans / Documents Management
 
 ### Added

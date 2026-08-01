@@ -3,19 +3,30 @@
 import { useId, useState } from "react";
 import * as Icons from "lucide-react";
 import { ChevronDown } from "lucide-react";
-import type { GuideSection } from "@/data/guide";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 interface GuideCardProps {
-  section: GuideSection;
+  title: string;
+  description: string;
+  icon?: string;
+  /** Short fact bullets shown when the card is expanded. */
+  facts?: string[];
+  /** Numeric stat chips shown when expanded (e.g. credit hour breakdown). */
+  stats?: Array<{ label: string; value: string }>;
+  /** Visually highlighted card — used for Important Notes. */
+  highlight?: boolean;
   stepNumber: number;
 }
 
 /**
  * Freshman Guide step card (components/shared — feature component per
- * 07_COMPONENT_RULES.md §3.4). Receives a single GuideSection via props;
- * all display text resolved through translate() — no hardcoded content.
+ * 07_COMPONENT_RULES.md §3.4).
+ *
+ * Sprint 4 — Phase 4.5: props changed from a whole static `GuideSection`
+ * (translation-key based) object to resolved primitives, since the
+ * caller now reads these from Firestore's GuideSectionDoc — plain
+ * strings/arrays, not translation keys.
  *
  * "Learn more" toggles an inline facts/stats panel rather than a modal,
  * matching the pattern already used in SystemCard's "How to Use" toggle
@@ -23,21 +34,34 @@ interface GuideCardProps {
  * `highlight` gives Important Notes a distinct look per UI_GUIDELINES.md
  * ("Important notes should be highlighted").
  */
-export function GuideCard({ section, stepNumber }: GuideCardProps) {
+export function GuideCard({
+  title,
+  description,
+  icon,
+  facts,
+  stats,
+  highlight,
+  stepNumber,
+}: GuideCardProps) {
   const { translate } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const detailsId = useId();
 
-  const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[
-    section.icon
-  ];
-  const hasDetails = Boolean(section.factKeys?.length || section.stats?.length);
+  const IconComponent = icon
+    ? (
+        Icons as unknown as Record<
+          string,
+          React.ComponentType<{ className?: string }>
+        >
+      )[icon]
+    : undefined;
+  const hasDetails = Boolean(facts?.length || stats?.length);
 
   return (
     <div
       className={cx(
         "flex flex-col rounded-lg border p-6 shadow-sm transition-shadow duration-200 hover:shadow-md",
-        section.highlight
+        highlight
           ? "border-secondary bg-secondary-light"
           : "border-border bg-surface"
       )}
@@ -47,9 +71,7 @@ export function GuideCard({ section, stepNumber }: GuideCardProps) {
         <span
           className={cx(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-            section.highlight
-              ? "bg-secondary text-white"
-              : "bg-primary-light text-primary"
+            highlight ? "bg-secondary text-white" : "bg-primary-light text-primary"
           )}
           aria-hidden="true"
         >
@@ -62,18 +84,16 @@ export function GuideCard({ section, stepNumber }: GuideCardProps) {
               <IconComponent
                 className={cx(
                   "h-5 w-5",
-                  section.highlight ? "text-secondary-dark" : "text-primary"
+                  highlight ? "text-secondary-dark" : "text-primary"
                 )}
                 aria-hidden="true"
               />
             )}
             <h3 className="text-base font-semibold text-foreground">
-              {translate(section.titleKey)}
+              {title}
             </h3>
           </div>
-          <p className="mt-2 text-sm text-foreground/70">
-            {translate(section.descriptionKey)}
-          </p>
+          <p className="mt-2 text-sm text-foreground/70">{description}</p>
         </div>
       </div>
 
@@ -101,36 +121,36 @@ export function GuideCard({ section, stepNumber }: GuideCardProps) {
 
           {expanded && (
             <div id={detailsId} className="mt-3 animate-fade-in">
-              {section.stats && section.stats.length > 0 && (
+              {stats && stats.length > 0 && (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {section.stats.map((stat) => (
+                  {stats.map((stat, index) => (
                     <div
-                      key={stat.labelKey}
+                      key={`${stat.label}-${index}`}
                       className="rounded-md bg-surface-muted p-3 text-center"
                     >
                       <div className="text-lg font-bold text-primary">
                         {stat.value}
                       </div>
                       <div className="mt-1 text-xs text-foreground/60">
-                        {translate(stat.labelKey)}
+                        {stat.label}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {section.factKeys && section.factKeys.length > 0 && (
+              {facts && facts.length > 0 && (
                 <ul className="mt-3 flex flex-col gap-2">
-                  {section.factKeys.map((factKey) => (
+                  {facts.map((fact, index) => (
                     <li
-                      key={factKey}
+                      key={index}
                       className="flex items-start gap-2 text-sm text-foreground/70"
                     >
                       <span
                         className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                         aria-hidden="true"
                       />
-                      {translate(factKey)}
+                      {fact}
                     </li>
                   ))}
                 </ul>
