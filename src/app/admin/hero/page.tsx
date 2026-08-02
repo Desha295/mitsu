@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Timestamp } from "firebase/firestore";
 import { PageContainer } from "@/components/admin/PageContainer";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
@@ -69,16 +70,18 @@ export default function AdminHeroPage() {
   }
 
   async function handleCreate(values: HeroDoc) {
-    const id = await heroService.create(values);
+    const payload: HeroDoc = { ...values, updatedAt: Timestamp.now() };
+    const id = await heroService.create(payload);
     setExistingId(id);
-    setExistingDoc(values);
+    setExistingDoc(payload);
     setSaved(true);
   }
 
   async function handleUpdate(values: HeroDoc) {
     if (!existingId) return;
-    await heroService.update(existingId, values);
-    setExistingDoc(values);
+    const payload: HeroDoc = { ...values, updatedAt: Timestamp.now() };
+    await heroService.update(existingId, payload);
+    setExistingDoc(payload);
     setSaved(true);
   }
 

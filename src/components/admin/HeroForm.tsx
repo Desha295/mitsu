@@ -159,7 +159,14 @@ export function HeroForm({
     setSubmitting(true);
     try {
       await onSubmit({ ...values, isActive });
-    } catch {
+    } catch (error) {
+      // Logged for developer visibility (previously this catch block
+      // discarded the error entirely with no bound variable, which is
+      // exactly why the original bug took this long to diagnose). The
+      // UI message stays generic per PROJECT_RULES.md #21 (don't expose
+      // technical details to end users) — this is the permanent version,
+      // not the diagnostic log-and-rethrow used during root-cause capture.
+      console.error("[MITSU] Hero save failed:", error);
       setError(translate("admin.hero.form.error"));
     } finally {
       setSubmitting(false);
