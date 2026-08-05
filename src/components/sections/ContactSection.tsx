@@ -5,7 +5,21 @@ import { ContactCard } from "@/components/shared/ContactCard";
 import { LeaderCard } from "@/components/shared/LeaderCard";
 import { officeInfo, communicationChannels } from "@/data/contact";
 import { president } from "@/data/union";
+import { useFirestoreDoc } from "@/hooks/useFirestoreDoc";
 import { useLanguage } from "@/hooks/useLanguage";
+import { settingsService } from "@/lib/firebase/services";
+import type { SettingsDoc } from "@/lib/firebase/collections";
+
+/**
+ * Maps the two office-info entries that now have a real Firestore home
+ * to their Settings field. "hours" has no Settings field (out of scope
+ * for Sprint 5.0 — not requested) and keeps its original static
+ * "Coming soon" treatment unchanged.
+ */
+const SETTINGS_VALUE_FIELD: Partial<Record<string, keyof SettingsDoc>> = {
+  location: "officeLocation",
+  email: "contactEmail",
+};
 
 /**
  * Contact section (components/sections). Composes:
@@ -17,12 +31,20 @@ import { useLanguage } from "@/hooks/useLanguage";
  *    that data or building a new leader-display component
  *  - Official communication channels (Microsoft Teams for advisors)
  *
+ * Sprint 5.0: office location and email now read from Settings
+ * (settingsService) where set; "Coming soon" still shows exactly as
+ * before whenever the admin hasn't filled them in yet — no content is
+ * invented, just relocated to an editable source. "hours" is
+ * unaffected. President contact and communication channels are
+ * unchanged from before this sprint.
+ *
  * Official social media links are handled separately by
  * SocialLinksSection, reusing unionSocialLinks so nothing is repeated
  * on this same page.
  */
 export function ContactSection() {
   const { translate } = useLanguage();
+  const { data: settings } = useFirestoreDoc(settingsService);
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -48,18 +70,23 @@ export function ContactSection() {
           </div>
 
           <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-3">
-            {officeInfo.map((item) => (
-              <ContactCard
-                key={item.id}
-                icon={item.icon}
-                title={translate(item.labelKey)}
-                description={
-                  item.valueKey
-                    ? translate(item.valueKey)
-                    : translate("common.comingSoon")
-                }
-              />
-            ))}
+            {officeInfo.map((item) => {
+              const settingsField = SETTINGS_VALUE_FIELD[item.id];
+              const settingsValue = settingsField
+                ? (settings?.[settingsField] as string | undefined)
+                : undefined;
+              const description =
+                settingsValue || (item.valueKey ? translate(item.valueKey) : translate("common.comingSoon"));
+
+              return (
+                <ContactCard
+                  key={item.id}
+                  icon={item.icon}
+                  title={translate(item.labelKey)}
+                  description={description}
+                />
+              );
+            })}
           </div>
         </div>
 

@@ -5,6 +5,7 @@
  * "@/lib/firebase/services"`.
  */
 export * from "./createFirestoreService";
+export * from "./createFirestoreDocService";
 export * from "./hero.service";
 export * from "./homepage.service";
 export * from "./announcements.service";
@@ -14,3 +15,4 @@ export * from "./systems.service";
 export * from "./guide.service";
 export * from "./leadership.service";
 export * from "./documents.service";
+export * from "./settings.service";

@@ -6,6 +6,58 @@ All notable changes to this project are documented in this file, grouped by vers
 
 ---
 
+## [v0.24.0] — Phase 5, Sprint 5.0: Site Settings Foundation
+
+### Added
+
+- `src/lib/firebase/services/createFirestoreDocService.ts` — **new** singleton-document service factory, parallel to `createFirestoreService` but for a single fixed-path document (e.g. `/settings/general`) instead of a collection. `update()` uses `setDoc(ref, data, { merge: true })`, collapsing create-if-missing/update-if-present into one operation — no separate create/update branching needed for a document that's never listed, auto-ID-created, or deleted. This also sidesteps the exact bug class fixed in Hero (Phase 4.0's `updatedAt` incident): merge-set only ever touches the fields it's given.
+- `src/lib/firebase/services/settings.service.ts` — `settingsService`, built on the new factory, reusing the `/settings/general` document reference already defined in Sprint 2.1.
+- `src/hooks/useFirestoreDoc.ts` — singleton-doc counterpart to `useFirestoreList` (Sprint 4), same loading/error/cancelled-guard pattern, for public sections to read Settings.
+- `src/app/admin/settings/page.tsx` + `src/components/admin/SettingsForm.tsx` — new admin CRUD page. Simpler than every other admin page: one always-present document, one form, one save handler, no list/create/delete. Deliberately **no `ConfirmDialog`** — there's no delete action for a singleton config document, so it genuinely doesn't apply, not omitted by oversight.
+- `src/locales/en.json` / `ar.json` — full `admin.settings.*` namespace (heading, field labels, validation/save/error copy).
+
+### Changed — Schema (additive only)
+
+- `src/lib/firebase/collections.ts` — `SettingsDoc` extended with `contactEmail?`, `contactPhone?`, `officeLocation?` (all optional, unset by default — never invented, per `00_PROJECT_RULES.md` #17/#27). Safe to extend because no admin page or public consumer existed for this collection before this sprint, so nothing depended on the previous shape.
+- `src/lib/firebase/services/index.ts` — new exports added for the doc-service factory and `settingsService`.
+- `src/data/adminNavigation.ts` — Settings entry flipped to implemented; the dashboard Quick Action that has pointed here since Sprint 3 is no longer a dangling link.
+
+### Changed — Public-site wiring (three deliberately scoped changes)
+
+- `src/components/layout/FooterSocialLinks.tsx` — WhatsApp/Facebook/Instagram hrefs now come from Settings instead of the permanently-empty placeholders in `data/socialLinks.ts` (that file's own comment already anticipated this). Icon/label metadata still sourced from the same static file, not duplicated. Rendering is identical: a real link once Settings has an href for that platform, a disabled button otherwise; the "Coming soon" caption only shows while every link is still unset.
+- `src/components/shared/Logo.tsx` — site name now Settings-driven (`projectName`), but with a flicker-safe instant-default pattern: `BRAND_NAME` renders immediately (identical to before this sprint) and only silently upgrades if Settings resolves with a different, non-empty value. This component renders on every single page as above-the-fold chrome, so a visible loading state was deliberately avoided.
+- `src/components/sections/ContactSection.tsx` — the `location`/`email` office-info cards now read `officeLocation`/`contactEmail` from Settings, falling back to the exact same "Coming soon" treatment as before when unset. `hours` is untouched — not requested this sprint.
+
+### Architecture Decisions
+
+- **Singleton-document services are a genuinely new shape**, not a variant of the existing collection factory — `createFirestoreDocService` is a small, separate, parallel abstraction, reusing `WithId` from `createFirestoreService` rather than redefining it, to avoid a duplicate-export collision in the services barrel.
+- **Explicit scope boundaries, all deliberate:**
+  - No `<img>` logo added anywhere — `logoUrl`/`universityLogoUrl`/`campusImageUrl` are in the schema and admin form (ready for future use), but no public component renders an image logo today; adding one would be new UI, not a data-source swap.
+  - Page `<title>`/metadata exports left untouched (still the static `BRAND_NAME` constant) — converting Next.js's static `metadata` exports to async `generateMetadata()` across 9+ pages was a much larger change than this sprint's scope.
+  - `contactPhone` has a schema field and admin input, but no new public UI card — there's no existing phone slot on the Contact page to replace.
+  - `unionSocialLinks` (Committees page) and its `WHATSAPP_COMMUNITY_URL` usage are untouched — "Footer social links" was requested specifically, not the separate Union-page social block.
+
+### Verification
+
+- `npm run lint` — passes (one unused-variable warning found and fixed during implementation).
+- `tsc --noEmit` — passes (one export-visibility issue found and fixed during implementation).
+- `npm run build` — succeeds; 22 routes (new `/admin/settings`).
+
+### Breaking Changes
+
+None. No existing Firestore schema field was changed or removed, and no existing admin page, form, or public section's established behavior changed outside the three explicitly-scoped wirings above.
+
+### Known Issues
+
+- Three temporary compatibility layers from Sprint 4 remain unresolved (Systems, Committees, Leadership).
+- Study Plans/Documents content-model decision still open.
+- Bilingual Firestore content strategy still undecided — now also applies to Settings.
+- `logoUrl`/`universityLogoUrl`/`campusImageUrl` have no public `<img>` consumer yet.
+- Page metadata still uses the static `BRAND_NAME` constant, not Settings.
+- The Firestore composite indexes (`firestore.indexes.json`) and Settings' rule coverage still need to be deployed/verified against a real Firebase project.
+
+---
+
 ## [v0.23.0] — Phase 4, Sprint 4 (Phases 4.0–4.8): Public Site Firebase Migration
 
 ### Added

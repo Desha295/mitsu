@@ -7,69 +7,70 @@ history) and `CHANGELOG.md` (versioned change log).
 
 ---
 
-**Version:** v0.23.0
-**Current Phase:** Phase 4 — Public Site Firebase Migration (complete) / Phase 5 — TBD
-**Current Sprint:** Sprint 5 — TBD (scope needs explicit confirmation)
+**Version:** v0.24.0
+**Current Phase:** Phase 5 — Site Settings Foundation (complete) / Phase 6 — TBD
+**Current Sprint:** Sprint 6 — TBD (scope needs explicit confirmation)
 **Status:** NOT YET SCOPED
 
 ---
 
 ## Previous Sprint (Completed)
 
-**Sprint 4 (Phases 4.0–4.8) — Public Site Firebase Migration** ✅ COMPLETE (v0.23.0)
+**Sprint 5.0 — Site Settings Foundation** ✅ COMPLETE (v0.24.0)
 
-Migrated 8 of 9 public sections from static `src/data/*.ts` files to live Firestore reads, reusing the nine domain services already built in Phase 3 — Hero, Quick Access, Announcements, Events, University Systems, Freshman Guide, Committees, and Leadership. One new shared hook (`useFirestoreList`) was introduced; no Firestore schema, admin form, or admin dashboard page was changed anywhere in this sprint.
+Built the first singleton-document admin CRUD page (`/settings/general`) — the architectural piece Sprint 4's own backlog had flagged as needed. New `createFirestoreDocService` factory (parallel to `createFirestoreService`, using `setDoc(..., { merge: true })` so there's no separate create/update path for a singleton document) backs the new `settingsService`; a new `useFirestoreDoc` hook (singleton-doc counterpart to `useFirestoreList`) lets public sections read it. `SettingsDoc` was extended additively with `contactEmail?`/`contactPhone?`/`officeLocation?` — safe, since no admin page or public consumer existed for this collection before this sprint.
 
-Two corrections were made and approved along the way: Hero's query was missing the `isActive == true` filter required by the deployed security rules (caught in Phase 4.1, fixed retroactively); an initial Announcements implementation inferred a "featured" item from recency, which was identified as an invented business rule and removed.
+The new admin Settings page is simpler than every other admin page: one document, one form, one save handler, no list/create/delete, and deliberately **no `ConfirmDialog`** (nothing to ever delete). `adminNavigation.ts`'s Settings entry — dangling since Sprint 3 — is now implemented.
 
-Study Plans/Documents (Phase 4.8) was **intentionally not migrated** — the public UI (image gallery with zoom viewer) and the Firestore `documents` collection (generic downloadable PDFs) are different content models, not two representations of the same data. Documented as an explicit exception in `StudyPlansSection.tsx` and in `PROJECT_STATE.md`.
+Three public consumers were wired to Settings, each a deliberately scoped change: `FooterSocialLinks.tsx` (WhatsApp/Facebook/Instagram), `Logo.tsx` (site name, using a flicker-safe instant-default pattern since it's universal above-the-fold chrome), and `ContactSection.tsx` (office location/email, "Coming soon" fallback preserved exactly). Explicitly **not** touched, by design: any image-logo UI (schema/admin-form fields exist, but no public `<img>` consumer to replace), page `<title>`/metadata exports (still the static `BRAND_NAME` constant — converting to async `generateMetadata()` was out of scope), a new phone UI card (no existing slot to replace), and the Union page's separate `unionSocialLinks` block (not what was asked for — "Footer social links" specifically).
 
-Three temporary compatibility layers remain, each isolated to its own section file and clearly marked for removal once the corresponding Firestore schema is extended: Systems' `category`/`required`, Committees' `icon`, and Leadership's `socialLinks` — all still sourced from static `src/data` files, joined to Firestore docs by `order` (Leadership uses a fixed `order = 1` → President / `order = 2` → Vice President convention, since the static data has no `order` field of its own).
+Between Sprint 4 and this sprint, a separate infrastructure fix was made and is now finalized alongside it: every public section combining a `filters` equality clause with `orderByField` on a different field was failing at runtime once real Firestore data existed, because no composite index had ever been defined for the project. Root cause was confirmed via actual runtime execution of the real Firestore SDK (not inference) and a full re-trace confirming no code layer swallows errors. Fix: `firestore.indexes.json` (7 composite indexes) and `firebase.json` (didn't exist before). No query, hook, or service code changed. Requires `firebase deploy --only firestore:indexes` against a real project to take effect.
 
-`LeaderCard`'s prop contract was cleaned up since it's shared with the still-fully-static `ContactSection` (out of scope this sprint) — `ContactSection`'s one call site was updated mechanically to match, with no behavior, data-source, or content change there.
-
-A closing runtime-import audit found `Footer.tsx` independently sourced its "University Systems" column from static data, separately from `SystemsSection.tsx`. Fixed as Phase 4.4 cleanup (Footer now reads `systemsService` via the same exported query, no duplicated logic, no new compatibility layer) before this sprint was considered fully closed.
-
-See `CHANGELOG.md` v0.23.0 and `PROJECT_STATE.md`'s Phase 4 entry for full detail.
+See `CHANGELOG.md` v0.24.0 and `PROJECT_STATE.md`'s Phase 5 entry for full detail.
 
 ---
 
 ## Current Sprint Scope (pending approval)
 
-Carried forward unchanged from the pre-Sprint-4 backlog, plus three new Sprint 4 follow-ups:
+Carried forward, unchanged, from the pre-Sprint-5 backlog (Site Settings itself is now done):
 
-1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`).
-   No service yet; `getSettingsDocRef` is a single `DocumentReference`,
-   not a collection, so this needs a new singleton-document service
-   shape — the first real architectural decision in the remaining
-   backlog. Medium complexity.
-2. **Contact / About Management** — no existing collection, schema, or
-   service at all, and both pages are currently 100% translation-key
-   driven. Raises an unresolved bilingual-content-in-Firestore
-   question no prior sprint has had to answer. High complexity —
-   needs its own scoping conversation.
-3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage
+1. **Contact / About Management** — no existing collection, schema, or
+   service at all for the remaining content (office location/email are
+   now Settings-driven; the rest of both pages is still
+   translation-key driven). Raises an unresolved
+   bilingual-content-in-Firestore question. High complexity — needs
+   its own scoping conversation.
+2. **Security Foundation** (original Sprint 2.10) — Firestore/Storage
    rules hardening and permission review across all collections.
-   Not a CRUD feature; cross-cutting and security-critical. Medium
-   complexity, best done as its own dedicated pass.
-4. **Student Union remainder** (Vision/Mission/Social Media) — still
+   Medium complexity, best done as its own dedicated pass.
+3. **Student Union remainder** (Vision/Mission/Social Media) — still
    unaddressed; no confirmed schema or collection.
-5. **"External Links"** (original Sprint 2.9 remainder) — may already
-   be partially covered by Documents' `fileUrl` supporting any valid
-   href, not just uploaded PDFs; needs confirmation whether a distinct
-   feature is still wanted.
-6. **Retire the three Sprint 4 temporary compatibility layers** — add
+4. **"External Links"** (original Sprint 2.9 remainder) — may already
+   be partially covered by Documents' `fileUrl`; needs confirmation.
+
+Carried forward from Sprint 4:
+
+5. **Retire the three temporary compatibility layers** — add
    `category`/`required` to `SystemDoc`, `icon` to `CommitteeDoc`,
    `socialLinks` to `LeadershipDoc`; update the corresponding admin
    forms; remove each static overlay.
-7. **Study Plans / Documents content model** — decide whether to
+6. **Study Plans / Documents content model** — decide whether to
    extend `DocumentResourceDoc` with image/dimension fields, or rework
    the public section into a PDF/download list backed by
    `documentsService` as-is.
-8. **Bilingual Firestore content** — every collection migrated in
-   Sprint 4 (and every collection already backing the admin dashboard)
-   stores single-language strings only; a future sprint needs to
-   decide and implement the bilingual field strategy.
+7. **Bilingual Firestore content** — every collection (including
+   Settings, as of this sprint) stores single-language strings only; a
+   future sprint needs to decide and implement the bilingual field
+   strategy.
+
+New follow-ups from Sprint 5.0:
+
+8. **Image logo wiring** — `logoUrl`/`universityLogoUrl`/`campusImageUrl`
+   have no public `<img>` consumer yet.
+9. **Dynamic page metadata** — page titles still use the static
+   `BRAND_NAME` constant, not Settings.
+10. **Deploy the Firestore composite indexes** and confirm the Site
+    Settings rule coverage once a real Firebase project is connected.
 
 **Not yet approved or started — do not implement until explicitly scoped.**
 

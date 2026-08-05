@@ -119,6 +119,18 @@ export interface SettingsDoc {
   whatsappCommunityUrl: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  /**
+   * Sprint 5.0 — additive. No admin page or public consumer existed for
+   * this collection before this sprint, so extending the schema here
+   * doesn't touch any established behavior. Left optional and unset by
+   * default (never invented) per 00_PROJECT_RULES.md #17/#27 — the
+   * admin fills these in once real office contact details are
+   * confirmed; until then, public consumers fall back to their
+   * existing "Coming soon" treatment exactly as before this sprint.
+   */
+  contactEmail?: string;
+  contactPhone?: string;
+  officeLocation?: string;
   updatedAt: Timestamp;
 }
 

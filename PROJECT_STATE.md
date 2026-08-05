@@ -9,10 +9,10 @@ Must be updated at the end of every sprint (00_PROJECT_RULES.md #22, #26).
 
 ## Current Status
 
-**Phase:** Phase 4 — Public Site Firebase Migration
-**Current Sprint:** Sprint 4 (Phases 4.0–4.8) — Public Site Firebase Migration
+**Phase:** Phase 5 — Site Settings Foundation
+**Current Sprint:** Sprint 5.0 — Site Settings Foundation
 **Status:** Complete
-**Version:** v0.23.0
+**Version:** v0.24.0
 
 ---
 
@@ -427,53 +427,82 @@ None of `SystemDoc`, `CommitteeDoc`, or `LeadershipDoc` have these fields today;
 **Post-completion cleanup — Footer (treated as Phase 4.4 cleanup, not a new sprint):**
 A runtime-import audit conducted at sprint close found that `src/components/layout/Footer.tsx` independently built its own "University Systems" link column directly from static `src/data/systems.ts`, separately from `SystemsSection.tsx` — a real gap Phase 4.4 had missed, since Footer doesn't render `SystemsSection` itself. Fixed: `Footer.tsx` now reads via `useFirestoreList(systemsService, ACTIVE_SYSTEMS_ORDERED)`, reusing the exact same exported query constant `SystemsSection.tsx` defines (no duplicated query logic, no new compatibility layer — Footer only needed `name`/`officialUrl`, both already in `SystemDoc`). `PASSWORD_RESET_URL` untouched (Footer never imported it). Re-verified: `lint`/`tsc`/`build` all pass; a repeat runtime-import audit confirms `src/data/systems` now has exactly one remaining import (`SystemsSection.tsx`'s own compatibility-layer usage) anywhere in the codebase.
 
+**Post-Sprint-4 infrastructure fix — Firestore composite indexes:**
+Every public section combining a `filters` equality clause with `orderByField` on a different field (Quick Access, Announcements, Events, Systems, Guide, Committees, Leadership — 7 total) failed at runtime once real Firestore data existed, because no composite index had ever been defined for the project (no `firestore.indexes.json`, no `firebase.json` existed at all). Root cause was confirmed via actual runtime execution of the real `firebase/firestore` SDK (not inference), and via a full re-trace of `buildQuery()`/`createFirestoreService`/`useFirestoreList` confirming none of them swallow errors. Fix: added `firestore.indexes.json` (7 composite indexes, one per affected query) and `firebase.json` (didn't exist before — ties `firestore.rules`/`storage.rules`/the new indexes file together). No query, hook, or service code changed; `orderByField` was kept exactly as architected in every section. Requires `firebase deploy --only firestore:indexes` to actually take effect on the live project.
+
+### Phase 5 — Site Settings Foundation: Sprint 5.0 (v0.24.0)
+
+**Objective:** build the first singleton-document admin CRUD page (`/settings/general`), the architectural piece flagged as needed since Sprint 4's own backlog, and move global site configuration (site name, WhatsApp Community URL, footer social links, contact email/phone/office location, logo URLs) off hardcoded constants/data files and into Firestore — additive only, no redesign of the public site.
+
+**New: singleton-document service architecture**
+- `src/lib/firebase/services/createFirestoreDocService.ts` — new factory parallel to `createFirestoreService`, for a single fixed-path document instead of a collection. `update()` uses `setDoc(ref, data, { merge: true })`, collapsing create-if-missing/update-if-present into one operation — no separate create/update branching needed, and this sidesteps the exact bug class fixed in Hero (a stray `undefined` field crashing a raw write).
+- `src/lib/firebase/services/settings.service.ts` — `settingsService = createFirestoreDocService(getSettingsDocRef)`, reusing the doc reference from Sprint 2.1.
+- `src/hooks/useFirestoreDoc.ts` — singleton-doc counterpart to `useFirestoreList`, same loading/error/cancelled-guard pattern, for public sections.
+
+**Schema — additive only:** `SettingsDoc` extended with `contactEmail?`, `contactPhone?`, `officeLocation?` (all optional, unset by default — no admin page or public consumer existed for this collection before this sprint, so nothing depended on the old shape).
+
+**New admin page:** `src/app/admin/settings/page.tsx` + `src/components/admin/SettingsForm.tsx`. Simpler than every other admin page — one document, one form, one save handler, no list/create/delete. **No `ConfirmDialog`** — genuinely not applicable (nothing to ever delete). Validation reuses `isValidHref` for every URL field; a small new `isValidEmail` for `contactEmail`. `adminNavigation.ts` flipped to implemented — the dashboard Quick Action that pointed here since Sprint 3 is no longer dangling.
+
+**Public-site wiring (three deliberately scoped changes):**
+- `FooterSocialLinks.tsx` — WhatsApp/Facebook/Instagram hrefs now from Settings; icon/label metadata still from the existing static file. Exact same disabled-vs-real-link rendering preserved; "Coming soon" caption only shows while every link is unset.
+- `Logo.tsx` — site name now Settings-driven, but with an instant-default pattern (`BRAND_NAME` renders immediately, silently upgrades if Settings has a different value) since this is universally-rendered, above-the-fold chrome where a loading flicker would be a real UX regression.
+- `ContactSection.tsx` — `location`/`email` office-info cards now read `officeLocation`/`contactEmail` from Settings, falling back to the exact same "Coming soon" treatment as before when unset. `hours` untouched (not requested).
+
+**Explicit scope boundaries (deliberate):** no `<img>` logo added anywhere (schema/admin-form fields exist, but no public component renders an image logo today — adding one would be new UI, not a data-source swap); page `<title>`/metadata exports untouched (still use `BRAND_NAME` — converting Next.js static metadata to async `generateMetadata()` across 9+ pages was out of scope); `contactPhone` has a schema field and admin input but no new public UI card (none exists to replace); `unionSocialLinks`/`WHATSAPP_COMMUNITY_URL` in `CommitteesSection.tsx` untouched ("Footer social links" was requested, not the separate Union-page social block).
+
+**Verification:** `npm run lint` → passes (one warning found and fixed during implementation). `tsc --noEmit` → passes (one export-visibility issue found and fixed). `npm run build` → succeeds; 22 routes (new `/admin/settings`).
+
+**Constraints honored:** No existing Firestore schema field was changed or removed. No existing admin page, form, or public section's established behavior changed — only additive extensions and the three explicitly-scoped public-consumer wirings above.
+
 ---
 
 ## Current Sprint
 
-**Sprint 4 (Phases 4.0–4.8): Public Site Firebase Migration** — CLOSED
+**Sprint 5.0: Site Settings Foundation** — CLOSED
 
 Tasks completed:
-- [x] Shared `useFirestoreList` hook created — one new abstraction, reused by all 8 migrated sections
-- [x] Phase 4.0 — Hero migrated to `heroService` (`isActive` query filter corrected after initial review)
-- [x] Phase 4.1 — Quick Access migrated to `homepageService`
-- [x] Phase 4.2 — Announcements migrated to `announcementsService` (inferred "featured" logic removed after review — not present in schema)
-- [x] Phase 4.3 — Events migrated to `eventsService`
-- [x] Phase 4.4 — University Systems migrated to `systemsService` (`category`/`required` temporarily kept on static data)
-- [x] Phase 4.5 — Freshman Guide migrated to `guideService` (no schema gap)
-- [x] Phase 4.6 — Committees migrated to `unionService` (`icon` temporarily kept on static data)
-- [x] Phase 4.7 — Leadership migrated to `leadershipService` (`socialLinks` temporarily kept on static data; `LeaderCard` given a single clean contract shared with the still-static `ContactSection`)
-- [x] Phase 4.8 — Study Plans/Documents: intentionally **not** migrated; documented exception (different content models, not a compatibility gap)
-- [x] Loading/empty/error states added to every migrated section
-- [x] `next.config.ts` updated with Firebase Storage `remotePatterns`
-- [x] Localization (EN/AR) — loading/empty/error copy for every migrated section
-- [x] Verification: lint, TypeScript, build all pass after every phase and at final close (21 routes, unchanged)
+- [x] `createFirestoreDocService` factory created — one new abstraction, for singleton documents (parallel to `createFirestoreService`)
+- [x] `settingsService` created, backed by `/settings/general`
+- [x] `useFirestoreDoc` hook created — singleton-doc counterpart to `useFirestoreList`
+- [x] `SettingsDoc` extended (additive): `contactEmail?`, `contactPhone?`, `officeLocation?`
+- [x] Admin Settings page + form built — load, update, validation, loading/success/error states, no ConfirmDialog (not applicable)
+- [x] `adminNavigation.ts` Settings entry flipped to implemented
+- [x] `FooterSocialLinks.tsx` wired to Settings (WhatsApp/Facebook/Instagram)
+- [x] `Logo.tsx` wired to Settings (site name), with a flicker-safe instant-default pattern
+- [x] `ContactSection.tsx` wired to Settings (office location/email), "Coming soon" fallback preserved
+- [x] Localization (EN/AR) — full `admin.settings.*` namespace
+- [x] Verification: lint, TypeScript, build all pass (22 routes — new `/admin/settings`)
 - [x] Production fonts restored after every build check
 - [x] PROJECT_STATE.md updated
 - [x] CHANGELOG.md updated
-- [x] CURRENT_SPRINT.md advanced to Sprint 5
-- [x] No git commit created (per explicit instruction this sprint)
+- [x] CURRENT_SPRINT.md advanced to Sprint 6
+- [x] Git commit created
 
 ---
 
-## Next Actions — Sprint 5 (not yet scoped)
+## Next Actions — Sprint 6 (not yet scoped)
 
-**Phase:** Phase 5 — TBD (naming pending; candidate scope below spans both the pre-Sprint-4 backlog and new Sprint 4 follow-ups)
+**Phase:** Phase 6 — TBD (naming pending)
 **Status:** READY TO START — scope needs explicit confirmation
 
-Carried forward, unchanged, from the pre-Sprint-4 backlog (nothing below was addressed by Sprint 4):
+Carried forward, unchanged, from the pre-Sprint-5 backlog (Site Settings itself is now done):
 
-1. **Site Settings** — maps to `/settings/general` (`SettingsDoc`). No service yet; `getSettingsDocRef` is a single `DocumentReference`, not a collection, so this needs a new singleton-document service shape. Medium complexity.
-2. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are currently 100% translation-key driven. Raises an unresolved bilingual-content-in-Firestore question. High complexity — needs its own scoping conversation.
-3. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Medium complexity, best done as its own dedicated pass.
-4. **Student Union remainder** (Vision/Mission/Social Media) — still unaddressed; no confirmed schema or collection.
-5. **"External Links"** (original Sprint 2.9 remainder) — may already be partially covered by Documents' `fileUrl`; needs confirmation.
+1. **Contact / About Management** — no existing collection, schema, or service at all, and both pages are still mostly translation-key driven (office location/email now Settings-driven per Sprint 5.0; the rest of About/Contact content is not). Raises an unresolved bilingual-content-in-Firestore question. High complexity — needs its own scoping conversation.
+2. **Security Foundation** (original Sprint 2.10) — Firestore/Storage rules hardening and permission review across all collections. Medium complexity, best done as its own dedicated pass.
+3. **Student Union remainder** (Vision/Mission/Social Media) — still unaddressed; no confirmed schema or collection.
+4. **"External Links"** (original Sprint 2.9 remainder) — may already be partially covered by Documents' `fileUrl`; needs confirmation.
 
-New follow-ups from Sprint 4:
+Carried forward from Sprint 4:
 
-6. **Retire the three temporary compatibility layers** — add `category`/`required` to `SystemDoc`, `icon` to `CommitteeDoc`, `socialLinks` to `LeadershipDoc`; update the corresponding admin forms; remove each static overlay and its `order`-based join.
-7. **Study Plans / Documents content model** — decide whether to extend `DocumentResourceDoc` with image/dimension fields, or rework the public section into a PDF/download list backed by `documentsService` as-is.
-8. **Bilingual Firestore content** — every migrated collection still stores single-language strings; a future sprint needs to decide and implement the bilingual field strategy (deferred at the start of Sprint 4).
+5. **Retire the three temporary compatibility layers** — add `category`/`required` to `SystemDoc`, `icon` to `CommitteeDoc`, `socialLinks` to `LeadershipDoc`; update the corresponding admin forms; remove each static overlay and its `order`-based join.
+6. **Study Plans / Documents content model** — decide whether to extend `DocumentResourceDoc` with image/dimension fields, or rework the public section into a PDF/download list backed by `documentsService` as-is.
+7. **Bilingual Firestore content** — every migrated collection still stores single-language strings; a future sprint needs to decide and implement the bilingual field strategy.
+
+New follow-ups from Sprint 5.0:
+
+8. **Image logo wiring** — `logoUrl`/`universityLogoUrl`/`campusImageUrl` are in the schema and admin form but have no public `<img>` consumer yet; add one if/when desired.
+9. **Dynamic page metadata** — page `<title>`/meta description still use the static `BRAND_NAME` constant; converting to Firestore-driven `generateMetadata()` across all pages was out of scope for Sprint 5.0.
+10. **Deploy the Firestore composite indexes** (`firestore.indexes.json`, added post-Sprint-4) and the Site Settings Firestore rule coverage once a real Firebase project is connected.
 
 No sprint has been approved yet — needs explicit direction before starting.
 
@@ -481,17 +510,19 @@ No sprint has been approved yet — needs explicit direction before starting.
 
 ## Outstanding Items / Blockers
 
-- No real Firebase project exists yet — `.env.local` is not populated, so no admin module or public section (now including the 8 Sprint-4-migrated ones) can be exercised end-to-end until then.
+- No real Firebase project exists yet — `.env.local` is not populated, so no admin module or public section can be exercised end-to-end until then.
 - No admin account exists yet — first `super_admin` document must be created manually per `SECURITY.md`.
 - `/admin` still nests inside the public Navbar/Footer (flagged in Sprint 3.1, unchanged).
 - Dashboard Quick Actions still only cover Hero/Announcements/Events/Settings — Student Union, Leadership, University Systems, Freshman Guide, Quick Access, and Study Plans (and any future CMS page) have no quick-action card unless one is deliberately added.
-- No singleton-document service pattern exists yet for `/settings/general`.
-- Contact/About have no Firestore schema, collection, or service — and raise an unresolved bilingual-content-in-Firestore question.
+- Contact/About have no Firestore schema, collection, or service for their remaining content (office location/email now come from Settings; the rest is still translation-key driven) — and raise an unresolved bilingual-content-in-Firestore question.
 - Vision/Mission/Social Media (Student Union remainder) have no confirmed schema or collection.
-- **New:** three temporary compatibility layers remain in place (Systems' `category`/`required`, Committees' `icon`, Leadership's `socialLinks`), each isolated to its own section file and clearly marked, pending future schema additions.
-- **New:** Study Plans/Documents public section intentionally remains on static data — different content model from the Firestore `documents` collection, not yet reconciled.
-- **New:** every Firestore collection migrated in Sprint 4 stores single-language content only; bilingual strategy remains undecided.
-- **Resolved during Sprint 4 close:** `Footer.tsx`'s independent static dependency on `src/data/systems.ts` (found during the runtime-import audit) was fixed as Phase 4.4 cleanup — see the Phase 4 entry above. No longer an outstanding item.
+- Three temporary compatibility layers remain in place (Systems' `category`/`required`, Committees' `icon`, Leadership's `socialLinks`), each isolated to its own section file and clearly marked, pending future schema additions.
+- Study Plans/Documents public section intentionally remains on static data — different content model from the Firestore `documents` collection, not yet reconciled.
+- Every Firestore collection migrated in Sprint 4 (and Settings, added in Sprint 5.0) stores single-language content only; bilingual strategy remains undecided.
+- The Firestore composite indexes (`firestore.indexes.json`, added post-Sprint-4) still need `firebase deploy --only firestore:indexes` run against a real project before ordered public queries will work live.
+- **New:** `logoUrl`/`universityLogoUrl`/`campusImageUrl` (Settings) have no public `<img>` consumer yet — schema/admin-form only.
+- **New:** page `<title>`/meta description still use the static `BRAND_NAME` constant, not Settings — out of scope for Sprint 5.0.
+- **Resolved in Sprint 5.0:** no singleton-document service pattern existed for `/settings/general` — `createFirestoreDocService`/`settingsService` now provide this. No longer an outstanding item.
 - All other prior outstanding items remain unchanged.
 
 ---
@@ -540,6 +571,25 @@ No sprint has been approved yet — needs explicit direction before starting.
 - `src/locales/en.json` / `ar.json` — loading/empty/error copy for every migrated section
 - `src/components/layout/Footer.tsx` — Phase 4.4 cleanup: University Systems column migrated to Firestore (found via runtime-import audit)
 - `src/components/sections/SystemsSection.tsx` — `ACTIVE_SYSTEMS_ORDERED` exported (no logic change) so Footer could reuse it without duplication
+
+### New in Sprint 5.0
+
+- `src/lib/firebase/services/createFirestoreDocService.ts` — singleton-document service factory
+- `src/lib/firebase/services/settings.service.ts` — `settingsService`
+- `src/hooks/useFirestoreDoc.ts` — singleton-doc counterpart to `useFirestoreList`
+- `src/app/admin/settings/page.tsx` — Site Settings admin page
+- `src/components/admin/SettingsForm.tsx` — Site Settings admin form
+- `firestore.indexes.json` / `firebase.json` — added post-Sprint-4, finalized alongside Sprint 5.0
+
+### Modified in Sprint 5.0
+
+- `src/lib/firebase/collections.ts` — `SettingsDoc` extended with `contactEmail?`, `contactPhone?`, `officeLocation?`
+- `src/lib/firebase/services/index.ts` — new exports added
+- `src/data/adminNavigation.ts` — Settings marked implemented
+- `src/components/layout/FooterSocialLinks.tsx` — hrefs now from Settings
+- `src/components/shared/Logo.tsx` — site name now from Settings (instant-default pattern)
+- `src/components/sections/ContactSection.tsx` — office location/email now from Settings
+- `src/locales/en.json` / `ar.json` — added `admin.settings.*`
 
 ---
 

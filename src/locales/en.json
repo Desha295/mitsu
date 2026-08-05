@@ -1029,6 +1029,30 @@
         "confirming": "Deleting...",
         "cancel": "Cancel"
       }
+    },
+    "settings": {
+      "heading": "Site Settings",
+      "subheading": "Manage global site configuration — branding, official links, and contact information.",
+      "form": {
+        "projectName": "Site Name",
+        "universityName": "University Name",
+        "whatsappCommunityUrl": "WhatsApp Community URL",
+        "facebookUrl": "Facebook URL",
+        "instagramUrl": "Instagram URL",
+        "contactEmail": "Contact Email",
+        "contactPhone": "Contact Phone",
+        "officeLocation": "Office Location",
+        "logoUrl": "Logo URL",
+        "universityLogoUrl": "University Logo URL",
+        "campusImageUrl": "Campus Image URL",
+        "required": "This field is required.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "invalidEmail": "Enter a valid email address.",
+        "save": "Save Settings",
+        "saving": "Saving...",
+        "saved": "Settings saved.",
+        "error": "Something went wrong saving settings. Please try again."
+      }
     }
   },
   "foundation": {

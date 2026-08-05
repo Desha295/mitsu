@@ -106,6 +106,6 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "Settings",
     labelKey: "admin.nav.settings",
     href: "/admin/settings",
-    isImplemented: false,
+    isImplemented: true,
   },
 ];
