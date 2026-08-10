@@ -81,6 +81,17 @@
         "description": "Learn more about our mission"
       },
       "explore": "Explore"
+    },
+    "campus": {
+      "heading": "Faculty Community",
+      "imageAlt": "MUST Campus",
+      "universityLogoAlt": "University logo"
+    },
+    "facultyLeadership": {
+      "heading": "Faculty Leadership",
+      "subheading": "Meet the faculty’s leaders and administrative representatives and learn about their roles in academic and administrative affairs and student support.",
+      "empty": "No faculty leadership information is available yet.",
+      "error": "We couldn't load faculty leadership right now. Please try again later."
     }
   },
   "systems": {
@@ -455,7 +466,8 @@
     "office": {
       "location": "Office Location",
       "hours": "Office Hours",
-      "email": "Email"
+      "email": "Email",
+      "phone": "Phone"
     },
     "presidentHeading": "President Contact",
     "presidentSubheading": "Reach the Student Union President directly.",
@@ -490,6 +502,7 @@
       "events": "Events",
       "union": "Student Union",
       "leadership": "Leadership",
+      "facultyLeadership": "Faculty Leadership",
       "systems": "University Systems",
       "guide": "Freshman Guide",
       "studyPlans": "Study Plans",
@@ -520,10 +533,15 @@
       "recentActivityHeading": "Recent Activity",
       "recentActivityEmpty": "No recent activity yet.",
       "systemStatusHeading": "System Status",
+      "error": "We couldn't load the dashboard overview. Please try again later.",
       "systemStatus": {
         "firebase": "Firebase",
         "connected": "Connected",
-        "notConnected": "Not connected"
+        "notConnected": "Not connected",
+        "error": "Connection error",
+        "activeCollections": "Active Public Collections",
+        "publishedAnnouncements": "Published Announcements",
+        "publishedEvents": "Published Events"
       }
     },
     "stats": {
@@ -531,6 +549,8 @@
       "events": "Events",
       "committees": "Committees",
       "systems": "University Systems",
+      "leadership": "Leadership Members",
+      "guide": "Guide Sections",
       "placeholderValue": "Coming soon"
     },
     "quickActions": {
@@ -853,6 +873,62 @@
         "cancel": "Cancel"
       }
     },
+    "facultyLeadership": {
+      "heading": "Faculty Leadership",
+      "subheading": "Create, edit, and reorder Faculty leadership members.",
+      "newButton": "New Member",
+      "breadcrumb": {
+        "new": "New",
+        "edit": "Edit"
+      },
+      "empty": {
+        "title": "No faculty leadership members yet.",
+        "description": "Create your first member to get started."
+      },
+      "list": {
+        "edit": "Edit member",
+        "delete": "Delete member",
+        "orderLabel": "Order"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "feedback": {
+        "created": "Member created.",
+        "updated": "Member updated.",
+        "deleted": "Member deleted."
+      },
+      "form": {
+        "createHeading": "New Member",
+        "editHeading": "Edit Member",
+        "name": "Name",
+        "role": "Role",
+        "order": "Display order",
+        "orderHint": "Lower numbers appear first.",
+        "imageUrl": "Image URL",
+        "uploadImage": "Member photo",
+        "chooseImage": "Choose image",
+        "uploading": "Uploading...",
+        "imageInvalid": "Please choose a JPG, PNG, WEBP, or SVG image under 5MB.",
+        "imageUploadError": "Something went wrong uploading the image. Please try again.",
+        "required": "This field is required.",
+        "invalidOrder": "Enter a whole number of 1 or greater.",
+        "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
+        "isActive": "Active (visible to students)",
+        "create": "Create Member",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "error": "Something went wrong saving this member. Please try again."
+      },
+      "delete": {
+        "title": "Delete this member?",
+        "confirm": "Delete",
+        "confirming": "Deleting...",
+        "cancel": "Cancel"
+      }
+    },
     "systems": {
       "heading": "University Systems",
       "subheading": "Create, edit, and reorder the official university systems directory.",
@@ -1045,6 +1121,7 @@
         "logoUrl": "Logo URL",
         "universityLogoUrl": "University Logo URL",
         "campusImageUrl": "Campus Image URL",
+        "unionLogoUrl": "Student Union Logo URL",
         "required": "This field is required.",
         "invalidUrl": "Enter a valid URL or a relative path starting with \"/\".",
         "invalidEmail": "Enter a valid email address.",

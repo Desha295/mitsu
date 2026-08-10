@@ -164,13 +164,13 @@ export function HeroSection() {
         </div>
 
         {/* Right: Hero Image */}
-        <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden border border-border shadow-sm bg-surface-muted">
+        <div className="relative h-[520px] rounded-lg overflow-hidden border border-border shadow-sm bg-surface-muted">
           {hero.imageUrl ? (
             <Image
               src={hero.imageUrl}
               alt={translate("home.hero.imageAlt")}
               fill
-              className="object-cover"
+              className="object-contain p-4"
               priority
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
             />

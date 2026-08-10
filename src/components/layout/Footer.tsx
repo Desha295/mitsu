@@ -9,7 +9,7 @@ import { useFirestoreList } from "@/hooks/useFirestoreList";
 import { ACTIVE_SYSTEMS_ORDERED } from "@/components/sections/SystemsSection";
 import { systemsService } from "@/lib/firebase/services";
 import { useLanguage } from "@/hooks/useLanguage";
-import { BRAND_NAME } from "@/constants/brand";
+import { BRAND_NAME, BRAND_FULL_NAME } from "@/constants/brand";
 
 /**
  * Global footer (components/layout). Includes MITSU branding, quick links,
@@ -89,7 +89,7 @@ export function Footer() {
               © {year} {BRAND_NAME}. {translate("footer.rightsReserved")}
             </span>
             <span className="block">
-              MUST Faculty of Information Technology Student Union
+              {BRAND_FULL_NAME}
             </span>
           </p>
         </div>

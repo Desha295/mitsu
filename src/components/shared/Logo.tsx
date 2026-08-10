@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useFirestoreDoc } from "@/hooks/useFirestoreDoc";
 import { useLanguage } from "@/hooks/useLanguage";
 import { settingsService } from "@/lib/firebase/services";
@@ -25,6 +26,13 @@ interface LogoProps {
  * upgrades if Settings resolves with a different, non-empty value. In
  * practice this means no visible change at all unless an admin
  * deliberately edits the site name in Settings.
+ *
+ * Sprint 6.1: an optional image mark (`logoUrl`) now renders beside the
+ * wordmark once an admin sets one. `unoptimized` is used rather than
+ * relying on next.config.ts's remotePatterns allowlist, since this URL
+ * is a plain admin-entered value (SettingsForm is a text input, not a
+ * guaranteed Storage upload like Hero's image) and could be any domain.
+ * When unset, nothing renders here — identical to before this sprint.
  */
 export function Logo({ showIdentity = true, className }: LogoProps) {
   const { translate } = useLanguage();
@@ -32,15 +40,28 @@ export function Logo({ showIdentity = true, className }: LogoProps) {
   const siteName = settings?.projectName || BRAND_NAME;
 
   return (
-    <span className={cx("flex flex-col leading-tight", className)}>
-      <span className="text-lg font-bold tracking-tight text-primary">
-        {siteName}
-      </span>
-      {showIdentity && (
-        <span className="text-[11px] font-medium text-foreground/60">
-          {translate("navbar.identity")}
+    <span className={cx("flex items-center gap-2", className)}>
+      {settings?.logoUrl && (
+        <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-sm">
+          <Image
+            src={settings.logoUrl}
+            alt=""
+            fill
+            unoptimized
+            className="object-contain"
+          />
         </span>
       )}
+      <span className="flex flex-col leading-tight">
+        <span className="text-lg font-bold tracking-tight text-primary">
+          {siteName}
+        </span>
+        {showIdentity && (
+          <span className="text-[11px] font-medium text-foreground/60">
+            {translate("navbar.identity")}
+          </span>
+        )}
+      </span>
     </span>
   );
 }

@@ -19,6 +19,7 @@ import type { SettingsDoc } from "@/lib/firebase/collections";
 const SETTINGS_VALUE_FIELD: Partial<Record<string, keyof SettingsDoc>> = {
   location: "officeLocation",
   email: "contactEmail",
+  phone: "contactPhone",
 };
 
 /**
@@ -37,6 +38,11 @@ const SETTINGS_VALUE_FIELD: Partial<Record<string, keyof SettingsDoc>> = {
  * invented, just relocated to an editable source. "hours" is
  * unaffected. President contact and communication channels are
  * unchanged from before this sprint.
+ *
+ * Sprint 6.1: added a fourth office-info card, "phone", reading
+ * Settings' contactPhone the same way — same "Coming soon" fallback,
+ * same non-invented-content principle. The grid widened from 3 to 4
+ * columns at the lg breakpoint to fit it.
  *
  * Official social media links are handled separately by
  * SocialLinksSection, reusing unionSocialLinks so nothing is repeated
@@ -69,7 +75,7 @@ export function ContactSection() {
             </p>
           </div>
 
-          <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-3">
+          <div className="mx-auto mt-6 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {officeInfo.map((item) => {
               const settingsField = SETTINGS_VALUE_FIELD[item.id];
               const settingsValue = settingsField

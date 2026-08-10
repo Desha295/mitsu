@@ -25,6 +25,7 @@ const EMPTY_SETTINGS: SettingsDoc = {
   contactEmail: "",
   contactPhone: "",
   officeLocation: "",
+  unionLogoUrl: "",
   updatedAt: undefined as unknown as SettingsDoc["updatedAt"],
 };
 

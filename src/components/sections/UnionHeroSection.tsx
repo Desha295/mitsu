@@ -4,16 +4,27 @@ import Image from "next/image";
 import { Eye, Target } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { unionOverview } from "@/data/union";
+import { useFirestoreDoc } from "@/hooks/useFirestoreDoc";
 import { useLanguage } from "@/hooks/useLanguage";
+import { settingsService } from "@/lib/firebase/services";
 
 /**
  * Union Hero section (components/sections). Renders the Union's identity,
  * overview, hero image, and — per the page composition order in
  * Sprint 1.5 (Hero → Vision & Mission → Leadership → Committees → Social)
  * — the Vision and Mission cards directly beneath the hero.
+ *
+ * Sprint 6.1: the hero image now prefers Settings' `unionLogoUrl` when
+ * set, falling back to the original static placeholder exactly as
+ * before this sprint when unset — reuses this existing image slot
+ * rather than adding a new one, per "do not redesign any page".
  */
 export function UnionHeroSection() {
   const { translate } = useLanguage();
+  const { data: settings } = useFirestoreDoc(settingsService);
+
+  const heroImageSrc = settings?.unionLogoUrl || unionOverview.heroImagePath;
+  const usingSettingsImage = Boolean(settings?.unionLogoUrl);
 
   return (
     <section className="bg-gradient-to-b from-surface to-background py-12 sm:py-16 md:py-20">
@@ -29,15 +40,17 @@ export function UnionHeroSection() {
             </p>
           </div>
 
-          <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-border shadow-sm">
+          <div className="relative h-[520px] rounded-lg overflow-hidden border border-border shadow-sm bg-surface-muted">
             <Image
-              src={unionOverview.heroImagePath}
+              src={heroImageSrc}
               alt={translate(unionOverview.heroImageAltKey)}
               fill
-              className="object-cover"
-              // Local placeholder SVG — bypasses the image optimizer so it
-              // always renders correctly regardless of SVG restrictions.
-              unoptimized={unionOverview.heroImagePath.endsWith(".svg")}
+              className="object-contain p-4"
+              // Settings-driven URLs are plain admin-entered values (not
+              // a guaranteed Storage upload), so always unoptimized;
+              // the local placeholder SVG needs the same treatment for
+              // its own, unrelated reason (SVG restrictions).
+              unoptimized={usingSettingsImage || heroImageSrc.endsWith(".svg")}
               priority
               sizes="(max-width: 1024px) 100vw, 50vw"
             />

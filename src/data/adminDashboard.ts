@@ -1,14 +1,17 @@
 /**
  * Admin dashboard home data (Sprint 3.1 — Admin Dashboard Foundation).
  *
- * Static placeholders only — no Firestore reads yet (explicitly out of
- * scope this sprint). Stat values are intentionally not shown as fake
- * numbers; StatCard renders a "—" placeholder instead, consistent with
- * this project's established practice of never fabricating data that
- * could be mistaken for real (e.g. Sprint 1.7's "Coming soon" contact
- * info). Quick Actions link to future /admin/* routes that don't exist
- * yet this sprint, so QuickActionCard renders them as disabled/"coming
- * soon" rather than dead links.
+ * `dashboardStats` still just supplies icon/labelKey per stat card —
+ * the dashboard page (Sprint 6.0) now fetches real counts from each
+ * collection's own service instead of a placeholder value.
+ *
+ * `quickActions` below is no longer imported by the dashboard page as
+ * of Sprint 6.0 — Quick Actions are now derived directly from
+ * `adminNavigation.ts` (filtered to `isImplemented: true`), so the list
+ * of shortcuts can't silently drift out of sync with real navigation
+ * the way this separate, hand-maintained array had (it only ever
+ * listed 4 of the 10 implemented admin pages). Left in place as
+ * historical reference, not deleted.
  */
 
 export interface DashboardStat {
@@ -22,6 +25,8 @@ export const dashboardStats: DashboardStat[] = [
   { id: "events", icon: "CalendarDays", labelKey: "admin.stats.events" },
   { id: "committees", icon: "Users", labelKey: "admin.stats.committees" },
   { id: "systems", icon: "Laptop", labelKey: "admin.stats.systems" },
+  { id: "leadership", icon: "UserRound", labelKey: "admin.stats.leadership" },
+  { id: "guide", icon: "Compass", labelKey: "admin.stats.guide" },
 ];
 
 export interface QuickAction {

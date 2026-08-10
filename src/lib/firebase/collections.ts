@@ -53,6 +53,9 @@ export const COLLECTIONS = {
   hero: "hero",
   homepage: "homepage",
   guide: "guide",
+  // Added in Sprint 7.0 — Faculty Leadership CMS. Distinct from
+  // `leadership` (Student Union leadership) above; not a rename.
+  facultyLeadership: "facultyLeadership",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -109,6 +112,21 @@ export interface LeadershipDoc {
   isActive: boolean;
 }
 
+/**
+ * Faculty Leadership (Sprint 7.0 — new collection, distinct from
+ * `leadership` above). `leadership` is Student Union leadership
+ * (President/Vice President); this is Faculty-level leadership (e.g.
+ * Dean, Vice Deans) — a different concept, not a rename or replacement
+ * of the existing collection.
+ */
+export interface FacultyLeadershipDoc {
+  name: string;
+  role: string;
+  imageUrl?: string;
+  order: number;
+  isActive: boolean;
+}
+
 /** Single document at /settings/general, not a queried collection. */
 export interface SettingsDoc {
   projectName: string;
@@ -131,6 +149,13 @@ export interface SettingsDoc {
   contactEmail?: string;
   contactPhone?: string;
   officeLocation?: string;
+  /**
+   * Sprint 6.1 — additive, same reasoning as the three fields above:
+   * no existing consumer depended on the prior shape. Used by
+   * UnionHeroSection to override its existing static hero-image slot
+   * when set.
+   */
+  unionLogoUrl?: string;
   updatedAt: Timestamp;
 }
 
@@ -250,6 +275,10 @@ export function getCommitteesCollection(): CollectionReference<CommitteeDoc> | n
 
 export function getLeadershipCollection(): CollectionReference<LeadershipDoc> | null {
   return getTypedCollection<LeadershipDoc>(COLLECTIONS.leadership);
+}
+
+export function getFacultyLeadershipCollection(): CollectionReference<FacultyLeadershipDoc> | null {
+  return getTypedCollection<FacultyLeadershipDoc>(COLLECTIONS.facultyLeadership);
 }
 
 export function getDocumentsCollection(): CollectionReference<DocumentResourceDoc> | null {

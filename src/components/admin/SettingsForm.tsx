@@ -27,6 +27,7 @@ const FIELD_KEYS: Array<{ name: keyof SettingsDoc; labelKey: string; type: Field
   { name: "logoUrl", labelKey: "admin.settings.form.logoUrl", type: "url" },
   { name: "universityLogoUrl", labelKey: "admin.settings.form.universityLogoUrl", type: "url" },
   { name: "campusImageUrl", labelKey: "admin.settings.form.campusImageUrl", type: "url" },
+  { name: "unionLogoUrl", labelKey: "admin.settings.form.unionLogoUrl", type: "url" },
 ];
 
 const REQUIRED_FIELDS: Array<keyof SettingsDoc> = ["projectName", "universityName"];
@@ -38,6 +39,7 @@ const URL_FIELDS: Array<keyof SettingsDoc> = [
   "logoUrl",
   "universityLogoUrl",
   "campusImageUrl",
+  "unionLogoUrl",
 ];
 
 /** Deliberately light — matches the project's existing pragmatic
@@ -67,6 +69,7 @@ function normalizeSettingsValues(values: SettingsDoc): SettingsDoc {
     contactEmail: values.contactEmail ?? "",
     contactPhone: values.contactPhone ?? "",
     officeLocation: values.officeLocation ?? "",
+    unionLogoUrl: values.unionLogoUrl ?? "",
     updatedAt: values.updatedAt,
   };
 }

@@ -53,6 +53,16 @@ export const officeInfo: OfficeInfoItem[] = [
     labelKey: "contact.office.email",
     // No valueKey yet — no official contact email has been provided.
   },
+  {
+    id: "phone",
+    icon: "Phone",
+    labelKey: "contact.office.phone",
+    // No valueKey yet — no official contact phone number has been
+    // provided. Sprint 6.1: this is the fourth office-info item; like
+    // location/email before it, ContactSection now reads a live value
+    // from Settings (contactPhone) where set, falling back to the same
+    // "Coming soon" treatment.
+  },
 ];
 
 /**

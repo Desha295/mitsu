@@ -67,6 +67,13 @@ export const adminNavigation: AdminNavItem[] = [
     isImplemented: true,
   },
   {
+    id: "facultyLeadership",
+    icon: "GraduationCap",
+    labelKey: "admin.nav.facultyLeadership",
+    href: "/admin/faculty-leadership",
+    isImplemented: true,
+  },
+  {
     id: "systems",
     icon: "Laptop",
     labelKey: "admin.nav.systems",

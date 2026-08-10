@@ -81,6 +81,17 @@
         "description": "تعرف أكثر على مهمتنا"
       },
       "explore": "استكشف"
+    },
+    "campus": {
+      "heading": "أسرة الكلية",
+      "imageAlt": "حرم جامعة مصر للعلوم والتكنولوجيا",
+      "universityLogoAlt": "شعار الجامعة"
+    },
+    "facultyLeadership": {
+      "heading": "قيادات الكلية",
+      "subheading": "تعرّف على قيادات ومسؤولي الكلية ودورهم في إدارة الشؤون الأكاديمية والإدارية ودعم الطلاب.",
+      "empty": "لا تتوفر معلومات قيادات الكلية حاليًا.",
+      "error": "تعذر تحميل قيادات الكلية حاليًا. يرجى المحاولة مرة أخرى لاحقًا."
     }
   },
   "systems": {
@@ -455,7 +466,8 @@
     "office": {
       "location": "موقع المكتب",
       "hours": "ساعات العمل",
-      "email": "البريد الإلكتروني"
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف"
     },
     "presidentHeading": "التواصل مع الرئيس",
     "presidentSubheading": "تواصل مباشرة مع رئيس اتحاد الطلاب.",
@@ -490,6 +502,7 @@
       "events": "الفعاليات",
       "union": "اتحاد الطلاب",
       "leadership": "القيادة",
+      "facultyLeadership": "قيادة الكلية",
       "systems": "أنظمة الجامعة",
       "guide": "دليل الطالب المستجد",
       "studyPlans": "الخطط الدراسية",
@@ -520,10 +533,15 @@
       "recentActivityHeading": "النشاط الأخير",
       "recentActivityEmpty": "لا يوجد نشاط حديث بعد.",
       "systemStatusHeading": "حالة النظام",
+      "error": "تعذر تحميل نظرة عامة على لوحة التحكم. يرجى المحاولة مرة أخرى لاحقًا.",
       "systemStatus": {
         "firebase": "Firebase",
         "connected": "متصل",
-        "notConnected": "غير متصل"
+        "notConnected": "غير متصل",
+        "error": "خطأ في الاتصال",
+        "activeCollections": "المجموعات العامة النشطة",
+        "publishedAnnouncements": "الإعلانات المنشورة",
+        "publishedEvents": "الفعاليات المنشورة"
       }
     },
     "stats": {
@@ -531,6 +549,8 @@
       "events": "الفعاليات",
       "committees": "اللجان",
       "systems": "أنظمة الجامعة",
+      "leadership": "أعضاء القيادة",
+      "guide": "أقسام الدليل",
       "placeholderValue": "قريباً"
     },
     "quickActions": {
@@ -853,6 +873,62 @@
         "cancel": "إلغاء"
       }
     },
+    "facultyLeadership": {
+      "heading": "قيادة الكلية",
+      "subheading": "أنشئ أعضاء قيادة الكلية وعدّلهم ورتّبهم.",
+      "newButton": "عضو جديد",
+      "breadcrumb": {
+        "new": "جديد",
+        "edit": "تعديل"
+      },
+      "empty": {
+        "title": "لا يوجد أعضاء قيادة كلية حتى الآن.",
+        "description": "أنشئ أول عضو للبدء."
+      },
+      "list": {
+        "edit": "تعديل العضو",
+        "delete": "حذف العضو",
+        "orderLabel": "الترتيب"
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "feedback": {
+        "created": "تم إنشاء العضو.",
+        "updated": "تم تحديث العضو.",
+        "deleted": "تم حذف العضو."
+      },
+      "form": {
+        "createHeading": "عضو جديد",
+        "editHeading": "تعديل العضو",
+        "name": "الاسم",
+        "role": "الدور",
+        "order": "ترتيب العرض",
+        "orderHint": "الأرقام الأصغر تظهر أولاً.",
+        "imageUrl": "رابط الصورة",
+        "uploadImage": "صورة العضو",
+        "chooseImage": "اختيار صورة",
+        "uploading": "جارٍ الرفع...",
+        "imageInvalid": "يرجى اختيار صورة JPG أو PNG أو WEBP أو SVG بحجم أقل من 5 ميغابايت.",
+        "imageUploadError": "حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى.",
+        "required": "هذا الحقل مطلوب.",
+        "invalidOrder": "أدخل رقمًا صحيحًا أكبر من أو يساوي 1.",
+        "invalidUrl": "أدخل رابطًا صحيحًا أو مسارًا نسبيًا يبدأ بـ \"/\".",
+        "isActive": "نشط (يظهر للطلاب)",
+        "create": "إنشاء العضو",
+        "saveChanges": "حفظ التغييرات",
+        "saving": "جارٍ الحفظ...",
+        "cancel": "إلغاء",
+        "error": "حدث خطأ أثناء حفظ العضو. يرجى المحاولة مرة أخرى."
+      },
+      "delete": {
+        "title": "هل تريد حذف هذا العضو؟",
+        "confirm": "حذف",
+        "confirming": "جارٍ الحذف...",
+        "cancel": "إلغاء"
+      }
+    },
     "systems": {
       "heading": "أنظمة الجامعة",
       "subheading": "أنشئ دليل أنظمة الجامعة الرسمية وعدّله ورتّبه.",
@@ -1045,6 +1121,7 @@
         "logoUrl": "رابط الشعار",
         "universityLogoUrl": "رابط شعار الجامعة",
         "campusImageUrl": "رابط صورة الحرم الجامعي",
+        "unionLogoUrl": "رابط شعار اتحاد الطلاب",
         "required": "هذا الحقل مطلوب.",
         "invalidUrl": "أدخل رابطًا صحيحًا أو مسارًا نسبيًا يبدأ بـ \"/\".",
         "invalidEmail": "أدخل بريدًا إلكترونيًا صحيحًا.",

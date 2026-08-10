@@ -70,6 +70,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Sprint 7.0 — Faculty Leadership CMS. Distinct collection from
+    // /leadership above (Student Union leadership); same rule shape.
+    match /facultyLeadership/{id} {
+      allow read: if resource.data.isActive == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
     match /documents/{id} {
       allow read: if resource.data.isPublished == true || isAdmin();
       allow write: if isAdmin();
