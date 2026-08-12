@@ -87,6 +87,19 @@ export function AnnouncementsSection() {
     loading,
     error,
   } = useFirestoreList(announcementsService, PUBLISHED_NEWEST_FIRST);
+  const filteredItems = items.filter((announcement) => {
+  const search = searchValue.trim().toLowerCase();
+
+  const matchesSearch =
+    !search ||
+    announcement.title.toLowerCase().includes(search) ||
+    announcement.description.toLowerCase().includes(search);
+
+  const matchesCategory =
+    activeFilter === "all" || announcement.category === activeFilter;
+
+  return matchesSearch && matchesCategory;
+});
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -187,9 +200,9 @@ export function AnnouncementsSection() {
                 {translate("announcements.latestHeading")}
               </h2>
 
-              {items.length > 0 ? (
+              {filteredItems.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {items.map((announcement) => (
+                  {filteredItems.map((announcement) => (
 <AnnouncementCard
   key={announcement.id}
   title={announcement.title}
