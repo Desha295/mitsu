@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Save, Upload } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Save } from "lucide-react";
 import type { AnnouncementDoc } from "@/lib/firebase/collections";
 import type {
   AnnouncementCategory,
   AnnouncementPriority,
 } from "@/data/announcements";
-import { uploadImage } from "@/lib/firebase/storage";
-import { isValidImageFile } from "@/lib/auth/validation";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing, isValidHref } from "@/lib/utils";
 
@@ -74,8 +72,6 @@ export function AnnouncementForm({
   const [values, setValues] = useState<AnnouncementDoc>(initialValues);
   const [isPublished, setIsPublished] = useState(initialValues.isPublished);
   const [submitting, setSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<keyof AnnouncementDoc, string>>
@@ -104,43 +100,34 @@ export function AnnouncementForm({
     return Object.keys(errors).length === 0;
   }
 
-  function updateField(name: "title" | "description" | "imageUrl" | "category", value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => {
-      if (!prev[name]) return prev;
-      const next = { ...prev };
-      delete next[name];
-      return next;
-    });
+ function updateField(
+  name:
+    | "title"
+    | "description"
+    | "imageUrl"
+    | "category"
+    | "mediaImageUrl"
+    | "mediaFileUrl"
+    | "mediaVideoUrl",
+  value: string
+) {
+  setValues((prev) => ({ ...prev, [name]: value }));
+
+  setFieldErrors((prev) => {
+    if (!prev[name]) return prev;
+
+    const next = { ...prev };
+    delete next[name];
+    return next;
+  });
+}{ 
   }
 
   function updatePriority(value: AnnouncementPriority) {
     setValues((prev) => ({ ...prev, priority: value }));
   }
 
-  async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    setUploadError(null);
-
-    if (!isValidImageFile(file)) {
-      setUploadError(translate("admin.announcements.form.imageInvalid"));
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const path = `images/announcements/${Date.now()}-${file.name}`;
-      const url = await uploadImage(path, file);
-      updateField("imageUrl", url);
-    } catch {
-      setUploadError(translate("admin.announcements.form.imageUploadError"));
-    } finally {
-      setUploading(false);
-    }
-  }
+  
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -262,73 +249,74 @@ export function AnnouncementForm({
         </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="announcement-image-url"
-          className="text-sm font-medium text-foreground"
-        >
-          {translate("admin.announcements.form.imageUrl")}
-        </label>
-        <input
-          id="announcement-image-url"
-          type="url"
-          value={values.imageUrl ?? ""}
-          onChange={(event) => updateField("imageUrl", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.imageUrl)}
-          className={cx(
-            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.imageUrl ? "border-primary" : "border-border",
-            focusRing
-          )}
-        />
-        {fieldErrors.imageUrl && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.imageUrl}
-          </p>
-        )}
-      </div>
+       
+<div className="grid gap-5 sm:grid-cols-2">
+  <div>
+    <label
+      htmlFor="announcement-media-image-url"
+      className="text-sm font-medium text-foreground"
+    >
+      رابط الصورة
+    </label>
+    <input
+      id="announcement-media-image-url"
+      type="url"
+      value={values.mediaImageUrl ?? ""}
+      onChange={(event) =>
+        updateField("mediaImageUrl", event.target.value)
+      }
+      className={cx(
+        "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+        focusRing
+      )}
+      placeholder="https://..."
+    />
+  </div>
 
-      <div>
-        <label
-          htmlFor="announcement-image-upload"
-          className="text-sm font-medium text-foreground"
-        >
-          {translate("admin.announcements.form.uploadImage")}
-        </label>
-        <div className="mt-1 flex items-center gap-3">
-          <label
-            htmlFor="announcement-image-upload"
-            className={cx(
-              "inline-flex cursor-pointer items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors duration-150 hover:bg-surface-muted",
-              focusRing
-            )}
-          >
-            <Upload className="h-4 w-4" aria-hidden="true" />
-            {uploading
-              ? translate("admin.announcements.form.uploading")
-              : translate("admin.announcements.form.chooseImage")}
-          </label>
-          <input
-            id="announcement-image-upload"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/svg+xml"
-            disabled={uploading}
-            onChange={handleImageUpload}
-            className="sr-only"
-          />
-          {values.imageUrl && !uploading && (
-            <span className="truncate text-xs text-foreground/50">
-              {values.imageUrl}
-            </span>
-          )}
-        </div>
-        {uploadError && (
-          <p role="alert" className="mt-1 text-sm font-medium text-primary">
-            {uploadError}
-          </p>
-        )}
-      </div>
+  <div>
+    <label
+      htmlFor="announcement-media-file-url"
+      className="text-sm font-medium text-foreground"
+    >
+      رابط الملف
+    </label>
+    <input
+      id="announcement-media-file-url"
+      type="url"
+      value={values.mediaFileUrl ?? ""}
+      onChange={(event) =>
+        updateField("mediaFileUrl", event.target.value)
+      }
+      className={cx(
+        "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+        focusRing
+      )}
+      placeholder="https://..."
+    />
+  </div>
 
+  <div className="sm:col-span-2">
+    <label
+      htmlFor="announcement-media-video-url"
+      className="text-sm font-medium text-foreground"
+    >
+      رابط الفيديو
+    </label>
+    <input
+      id="announcement-media-video-url"
+      type="url"
+      value={values.mediaVideoUrl ?? ""}
+      onChange={(event) =>
+        updateField("mediaVideoUrl", event.target.value)
+      }
+      className={cx(
+        "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+        focusRing
+      )}
+      placeholder="https://..."
+    />
+  </div>
+</div>
       <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
@@ -348,7 +336,7 @@ export function AnnouncementForm({
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={submitting || uploading}
+          disabled={submitting }
           className={cx(
             "inline-flex w-fit items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark disabled:opacity-60",
             focusRing

@@ -67,6 +67,11 @@ export interface AnnouncementDoc {
   description: string;
   category: string;
   imageUrl?: string;
+
+  mediaImageUrl?: string;
+  mediaFileUrl?: string;
+  mediaVideoUrl?: string;
+
   priority: "normal" | "important" | "urgent";
   isPublished: boolean;
   createdAt: Timestamp;

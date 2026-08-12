@@ -9,12 +9,12 @@ import { cx, formatDate } from "@/lib/utils";
 interface AnnouncementCardProps {
   title: string;
   description: string;
-  /** Firestore stores this as a plain string; guarded below against the known taxonomy. */
   category: string;
   priority: AnnouncementDoc["priority"];
-  /** ISO date string derived from Firestore's createdAt Timestamp by the caller. */
   dateIso: string;
-  /** Larger layout used for the single featured announcement slot. */
+  mediaImageUrl?: string;
+  mediaFileUrl?: string;
+  mediaVideoUrl?: string;
   featured?: boolean;
 }
 
@@ -66,6 +66,9 @@ export function AnnouncementCard({
   category,
   priority,
   dateIso,
+  mediaImageUrl,
+  mediaFileUrl,
+  mediaVideoUrl,
   featured = false,
 }: AnnouncementCardProps) {
   const { translate, language } = useLanguage();
@@ -134,7 +137,32 @@ export function AnnouncementCard({
       >
         {description}
       </p>
+{mediaImageUrl && (
+  <img
+    src={mediaImageUrl}
+    alt={title}
+    className="mt-4 w-full rounded-md object-cover"
+  />
+)}
 
+{mediaVideoUrl && (
+  <video
+    src={mediaVideoUrl}
+    controls
+    className="mt-4 w-full rounded-md"
+  />
+)}
+
+{mediaFileUrl && (
+  <a
+    href={mediaFileUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+  >
+    فتح الملف
+  </a>
+)}
       <time
         dateTime={dateIso}
         className="mt-4 text-xs font-medium text-foreground/50"

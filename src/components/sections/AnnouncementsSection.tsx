@@ -190,14 +190,17 @@ export function AnnouncementsSection() {
               {items.length > 0 ? (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((announcement) => (
-                    <AnnouncementCard
-                      key={announcement.id}
-                      title={announcement.title}
-                      description={announcement.description}
-                      category={announcement.category}
-                      priority={announcement.priority}
-                      dateIso={toDateIso(announcement)}
-                    />
+<AnnouncementCard
+  key={announcement.id}
+  title={announcement.title}
+  description={announcement.description}
+  category={announcement.category}
+  priority={announcement.priority}
+  dateIso={toDateIso(announcement)}
+  mediaImageUrl={announcement.mediaImageUrl}
+  mediaFileUrl={announcement.mediaFileUrl}
+  mediaVideoUrl={announcement.mediaVideoUrl}
+/>
                   ))}
                 </div>
               ) : (
