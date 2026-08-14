@@ -19,8 +19,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_COMMITTEE: CommitteeDoc = {
-  name: "",
-  description: "",
+  nameAr: "",
+  nameEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   imageUrl: "",
   isActive: true,
   order: 1,
@@ -222,7 +224,15 @@ export default function AdminUnionPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title={translate("admin.union.delete.title")}
-        description={deleteTarget?.name}
+        description={
+          deleteTarget
+            ? `${deleteTarget.nameAr}${
+                deleteTarget.nameEn
+                  ? ` / ${deleteTarget.nameEn}`
+                  : ""
+              }`
+            : undefined
+        }
         confirmLabel={translate("admin.union.delete.confirm")}
         confirmingLabel={translate("admin.union.delete.confirming")}
         cancelLabel={translate("admin.union.delete.cancel")}

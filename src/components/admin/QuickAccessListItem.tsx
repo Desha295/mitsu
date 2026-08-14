@@ -26,7 +26,7 @@ export function QuickAccessListItem({
   onEdit,
   onDelete,
 }: QuickAccessListItemProps) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
 
   const IconComponent = item.icon
     ? (
@@ -37,11 +37,17 @@ export function QuickAccessListItem({
       )[item.icon]
     : undefined;
 
+  const title = language === "ar" ? item.titleAr : item.titleEn;
+  const description =
+    language === "ar" ? item.descriptionAr : item.descriptionEn;
+
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 flex-1 gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-light text-primary">
-          {IconComponent && <IconComponent className="h-5 w-5" aria-hidden="true" />}
+          {IconComponent && (
+            <IconComponent className="h-5 w-5" aria-hidden="true" />
+          )}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -66,10 +72,10 @@ export function QuickAccessListItem({
           </div>
 
           <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-            {item.title}
+            {title}
           </h3>
           <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-            {item.description}
+            {description}
           </p>
           <p className="mt-2 truncate text-xs font-medium text-foreground/50">
             {item.href}

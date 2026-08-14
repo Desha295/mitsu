@@ -53,7 +53,7 @@ function eventToActivity(doc: WithId<EventDoc>): ActivityItem {
   const date = timestampToDate(doc.createdAt);
   return {
     id: doc.id,
-    title: doc.title,
+    title: doc.titleAr,
     collectionLabelKey: "admin.nav.events",
     dateIso: (date ?? new Date(0)).toISOString(),
   };

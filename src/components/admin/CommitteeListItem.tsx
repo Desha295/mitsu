@@ -1,8 +1,8 @@
 "use client";
 
 import { Pencil, Trash2 } from "lucide-react";
-import type { CommitteeDoc } from "@/lib/firebase/collections";
 import type { WithId } from "@/lib/firebase/services";
+import type { CommitteeDoc } from "@/lib/firebase/collections";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
@@ -12,77 +12,88 @@ interface CommitteeListItemProps {
   onDelete: () => void;
 }
 
-/**
- * Single row in the admin Committees list (components/admin, Sprint
- * 3.5). Mirrors AnnouncementListItem/EventListItem's structure — same
- * edit/delete buttons, same badge shape — but shows an active/inactive
- * badge (CommitteeDoc.isActive, like Hero) instead of published/draft,
- * plus the `order` field that controls this committee's display
- * sequence on the public site. translate() only supports a static
- * key + fallback (no interpolation), so the order label and its value
- * are concatenated the same way admin/page.tsx already concatenates
- * the welcome heading with the signed-in user's name.
- */
 export function CommitteeListItem({
   committee,
   onEdit,
   onDelete,
 }: CommitteeListItemProps) {
-  const { translate } = useLanguage();
+  const { language, translate } = useLanguage();
+
+  const isArabic = language === "ar";
+
+  const name = isArabic ? committee.nameAr : committee.nameEn;
+  const description = isArabic
+    ? committee.descriptionAr
+    : committee.descriptionEn;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={cx(
-              "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium",
-              committee.isActive
-                ? "bg-secondary-light text-secondary-dark"
-                : "bg-surface-muted text-foreground/50"
-            )}
-          >
-            {translate(
-              committee.isActive
-                ? "admin.union.status.active"
-                : "admin.union.status.inactive"
-            )}
-          </span>
-          <span className="inline-flex items-center rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
-            {translate("admin.union.list.orderLabel")} {committee.order}
-          </span>
-        </div>
+    <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-center gap-4">
+        {committee.imageUrl ? (
+          <img
+            src={committee.imageUrl}
+            alt={name}
+            className="h-16 w-16 shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-surface-muted text-xs text-foreground/40">
+            —
+          </div>
+        )}
 
-        <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-          {committee.name}
-        </h3>
-        <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-          {committee.description}
-        </p>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-sm font-semibold text-foreground">
+              {name}
+            </h3>
+
+            <span
+              className={cx(
+                "rounded-full px-2 py-0.5 text-[11px] font-medium",
+                committee.isActive
+                  ? "bg-secondary-light text-secondary-dark"
+                  : "bg-surface-muted text-foreground/50"
+              )}
+            >
+              {committee.isActive
+                ? translate("common.active")
+                : translate("common.inactive")}
+            </span>
+          </div>
+
+          <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
+            {description}
+          </p>
+
+          <p className="mt-1 text-xs text-foreground/50">
+            {translate("admin.union.form.order")}: {committee.order}
+          </p>
+        </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onEdit}
-          aria-label={translate("admin.union.list.edit")}
           className={cx(
-            "inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-foreground/70 transition-colors duration-150 hover:bg-surface-muted",
+            "inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted",
             focusRing
           )}
         >
           <Pencil className="h-4 w-4" aria-hidden="true" />
+          {translate("common.edit")}
         </button>
+
         <button
           type="button"
           onClick={onDelete}
-          aria-label={translate("admin.union.list.delete")}
           className={cx(
-            "inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-primary transition-colors duration-150 hover:bg-primary-light",
+            "inline-flex items-center gap-2 rounded-md border border-primary px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-white",
             focusRing
           )}
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
+          {translate("common.delete")}
         </button>
       </div>
     </div>

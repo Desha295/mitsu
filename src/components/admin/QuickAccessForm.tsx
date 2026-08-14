@@ -16,18 +16,14 @@ interface QuickAccessFormProps {
   cancelLabel?: string;
 }
 
-type TextField = "title" | "description" | "href" | "icon";
+type TextField =
+  | "titleAr"
+  | "titleEn"
+  | "descriptionAr"
+  | "descriptionEn"
+  | "href"
+  | "icon";
 
-/**
- * Quick Access item form (components/admin, Sprint 3.8). Same
- * create/edit shape as SystemForm — text inputs, a live icon preview
- * next to the icon field (same convention as the public QuickAccessCard
- * and SystemCard's own icon lookup) — but simpler: every
- * QuickAccessItemDoc field is required (unlike SystemDoc's optional
- * `officialUrl`/`icon`), so all four text fields validate the same way
- * as `title`/`description` everywhere else, and `href` is checked with
- * the same shared `isValidHref()` used by every prior form.
- */
 export function QuickAccessForm({
   initialValues,
   onSubmit,
@@ -37,6 +33,7 @@ export function QuickAccessForm({
   cancelLabel,
 }: QuickAccessFormProps) {
   const { translate } = useLanguage();
+
   const [values, setValues] = useState<QuickAccessItemDoc>(initialValues);
   const [orderInput, setOrderInput] = useState(String(initialValues.order));
   const [isActive, setIsActive] = useState(initialValues.isActive);
@@ -46,7 +43,14 @@ export function QuickAccessForm({
     Partial<Record<TextField | "order", string>>
   >({});
 
-  const REQUIRED_FIELDS: TextField[] = ["title", "description", "href", "icon"];
+  const REQUIRED_FIELDS: TextField[] = [
+    "titleAr",
+    "titleEn",
+    "descriptionAr",
+    "descriptionEn",
+    "href",
+    "icon",
+  ];
 
   const IconPreview = values.icon
     ? (
@@ -67,6 +71,7 @@ export function QuickAccessForm({
     }
 
     const href = String(values.href ?? "").trim();
+
     if (href && !isValidHref(href)) {
       errors.href = translate("admin.quickAccess.form.invalidUrl");
     }
@@ -87,8 +92,10 @@ export function QuickAccessForm({
 
   function updateField(name: TextField, value: string) {
     setValues((prev) => ({ ...prev, [name]: value }));
+
     setFieldErrors((prev) => {
       if (!prev[name]) return prev;
+
       const next = { ...prev };
       delete next[name];
       return next;
@@ -97,8 +104,10 @@ export function QuickAccessForm({
 
   function updateOrder(value: string) {
     setOrderInput(value);
+
     setFieldErrors((prev) => {
       if (!prev.order) return prev;
+
       const next = { ...prev };
       delete next.order;
       return next;
@@ -108,15 +117,19 @@ export function QuickAccessForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
       await onSubmit({
         ...values,
         order: Number(orderInput),
         isActive,
       });
-    } catch {
+    } catch (error) {
+      console.error("[MITSU] Quick Access save failed:", error);
       setError(translate("admin.quickAccess.form.error"));
     } finally {
       setSubmitting(false);
@@ -127,52 +140,128 @@ export function QuickAccessForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
         <label
-          htmlFor="quick-access-title"
+          htmlFor="quick-access-title-ar"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.quickAccess.form.title")}
+          {translate("admin.quickAccess.form.titleAr")}
         </label>
+
         <input
-          id="quick-access-title"
+          id="quick-access-title-ar"
           type="text"
-          value={values.title}
-          onChange={(event) => updateField("title", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.title)}
+          dir="rtl"
+          value={values.titleAr}
+          onChange={(event) =>
+            updateField("titleAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.title ? "border-primary" : "border-border",
+            fieldErrors.titleAr ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.title && (
+
+        {fieldErrors.titleAr && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.title}
+            {fieldErrors.titleAr}
           </p>
         )}
       </div>
 
       <div>
         <label
-          htmlFor="quick-access-description"
+          htmlFor="quick-access-title-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.quickAccess.form.description")}
+          {translate("admin.quickAccess.form.titleEn")}
         </label>
-        <textarea
-          id="quick-access-description"
-          rows={3}
-          value={values.description}
-          onChange={(event) => updateField("description", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.description)}
+
+        <input
+          id="quick-access-title-en"
+          type="text"
+          dir="ltr"
+          value={values.titleEn}
+          onChange={(event) =>
+            updateField("titleEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleEn)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.description ? "border-primary" : "border-border",
+            fieldErrors.titleEn ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.description && (
+
+        {fieldErrors.titleEn && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.description}
+            {fieldErrors.titleEn}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="quick-access-description-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.quickAccess.form.descriptionAr")}
+        </label>
+
+        <textarea
+          id="quick-access-description-ar"
+          rows={3}
+          dir="rtl"
+          value={values.descriptionAr}
+          onChange={(event) =>
+            updateField("descriptionAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionAr)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionAr
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionAr && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.descriptionAr}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="quick-access-description-en"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.quickAccess.form.descriptionEn")}
+        </label>
+
+        <textarea
+          id="quick-access-description-en"
+          rows={3}
+          dir="ltr"
+          value={values.descriptionEn}
+          onChange={(event) =>
+            updateField("descriptionEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionEn && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.descriptionEn}
           </p>
         )}
       </div>
@@ -184,9 +273,11 @@ export function QuickAccessForm({
         >
           {translate("admin.quickAccess.form.href")}
         </label>
+
         <input
           id="quick-access-href"
           type="text"
+          dir="ltr"
           value={values.href}
           onChange={(event) => updateField("href", event.target.value)}
           placeholder="/guide"
@@ -197,6 +288,7 @@ export function QuickAccessForm({
             focusRing
           )}
         />
+
         {fieldErrors.href ? (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
             {fieldErrors.href}
@@ -216,6 +308,7 @@ export function QuickAccessForm({
           >
             {translate("admin.quickAccess.form.icon")}
           </label>
+
           <div className="mt-1 flex items-center gap-3">
             <input
               id="quick-access-icon"
@@ -230,6 +323,7 @@ export function QuickAccessForm({
                 focusRing
               )}
             />
+
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-foreground/60">
               {IconPreview ? (
                 <IconPreview className="h-4 w-4" aria-hidden="true" />
@@ -238,6 +332,7 @@ export function QuickAccessForm({
               )}
             </span>
           </div>
+
           {fieldErrors.icon && (
             <p role="alert" className="mt-1 text-xs font-medium text-primary">
               {fieldErrors.icon}
@@ -252,6 +347,7 @@ export function QuickAccessForm({
           >
             {translate("admin.quickAccess.form.order")}
           </label>
+
           <input
             id="quick-access-order"
             type="number"
@@ -266,6 +362,7 @@ export function QuickAccessForm({
               focusRing
             )}
           />
+
           {fieldErrors.order ? (
             <p role="alert" className="mt-1 text-xs font-medium text-primary">
               {fieldErrors.order}
@@ -285,6 +382,7 @@ export function QuickAccessForm({
           onChange={(event) => setIsActive(event.target.checked)}
           className={cx("h-4 w-4 rounded border-border", focusRing)}
         />
+
         {translate("admin.quickAccess.form.isActive")}
       </label>
 
@@ -306,6 +404,7 @@ export function QuickAccessForm({
           <Save className="h-4 w-4" aria-hidden="true" />
           {submitting ? submittingLabel : submitLabel}
         </button>
+
         {onCancel && (
           <button
             type="button"

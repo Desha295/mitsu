@@ -12,20 +12,16 @@ interface LeadershipListItemProps {
   onDelete: () => void;
 }
 
-/**
- * Single row in the admin Leadership list (components/admin, Sprint
- * 3.9). Mirrors CommitteeListItem's structure exactly — same
- * active/inactive + order badges, same edit/delete buttons — with
- * `position` rendered as a subtitle under the name (in place of
- * Committee's `description`) and the optional `bio` shown below it
- * only when present.
- */
 export function LeadershipListItem({
   leader,
   onEdit,
   onDelete,
 }: LeadershipListItemProps) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+
+  const name = language === "ar" ? leader.nameAr : leader.nameEn;
+  const position =
+    language === "ar" ? leader.positionAr : leader.positionEn;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
@@ -45,22 +41,19 @@ export function LeadershipListItem({
                 : "admin.leadership.status.inactive"
             )}
           </span>
+
           <span className="inline-flex items-center rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
             {translate("admin.leadership.list.orderLabel")} {leader.order}
           </span>
         </div>
 
         <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-          {leader.name}
+          {name}
         </h3>
+
         <p className="mt-0.5 truncate text-xs font-medium text-primary">
-          {leader.position}
+          {position}
         </p>
-        {leader.bio && (
-          <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-            {leader.bio}
-          </p>
-        )}
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
@@ -75,6 +68,7 @@ export function LeadershipListItem({
         >
           <Pencil className="h-4 w-4" aria-hidden="true" />
         </button>
+
         <button
           type="button"
           onClick={onDelete}

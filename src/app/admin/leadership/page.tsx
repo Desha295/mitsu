@@ -19,8 +19,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_LEADER: LeadershipDoc = {
-  name: "",
-  position: "",
+  nameAr: "",
+  nameEn: "",
+  positionAr: "",
+  positionEn: "",
   imageUrl: "",
   bio: "",
   order: 1,
@@ -225,18 +227,26 @@ export default function AdminLeadershipPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.leadership.delete.title")}
-        description={deleteTarget?.name}
-        confirmLabel={translate("admin.leadership.delete.confirm")}
-        confirmingLabel={translate("admin.leadership.delete.confirming")}
-        cancelLabel={translate("admin.leadership.delete.cancel")}
-        destructive
-        confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
-      />
+<ConfirmDialog
+  open={deleteTarget !== null}
+  title={translate("admin.leadership.delete.title")}
+  description={
+    deleteTarget
+      ? `${deleteTarget.nameAr}${
+          deleteTarget.nameEn
+            ? ` / ${deleteTarget.nameEn}`
+            : ""
+        }`
+      : undefined
+  }
+  confirmLabel={translate("admin.leadership.delete.confirm")}
+  confirmingLabel={translate("admin.leadership.delete.confirming")}
+  cancelLabel={translate("admin.leadership.delete.cancel")}
+  destructive
+  confirming={deleting}
+  onConfirm={handleDeleteConfirm}
+  onCancel={() => setDeleteTarget(null)}
+/>
     </PageContainer>
   );
 }

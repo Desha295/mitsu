@@ -19,16 +19,18 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_SYSTEM: SystemDoc = {
-  name: "",
-  description: "",
+  nameAr: "",
+  nameEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   purpose: "",
   officialUrl: "",
   icon: "",
-  instructions: "",
+instructionsAr: "",
+instructionsEn: "",
   order: 1,
   isActive: true,
 };
-
 function stripId(item: WithId<SystemDoc>): SystemDoc {
   const { id, ...rest } = item;
   void id;
@@ -221,18 +223,26 @@ export default function AdminSystemsPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.systems.delete.title")}
-        description={deleteTarget?.name}
-        confirmLabel={translate("admin.systems.delete.confirm")}
-        confirmingLabel={translate("admin.systems.delete.confirming")}
-        cancelLabel={translate("admin.systems.delete.cancel")}
-        destructive
-        confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
-      />
+<ConfirmDialog
+  open={deleteTarget !== null}
+  title={translate("admin.systems.delete.title")}
+  description={
+    deleteTarget
+      ? `${deleteTarget.nameAr}${
+          deleteTarget.nameEn
+            ? ` / ${deleteTarget.nameEn}`
+            : ""
+        }`
+      : undefined
+  }
+  confirmLabel={translate("admin.systems.delete.confirm")}
+  confirmingLabel={translate("admin.systems.delete.confirming")}
+  cancelLabel={translate("admin.systems.delete.cancel")}
+  destructive
+  confirming={deleting}
+  onConfirm={handleDeleteConfirm}
+  onCancel={() => setDeleteTarget(null)}
+/>
     </PageContainer>
   );
 }

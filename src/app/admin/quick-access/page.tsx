@@ -19,8 +19,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_QUICK_ACCESS: QuickAccessItemDoc = {
-  title: "",
-  description: "",
+  titleAr: "",
+  titleEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   href: "",
   icon: "",
   order: 1,
@@ -220,19 +222,26 @@ export default function AdminQuickAccessPage() {
           submittingLabel={translate("admin.quickAccess.form.saving")}
         />
       )}
-
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.quickAccess.delete.title")}
-        description={deleteTarget?.title}
-        confirmLabel={translate("admin.quickAccess.delete.confirm")}
-        confirmingLabel={translate("admin.quickAccess.delete.confirming")}
-        cancelLabel={translate("admin.quickAccess.delete.cancel")}
-        destructive
-        confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
-      />
+<ConfirmDialog
+  open={deleteTarget !== null}
+  title={translate("admin.quickAccess.delete.title")}
+  description={
+    deleteTarget
+      ? `${deleteTarget.titleAr}${
+          deleteTarget.titleEn
+            ? ` / ${deleteTarget.titleEn}`
+            : ""
+        }`
+      : undefined
+  }
+  confirmLabel={translate("admin.quickAccess.delete.confirm")}
+  confirmingLabel={translate("admin.quickAccess.delete.confirming")}
+  cancelLabel={translate("admin.quickAccess.delete.cancel")}
+  destructive
+  confirming={deleting}
+  onConfirm={handleDeleteConfirm}
+  onCancel={() => setDeleteTarget(null)}
+/>
     </PageContainer>
   );
 }

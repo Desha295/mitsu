@@ -22,7 +22,7 @@ interface GuideListItemProps {
  * admin can tell at a glance which sections have expandable detail.
  */
 export function GuideListItem({ section, onEdit, onDelete }: GuideListItemProps) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
 
   const IconComponent = section.icon
     ? (
@@ -70,10 +70,10 @@ export function GuideListItem({ section, onEdit, onDelete }: GuideListItemProps)
           </div>
 
           <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-            {section.title}
+            {language === "ar" ? section.titleAr : section.titleEn}
           </h3>
           <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-            {section.description}
+            {language === "ar" ? section.descriptionAr : section.descriptionEn}
           </p>
 
           {(factCount > 0 || statCount > 0) && (

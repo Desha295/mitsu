@@ -16,26 +16,23 @@ interface GuideFormProps {
   cancelLabel?: string;
 }
 
-type TextField = "icon" | "title" | "description";
-type StatRow = { label: string; value: string };
+type TextField =
+  | "icon"
+  | "titleAr"
+  | "titleEn"
+  | "descriptionAr"
+  | "descriptionEn";
 
-/**
- * Guide section content form (components/admin, Sprint 3.7). Same
- * create/edit shape as SystemForm/CommitteeForm, extended with two
- * dynamic list editors for GuideSectionDoc's optional `facts` (string
- * bullets) and `stats` (label/value pairs) — the first schema so far
- * with array fields. Each list is plain add/remove-row local state,
- * not a new shared component, since no other form needs this yet;
- * blank rows are silently dropped on submit rather than validated,
- * since both arrays are entirely optional at the schema level.
- *
- * `icon` is required here (unlike SystemDoc's optional icon), so it's
- * validated like `title`/`description` rather than left freeform.
- * `highlight` is tracked separately from `isActive`, mirroring how
- * `isActive`/`isPublished` are already isolated from the generic values
- * object in every prior form — GuideCard uses `highlight` purely for
- * visual emphasis (Important Notes), unrelated to publish state.
- */
+type FactRow = {
+  ar: string;
+  en: string;
+};
+
+type StatRow = {
+  label: string;
+  value: string;
+};
+
 export function GuideForm({
   initialValues,
   onSubmit,
@@ -45,19 +42,36 @@ export function GuideForm({
   cancelLabel,
 }: GuideFormProps) {
   const { translate } = useLanguage();
+
   const [values, setValues] = useState<GuideSectionDoc>(initialValues);
   const [orderInput, setOrderInput] = useState(String(initialValues.order));
   const [isActive, setIsActive] = useState(initialValues.isActive);
-  const [highlight, setHighlight] = useState(initialValues.highlight ?? false);
-  const [facts, setFacts] = useState<string[]>(initialValues.facts ?? []);
-  const [stats, setStats] = useState<StatRow[]>(initialValues.stats ?? []);
+  const [highlight, setHighlight] = useState(
+    initialValues.highlight ?? false
+  );
+
+  const [facts, setFacts] = useState<FactRow[]>(
+    initialValues.facts ?? []
+  );
+
+  const [stats, setStats] = useState<StatRow[]>(
+    initialValues.stats ?? []
+  );
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<TextField | "order", string>>
   >({});
 
-  const REQUIRED_FIELDS: TextField[] = ["icon", "title", "description"];
+  const REQUIRED_FIELDS: TextField[] = [
+    "icon",
+    "titleAr",
+    "titleEn",
+    "descriptionAr",
+    "descriptionEn",
+  ];
 
   const IconPreview = values.icon
     ? (
@@ -92,9 +106,14 @@ export function GuideForm({
   }
 
   function updateField(name: TextField, value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }));
+    setValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setFieldErrors((prev) => {
       if (!prev[name]) return prev;
+
       const next = { ...prev };
       delete next[name];
       return next;
@@ -103,8 +122,10 @@ export function GuideForm({
 
   function updateOrder(value: string) {
     setOrderInput(value);
+
     setFieldErrors((prev) => {
       if (!prev.order) return prev;
+
       const next = { ...prev };
       delete next.order;
       return next;
@@ -112,11 +133,30 @@ export function GuideForm({
   }
 
   function addFact() {
-    setFacts((prev) => [...prev, ""]);
+    setFacts((prev) => [
+      ...prev,
+      {
+        ar: "",
+        en: "",
+      },
+    ]);
   }
 
-  function updateFact(index: number, value: string) {
-    setFacts((prev) => prev.map((fact, i) => (i === index ? value : fact)));
+  function updateFact(
+    index: number,
+    language: "ar" | "en",
+    value: string
+  ) {
+    setFacts((prev) =>
+      prev.map((fact, i) =>
+        i === index
+          ? {
+              ...fact,
+              [language]: value,
+            }
+          : fact
+      )
+    );
   }
 
   function removeFact(index: number) {
@@ -124,12 +164,25 @@ export function GuideForm({
   }
 
   function addStat() {
-    setStats((prev) => [...prev, { label: "", value: "" }]);
+    setStats((prev) => [
+      ...prev,
+      {
+        label: "",
+        value: "",
+      },
+    ]);
   }
 
   function updateStat(index: number, key: keyof StatRow, value: string) {
     setStats((prev) =>
-      prev.map((stat, i) => (i === index ? { ...stat, [key]: value } : stat))
+      prev.map((stat, i) =>
+        i === index
+          ? {
+              ...stat,
+              [key]: value,
+            }
+          : stat
+      )
     );
   }
 
@@ -140,12 +193,24 @@ export function GuideForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
-      const cleanedFacts = facts.map((fact) => fact.trim()).filter(Boolean);
+      const cleanedFacts = facts
+        .map((fact) => ({
+          ar: fact.ar.trim(),
+          en: fact.en.trim(),
+        }))
+        .filter((fact) => fact.ar || fact.en);
+
       const cleanedStats = stats
-        .map((stat) => ({ label: stat.label.trim(), value: stat.value.trim() }))
+        .map((stat) => ({
+          label: stat.label.trim(),
+          value: stat.value.trim(),
+        }))
         .filter((stat) => stat.label && stat.value);
 
       await onSubmit({
@@ -165,60 +230,140 @@ export function GuideForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div>
-        <label htmlFor="guide-title" className="text-sm font-medium text-foreground">
-          {translate("admin.guide.form.title")}
-        </label>
-        <input
-          id="guide-title"
-          type="text"
-          value={values.title}
-          onChange={(event) => updateField("title", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.title)}
-          className={cx(
-            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.title ? "border-primary" : "border-border",
-            focusRing
-          )}
-        />
-        {fieldErrors.title && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.title}
-          </p>
-        )}
-      </div>
-
+      {/* Title AR */}
       <div>
         <label
-          htmlFor="guide-description"
+          htmlFor="guide-title-ar"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.guide.form.description")}
+          {translate("admin.guide.form.title")} (AR)
         </label>
-        <textarea
-          id="guide-description"
-          rows={3}
-          value={values.description}
-          onChange={(event) => updateField("description", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.description)}
+
+        <input
+          id="guide-title-ar"
+          type="text"
+          dir="rtl"
+          value={values.titleAr}
+          onChange={(event) => updateField("titleAr", event.target.value)}
+          aria-invalid={Boolean(fieldErrors.titleAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.description ? "border-primary" : "border-border",
+            fieldErrors.titleAr ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.description && (
+
+        {fieldErrors.titleAr && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.description}
+            {fieldErrors.titleAr}
           </p>
         )}
       </div>
 
+      {/* Title EN */}
+      <div>
+        <label
+          htmlFor="guide-title-en"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.guide.form.title")} (EN)
+        </label>
+
+        <input
+          id="guide-title-en"
+          type="text"
+          dir="ltr"
+          value={values.titleEn}
+          onChange={(event) => updateField("titleEn", event.target.value)}
+          aria-invalid={Boolean(fieldErrors.titleEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.titleEn ? "border-primary" : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.titleEn && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.titleEn}
+          </p>
+        )}
+      </div>
+
+      {/* Description AR */}
+      <div>
+        <label
+          htmlFor="guide-description-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.guide.form.description")} (AR)
+        </label>
+
+        <textarea
+          id="guide-description-ar"
+          rows={3}
+          dir="rtl"
+          value={values.descriptionAr}
+          onChange={(event) =>
+            updateField("descriptionAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionAr)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionAr ? "border-primary" : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionAr && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.descriptionAr}
+          </p>
+        )}
+      </div>
+
+      {/* Description EN */}
+      <div>
+        <label
+          htmlFor="guide-description-en"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.guide.form.description")} (EN)
+        </label>
+
+        <textarea
+          id="guide-description-en"
+          rows={3}
+          dir="ltr"
+          value={values.descriptionEn}
+          onChange={(event) =>
+            updateField("descriptionEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionEn ? "border-primary" : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionEn && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.descriptionEn}
+          </p>
+        )}
+      </div>
+
+      {/* Icon + Order */}
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="guide-icon" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="guide-icon"
+            className="text-sm font-medium text-foreground"
+          >
             {translate("admin.guide.form.icon")}
           </label>
+
           <div className="mt-1 flex items-center gap-3">
             <input
               id="guide-icon"
@@ -233,6 +378,7 @@ export function GuideForm({
                 focusRing
               )}
             />
+
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-foreground/60">
               {IconPreview ? (
                 <IconPreview className="h-4 w-4" aria-hidden="true" />
@@ -241,6 +387,7 @@ export function GuideForm({
               )}
             </span>
           </div>
+
           {fieldErrors.icon && (
             <p role="alert" className="mt-1 text-xs font-medium text-primary">
               {fieldErrors.icon}
@@ -249,9 +396,13 @@ export function GuideForm({
         </div>
 
         <div>
-          <label htmlFor="guide-order" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="guide-order"
+            className="text-sm font-medium text-foreground"
+          >
             {translate("admin.guide.form.order")}
           </label>
+
           <input
             id="guide-order"
             type="number"
@@ -266,6 +417,7 @@ export function GuideForm({
               focusRing
             )}
           />
+
           {fieldErrors.order ? (
             <p role="alert" className="mt-1 text-xs font-medium text-primary">
               {fieldErrors.order}
@@ -278,12 +430,13 @@ export function GuideForm({
         </div>
       </div>
 
-      {/* Facts list */}
+      {/* Bilingual Facts */}
       <div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">
             {translate("admin.guide.form.facts")}
           </span>
+
           <button
             type="button"
             onClick={addFact}
@@ -296,32 +449,59 @@ export function GuideForm({
             {translate("admin.guide.form.addFact")}
           </button>
         </div>
+
         <p className="mt-1 text-xs text-foreground/50">
           {translate("admin.guide.form.factsHint")}
         </p>
+
         {facts.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-2 flex flex-col gap-3">
             {facts.map((fact, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={fact}
-                  onChange={(event) => updateFact(index, event.target.value)}
-                  className={cx(
-                    "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                    focusRing
-                  )}
-                />
+              <div
+                key={index}
+                className="rounded-md border border-border bg-surface-muted p-3"
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    dir="rtl"
+                    value={fact.ar}
+                    onChange={(event) =>
+                      updateFact(index, "ar", event.target.value)
+                    }
+                    placeholder="النص بالعربية"
+                    className={cx(
+                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                      focusRing
+                    )}
+                  />
+
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={fact.en}
+                    onChange={(event) =>
+                      updateFact(index, "en", event.target.value)
+                    }
+                    placeholder="English text"
+                    className={cx(
+                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                      focusRing
+                    )}
+                  />
+                </div>
+
                 <button
                   type="button"
                   onClick={() => removeFact(index)}
                   aria-label={translate("admin.guide.form.removeFact")}
                   className={cx(
-                    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
+                    "mt-2 inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
                     focusRing
                   )}
                 >
-                  <X className="h-4 w-4" aria-hidden="true" />
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  {translate("admin.guide.form.removeFact")}
                 </button>
               </div>
             ))}
@@ -329,12 +509,13 @@ export function GuideForm({
         )}
       </div>
 
-      {/* Stats list */}
+      {/* Stats */}
       <div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">
             {translate("admin.guide.form.stats")}
           </span>
+
           <button
             type="button"
             onClick={addStat}
@@ -347,9 +528,11 @@ export function GuideForm({
             {translate("admin.guide.form.addStat")}
           </button>
         </div>
+
         <p className="mt-1 text-xs text-foreground/50">
           {translate("admin.guide.form.statsHint")}
         </p>
+
         {stats.length > 0 && (
           <div className="mt-2 flex flex-col gap-2">
             {stats.map((stat, index) => (
@@ -357,23 +540,33 @@ export function GuideForm({
                 <input
                   type="text"
                   value={stat.label}
-                  onChange={(event) => updateStat(index, "label", event.target.value)}
-                  placeholder={translate("admin.guide.form.statLabelPlaceholder")}
+                  onChange={(event) =>
+                    updateStat(index, "label", event.target.value)
+                  }
+                  placeholder={translate(
+                    "admin.guide.form.statLabelPlaceholder"
+                  )}
                   className={cx(
                     "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
                     focusRing
                   )}
                 />
+
                 <input
                   type="text"
                   value={stat.value}
-                  onChange={(event) => updateStat(index, "value", event.target.value)}
-                  placeholder={translate("admin.guide.form.statValuePlaceholder")}
+                  onChange={(event) =>
+                    updateStat(index, "value", event.target.value)
+                  }
+                  placeholder={translate(
+                    "admin.guide.form.statValuePlaceholder"
+                  )}
                   className={cx(
                     "w-full max-w-[6rem] rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
                     focusRing
                   )}
                 />
+
                 <button
                   type="button"
                   onClick={() => removeStat(index)}
@@ -391,6 +584,7 @@ export function GuideForm({
         )}
       </div>
 
+      {/* Status */}
       <div className="flex flex-col gap-2">
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input
@@ -401,6 +595,7 @@ export function GuideForm({
           />
           {translate("admin.guide.form.isActive")}
         </label>
+
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
@@ -418,6 +613,7 @@ export function GuideForm({
         </p>
       )}
 
+      {/* Actions */}
       <div className="flex items-center gap-3">
         <button
           type="submit"
@@ -430,6 +626,7 @@ export function GuideForm({
           <Save className="h-4 w-4" aria-hidden="true" />
           {submitting ? submittingLabel : submitLabel}
         </button>
+
         {onCancel && (
           <button
             type="button"

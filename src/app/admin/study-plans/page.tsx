@@ -20,14 +20,16 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_DOCUMENT: DocumentResourceDoc = {
-  title: "",
-  description: "",
+  titleAr: "",
+  titleEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   fileUrl: "",
-  category: "",
-  isPublished: false,
+  categoryAr: "",
+  categoryEn: "",
   uploadedAt: undefined as unknown as DocumentResourceDoc["uploadedAt"],
+  isPublished: false,
 };
-
 function stripId(item: WithId<DocumentResourceDoc>): DocumentResourceDoc {
   const { id, ...rest } = item;
   void id;
@@ -219,18 +221,26 @@ export default function AdminStudyPlansPage() {
         />
       )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.studyPlans.delete.title")}
-        description={deleteTarget?.title}
-        confirmLabel={translate("admin.studyPlans.delete.confirm")}
-        confirmingLabel={translate("admin.studyPlans.delete.confirming")}
-        cancelLabel={translate("admin.studyPlans.delete.cancel")}
-        destructive
-        confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
-      />
+<ConfirmDialog
+  open={deleteTarget !== null}
+  title={translate("admin.studyPlans.delete.title")}
+  description={
+    deleteTarget
+      ? `${deleteTarget.titleAr}${
+          deleteTarget.titleEn
+            ? ` / ${deleteTarget.titleEn}`
+            : ""
+        }`
+      : undefined
+  }
+  confirmLabel={translate("admin.studyPlans.delete.confirm")}
+  confirmingLabel={translate("admin.studyPlans.delete.confirming")}
+  cancelLabel={translate("admin.studyPlans.delete.cancel")}
+  destructive
+  confirming={deleting}
+  onConfirm={handleDeleteConfirm}
+  onCancel={() => setDeleteTarget(null)}
+/>
     </PageContainer>
   );
 }

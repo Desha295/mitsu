@@ -11,40 +11,22 @@ import { systemsService } from "@/lib/firebase/services";
 import { useLanguage } from "@/hooks/useLanguage";
 import { BRAND_NAME, BRAND_FULL_NAME } from "@/constants/brand";
 
-/**
- * Global footer (components/layout). Includes MITSU branding, quick links,
- * university systems directory, and social placeholder section. Link content
- * is sourced from data files (no hardcoding per Sprint 1.1 requirements).
- *
- * Sprint 4.4 cleanup: the University Systems column now reads from
- * Firestore via systemsService, using the exact same query
- * (ACTIVE_SYSTEMS_ORDERED, imported from SystemsSection rather than
- * redefined) that powers the /systems page itself — this was found
- * during the Sprint 4 runtime-import audit as an independent static
- * dependency Phase 4.4 had missed, since the Footer builds its own list
- * rather than rendering SystemsSection.
- */
 export function Footer() {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
   const year = new Date().getFullYear();
+
   const { data: activeSystems } = useFirestoreList(
     systemsService,
     ACTIVE_SYSTEMS_ORDERED
   );
 
-  // Convert mainNavigation to FooterLinkGroup format
   const quickLinks = mainNavigation.map((item) => ({
     label: translate(item.labelKey),
     href: item.href,
   }));
 
-  // Convert systems to FooterLinkGroup format — name/officialUrl come
-  // directly from Firestore now (plain strings, not translation keys);
-  // empty href still renders as a "coming soon" placeholder (e.g. MUSTER
-  // has no web portal). The query already filters isActive and orders
-  // by `order`, so no client-side filter/sort is needed here.
   const systemLinks = activeSystems.map((s) => ({
-    label: s.name,
+    label: language === "ar" ? s.nameAr : s.nameEn,
     href: s.officialUrl || undefined,
   }));
 
@@ -88,9 +70,7 @@ export function Footer() {
             <span className="block">
               © {year} {BRAND_NAME}. {translate("footer.rightsReserved")}
             </span>
-            <span className="block">
-              {BRAND_FULL_NAME}
-            </span>
+            <span className="block">{BRAND_FULL_NAME}</span>
           </p>
         </div>
       </Container>

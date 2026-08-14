@@ -20,10 +20,13 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_EVENT: EventDoc = {
-  title: "",
-  description: "",
+  titleAr: "",
+  titleEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   date: undefined as unknown as EventDoc["date"],
-  location: "",
+  locationAr: "",
+  locationEn: "",
   imageUrl: "",
   category: "",
   isPublished: false,
@@ -40,41 +43,53 @@ type FormTarget = WithId<EventDoc> | "new" | null;
 type Feedback = "created" | "updated" | "deleted" | null;
 
 /**
- * Events management page (Sprint 3.4). Third real CRUD admin page,
- * extending Sprint 3.3's Announcements list pattern to `eventsService`
- * (Sprint 2.2, unused until now) and the `manageEvents` permission
- * (Sprint 2.3, unused until now). Reuses the same ConfirmDialog as
- * Announcements rather than a new one.
+ * Events management page.
  *
- * List is ordered by `date` ascending (soonest first) rather than
- * `createdAt` descending — matches how the public EventsSection already
- * sorts events, and is the more useful order for managing upcoming
- * activities.
+ * Uses the bilingual EventDoc schema:
+ * - titleAr / titleEn
+ * - descriptionAr / descriptionEn
+ *
+ * The current language is used when displaying the event title
+ * inside the delete confirmation dialog.
  */
 export default function AdminEventsPage() {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+
   const { loading: authLoading, admin } = useAuthGuard();
+
   const [items, setItems] = useState<Array<WithId<EventDoc>>>([]);
   const [hasFetched, setHasFetched] = useState(false);
   const [formTarget, setFormTarget] = useState<FormTarget>(null);
   const [feedback, setFeedback] = useState<Feedback>(null);
-  const [deleteTarget, setDeleteTarget] = useState<WithId<EventDoc> | null>(null);
+  const [deleteTarget, setDeleteTarget] =
+    useState<WithId<EventDoc> | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const allowed = admin ? canAccess(admin, PERMISSIONS.manageEvents) : false;
+  const allowed = admin
+    ? canAccess(admin, PERMISSIONS.manageEvents)
+    : false;
+
   const loadingList = allowed && !hasFetched;
 
   useEffect(() => {
     if (!allowed) return;
 
     let cancelled = false;
+
     eventsService
-      .getAll({ orderByField: { field: "date", direction: "asc" } })
+      .getAll({
+        orderByField: {
+          field: "date",
+          direction: "asc",
+        },
+      })
       .then((docs) => {
         if (cancelled) return;
+
         setItems(docs);
         setHasFetched(true);
       });
+
     return () => {
       cancelled = true;
     };
@@ -89,30 +104,59 @@ export default function AdminEventsPage() {
   }
 
   async function handleCreate(values: EventDoc) {
-    const payload: EventDoc = { ...values, createdAt: Timestamp.now() };
+    const payload: EventDoc = {
+      ...values,
+      createdAt: Timestamp.now(),
+    };
+
     const id = await eventsService.create(payload);
-    setItems((prev) => [...prev, { id, ...payload }]);
+
+    setItems((prev) => [
+      ...prev,
+      {
+        id,
+        ...payload,
+      },
+    ]);
+
     setFormTarget(null);
     setFeedback("created");
   }
 
   async function handleUpdate(values: EventDoc) {
     if (formTarget === null || formTarget === "new") return;
+
     const id = formTarget.id;
+
     await eventsService.update(id, values);
+
     setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...values } : item))
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...values,
+            }
+          : item
+      )
     );
+
     setFormTarget(null);
     setFeedback("updated");
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
+
     setDeleting(true);
+
     try {
       await eventsService.remove(deleteTarget.id);
-      setItems((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+
+      setItems((prev) =>
+        prev.filter((item) => item.id !== deleteTarget.id)
+      );
+
       setFeedback("deleted");
     } finally {
       setDeleting(false);
@@ -122,6 +166,12 @@ export default function AdminEventsPage() {
 
   const inForm = formTarget !== null;
   const isCreating = formTarget === "new";
+
+  const deleteTitle = deleteTarget
+    ? language === "en"
+      ? deleteTarget.titleEn
+      : deleteTarget.titleAr
+    : undefined;
 
   return (
     <PageContainer className="flex flex-col gap-8">
@@ -133,15 +183,26 @@ export default function AdminEventsPage() {
               ? translate("admin.events.form.createHeading")
               : translate("admin.events.form.editHeading")
         }
-        description={!inForm ? translate("admin.events.subheading") : undefined}
-        breadcrumbs={[
-          { label: translate("admin.breadcrumb.root"), href: "/admin" },
+        description={
           !inForm
-            ? { label: translate("admin.events.heading") }
+            ? translate("admin.events.subheading")
+            : undefined
+        }
+        breadcrumbs={[
+          {
+            label: translate("admin.breadcrumb.root"),
+            href: "/admin",
+          },
+
+          !inForm
+            ? {
+                label: translate("admin.events.heading"),
+              }
             : {
                 label: translate("admin.events.heading"),
                 href: "/admin/events",
               },
+
           ...(inForm
             ? [
                 {
@@ -162,7 +223,11 @@ export default function AdminEventsPage() {
                 focusRing
               )}
             >
-              <Plus className="h-4 w-4" aria-hidden="true" />
+              <Plus
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+
               {translate("admin.events.newButton")}
             </button>
           ) : undefined
@@ -191,33 +256,57 @@ export default function AdminEventsPage() {
           <EmptyState
             icon="CalendarDays"
             title={translate("admin.events.empty.title")}
-            description={translate("admin.events.empty.description")}
+            description={translate(
+              "admin.events.empty.description"
+            )}
           />
         )
       ) : (
         <EventForm
-          key={isCreating ? "new" : (formTarget as WithId<EventDoc>).id}
-          initialValues={
-            isCreating ? EMPTY_EVENT : stripId(formTarget as WithId<EventDoc>)
+          key={
+            isCreating
+              ? "new"
+              : (formTarget as WithId<EventDoc>).id
           }
-          onSubmit={isCreating ? handleCreate : handleUpdate}
+          initialValues={
+            isCreating
+              ? EMPTY_EVENT
+              : stripId(
+                  formTarget as WithId<EventDoc>
+                )
+          }
+          onSubmit={
+            isCreating
+              ? handleCreate
+              : handleUpdate
+          }
           onCancel={() => setFormTarget(null)}
           submitLabel={
             isCreating
               ? translate("admin.events.form.create")
-              : translate("admin.events.form.saveChanges")
+              : translate(
+                  "admin.events.form.saveChanges"
+                )
           }
-          submittingLabel={translate("admin.events.form.saving")}
+          submittingLabel={translate(
+            "admin.events.form.saving"
+          )}
         />
       )}
 
       <ConfirmDialog
         open={deleteTarget !== null}
         title={translate("admin.events.delete.title")}
-        description={deleteTarget?.title}
-        confirmLabel={translate("admin.events.delete.confirm")}
-        confirmingLabel={translate("admin.events.delete.confirming")}
-        cancelLabel={translate("admin.events.delete.cancel")}
+        description={deleteTitle}
+        confirmLabel={translate(
+          "admin.events.delete.confirm"
+        )}
+        confirmingLabel={translate(
+          "admin.events.delete.confirming"
+        )}
+        cancelLabel={translate(
+          "admin.events.delete.cancel"
+        )}
         destructive
         confirming={deleting}
         onConfirm={handleDeleteConfirm}

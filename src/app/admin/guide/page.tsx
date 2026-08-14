@@ -20,8 +20,10 @@ import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_GUIDE_SECTION: GuideSectionDoc = {
   icon: "",
-  title: "",
-  description: "",
+  titleAr: "",
+  titleEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
   facts: [],
   stats: [],
   highlight: false,
@@ -220,18 +222,26 @@ export default function AdminGuidePage() {
         />
       )}
 
-      <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.guide.delete.title")}
-        description={deleteTarget?.title}
-        confirmLabel={translate("admin.guide.delete.confirm")}
-        confirmingLabel={translate("admin.guide.delete.confirming")}
-        cancelLabel={translate("admin.guide.delete.cancel")}
-        destructive
-        confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
-      />
+<ConfirmDialog
+  open={deleteTarget !== null}
+  title={translate("admin.guide.delete.title")}
+  description={
+    deleteTarget
+      ? `${deleteTarget.titleAr}${
+          deleteTarget.titleEn
+            ? ` / ${deleteTarget.titleEn}`
+            : ""
+        }`
+      : undefined
+  }
+  confirmLabel={translate("admin.guide.delete.confirm")}
+  confirmingLabel={translate("admin.guide.delete.confirming")}
+  cancelLabel={translate("admin.guide.delete.cancel")}
+  destructive
+  confirming={deleting}
+  onConfirm={handleDeleteConfirm}
+  onCancel={() => setDeleteTarget(null)}
+/>
     </PageContainer>
   );
 }

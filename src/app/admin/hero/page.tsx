@@ -15,11 +15,15 @@ import { LoadingDashboard } from "@/components/admin/LoadingDashboard";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const EMPTY_HERO: HeroDoc = {
-  heading: "",
-  description: "",
-  primaryCtaLabel: "",
+  headingAr: "",
+  headingEn: "",
+  descriptionAr: "",
+  descriptionEn: "",
+  primaryCtaLabelAr: "",
+  primaryCtaLabelEn: "",
   primaryCtaHref: "",
-  secondaryCtaLabel: "",
+  secondaryCtaLabelAr: "",
+  secondaryCtaLabelEn: "",
   secondaryCtaHref: "",
   imageUrl: "",
   isActive: true,

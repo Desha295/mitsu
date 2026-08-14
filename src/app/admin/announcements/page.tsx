@@ -21,7 +21,9 @@ import { cx, focusRing } from "@/lib/utils";
 
 const EMPTY_ANNOUNCEMENT: AnnouncementDoc = {
   title: "",
+  titleEn: "",
   description: "",
+  descriptionEn: "",
   category: "general",
   priority: "normal",
   imageUrl: "",

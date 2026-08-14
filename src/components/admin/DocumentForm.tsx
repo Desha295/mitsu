@@ -17,28 +17,17 @@ interface DocumentFormProps {
   cancelLabel?: string;
 }
 
-type TextField = "title" | "description" | "category" | "fileUrl";
+type TextField =
+  | "titleAr"
+  | "titleEn"
+  | "descriptionAr"
+  | "descriptionEn"
+  | "categoryAr"
+  | "categoryEn"
+  | "fileUrl";
 
 const PDF_MIME_TYPE = "application/pdf";
 
-/**
- * Document/Study Plan form (components/admin, Sprint 3.10). Same
- * create/edit shape as AnnouncementForm — a manual URL field
- * (`fileUrl`) plus an upload control that fills it in. `category` has
- * no fixed vocabulary anywhere in the schema or public site (unlike
- * Announcement/Event's category, which reuses an established public
- * taxonomy), so it's a plain required text field rather than a
- * `<select>` — inventing a fixed list here would mean guessing an
- * official taxonomy that doesn't exist yet.
- *
- * Upload reuses Sprint 2.3's already-built `isValidDocumentFile` (size
- * only, 10MB) plus an explicit PDF MIME-type check added here in the
- * form, since the shared validator intentionally stays generic (it may
- * back other document types later). Uploads via the new
- * `uploadDocument()` storage helper, which is otherwise identical to
- * `uploadImage()` — Storage doesn't care about content type, only the
- * name differs for callers' clarity.
- */
 export function DocumentForm({
   initialValues,
   onSubmit,
@@ -48,164 +37,377 @@ export function DocumentForm({
   cancelLabel,
 }: DocumentFormProps) {
   const { translate } = useLanguage();
-  const [values, setValues] = useState<DocumentResourceDoc>(initialValues);
-  const [isPublished, setIsPublished] = useState(initialValues.isPublished);
+
+  const [values, setValues] =
+    useState<DocumentResourceDoc>(initialValues);
+
+  const [isPublished, setIsPublished] = useState(
+    initialValues.isPublished
+  );
+
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<TextField, string>>
   >({});
 
-  const REQUIRED_FIELDS: TextField[] = ["title", "description", "category"];
+  const REQUIRED_FIELDS: TextField[] = [
+    "titleAr",
+    "titleEn",
+    "descriptionAr",
+    "descriptionEn",
+    "categoryAr",
+    "categoryEn",
+  ];
 
   function validate(): boolean {
     const errors: Partial<Record<TextField, string>> = {};
 
     for (const field of REQUIRED_FIELDS) {
       if (!String(values[field] ?? "").trim()) {
-        errors[field] = translate("admin.studyPlans.form.required");
+        errors[field] = translate(
+          "admin.studyPlans.form.required"
+        );
       }
     }
 
     const fileUrl = String(values.fileUrl ?? "").trim();
+
     if (!fileUrl) {
-      errors.fileUrl = translate("admin.studyPlans.form.required");
+      errors.fileUrl = translate(
+        "admin.studyPlans.form.required"
+      );
     } else if (!isValidHref(fileUrl)) {
-      errors.fileUrl = translate("admin.studyPlans.form.invalidUrl");
+      errors.fileUrl = translate(
+        "admin.studyPlans.form.invalidUrl"
+      );
     }
 
     setFieldErrors(errors);
+
     return Object.keys(errors).length === 0;
   }
 
   function updateField(name: TextField, value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }));
+    setValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setFieldErrors((prev) => {
       if (!prev[name]) return prev;
+
       const next = { ...prev };
       delete next[name];
+
       return next;
     });
   }
 
-  async function handleFileUpload(event: ChangeEvent<HTMLInputElement>) {
+  async function handleFileUpload(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0];
+
     event.target.value = "";
+
     if (!file) return;
 
     setUploadError(null);
 
-    if (file.type !== PDF_MIME_TYPE || !isValidDocumentFile(file)) {
-      setUploadError(translate("admin.studyPlans.form.fileInvalid"));
+    if (
+      file.type !== PDF_MIME_TYPE ||
+      !isValidDocumentFile(file)
+    ) {
+      setUploadError(
+        translate("admin.studyPlans.form.fileInvalid")
+      );
       return;
     }
 
     setUploading(true);
+
     try {
       const path = `documents/study-plans/${Date.now()}-${file.name}`;
+
       const url = await uploadDocument(path, file);
+
       updateField("fileUrl", url);
     } catch {
-      setUploadError(translate("admin.studyPlans.form.fileUploadError"));
+      setUploadError(
+        translate(
+          "admin.studyPlans.form.fileUploadError"
+        )
+      );
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
     setError(null);
+
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
-      await onSubmit({ ...values, isPublished });
+      await onSubmit({
+        ...values,
+        isPublished,
+      });
     } catch {
-      setError(translate("admin.studyPlans.form.error"));
+      setError(
+        translate("admin.studyPlans.form.error")
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-5"
+    >
+      {/* Arabic title */}
       <div>
-        <label htmlFor="document-title" className="text-sm font-medium text-foreground">
-          {translate("admin.studyPlans.form.title")}
+        <label
+          htmlFor="document-title-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          العنوان بالعربية
         </label>
+
         <input
-          id="document-title"
+          id="document-title-ar"
           type="text"
-          value={values.title}
-          onChange={(event) => updateField("title", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.title)}
+          dir="rtl"
+          value={values.titleAr}
+          onChange={(event) =>
+            updateField("titleAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.title ? "border-primary" : "border-border",
+            fieldErrors.titleAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.title && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.title}
+
+        {fieldErrors.titleAr && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.titleAr}
           </p>
         )}
       </div>
 
+      {/* English title */}
       <div>
         <label
-          htmlFor="document-description"
+          htmlFor="document-title-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.studyPlans.form.description")}
+          Title in English
         </label>
+
+        <input
+          id="document-title-en"
+          type="text"
+          dir="ltr"
+          value={values.titleEn}
+          onChange={(event) =>
+            updateField("titleEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.titleEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.titleEn && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.titleEn}
+          </p>
+        )}
+      </div>
+
+      {/* Arabic description */}
+      <div>
+        <label
+          htmlFor="document-description-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          الوصف بالعربية
+        </label>
+
         <textarea
-          id="document-description"
+          id="document-description-ar"
           rows={3}
-          value={values.description}
-          onChange={(event) => updateField("description", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.description)}
+          dir="rtl"
+          value={values.descriptionAr}
+          onChange={(event) =>
+            updateField(
+              "descriptionAr",
+              event.target.value
+            )
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.description ? "border-primary" : "border-border",
+            fieldErrors.descriptionAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.description && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.description}
+
+        {fieldErrors.descriptionAr && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.descriptionAr}
           </p>
         )}
       </div>
 
+      {/* English description */}
       <div>
         <label
-          htmlFor="document-category"
+          htmlFor="document-description-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.studyPlans.form.category")}
+          Description in English
         </label>
+
+        <textarea
+          id="document-description-en"
+          rows={3}
+          dir="ltr"
+          value={values.descriptionEn}
+          onChange={(event) =>
+            updateField(
+              "descriptionEn",
+              event.target.value
+            )
+          }
+          aria-invalid={Boolean(fieldErrors.descriptionEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionEn && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.descriptionEn}
+          </p>
+        )}
+      </div>
+
+      {/* Arabic category */}
+      <div>
+        <label
+          htmlFor="document-category-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          التصنيف بالعربية
+        </label>
+
         <input
-          id="document-category"
+          id="document-category-ar"
           type="text"
-          value={values.category}
-          onChange={(event) => updateField("category", event.target.value)}
-          placeholder={translate("admin.studyPlans.form.categoryPlaceholder")}
-          aria-invalid={Boolean(fieldErrors.category)}
+          dir="rtl"
+          value={values.categoryAr}
+          onChange={(event) =>
+            updateField("categoryAr", event.target.value)
+          }
+          placeholder="مثال: خطط دراسية"
+          aria-invalid={Boolean(fieldErrors.categoryAr)}
           className={cx(
             "mt-1 w-full max-w-xs rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.category ? "border-primary" : "border-border",
+            fieldErrors.categoryAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.category && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.category}
+
+        {fieldErrors.categoryAr && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.categoryAr}
           </p>
         )}
       </div>
 
+      {/* English category */}
+      <div>
+        <label
+          htmlFor="document-category-en"
+          className="text-sm font-medium text-foreground"
+        >
+          Category in English
+        </label>
+
+        <input
+          id="document-category-en"
+          type="text"
+          dir="ltr"
+          value={values.categoryEn}
+          onChange={(event) =>
+            updateField("categoryEn", event.target.value)
+          }
+          placeholder="e.g. Study Plans"
+          aria-invalid={Boolean(fieldErrors.categoryEn)}
+          className={cx(
+            "mt-1 w-full max-w-xs rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.categoryEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.categoryEn && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.categoryEn}
+          </p>
+        )}
+      </div>
+
+      {/* File URL */}
       <div>
         <label
           htmlFor="document-file-url"
@@ -213,25 +415,36 @@ export function DocumentForm({
         >
           {translate("admin.studyPlans.form.fileUrl")}
         </label>
+
         <input
           id="document-file-url"
           type="url"
+          dir="ltr"
           value={values.fileUrl}
-          onChange={(event) => updateField("fileUrl", event.target.value)}
+          onChange={(event) =>
+            updateField("fileUrl", event.target.value)
+          }
           aria-invalid={Boolean(fieldErrors.fileUrl)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.fileUrl ? "border-primary" : "border-border",
+            fieldErrors.fileUrl
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
+
         {fieldErrors.fileUrl && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.fileUrl}
           </p>
         )}
       </div>
 
+      {/* Upload */}
       <div>
         <label
           htmlFor="document-file-upload"
@@ -239,6 +452,7 @@ export function DocumentForm({
         >
           {translate("admin.studyPlans.form.uploadFile")}
         </label>
+
         <div className="mt-1 flex items-center gap-3">
           <label
             htmlFor="document-file-upload"
@@ -247,11 +461,20 @@ export function DocumentForm({
               focusRing
             )}
           >
-            <Upload className="h-4 w-4" aria-hidden="true" />
+            <Upload
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+
             {uploading
-              ? translate("admin.studyPlans.form.uploading")
-              : translate("admin.studyPlans.form.choosePdf")}
+              ? translate(
+                  "admin.studyPlans.form.uploading"
+                )
+              : translate(
+                  "admin.studyPlans.form.choosePdf"
+                )}
           </label>
+
           <input
             id="document-file-upload"
             type="file"
@@ -260,35 +483,53 @@ export function DocumentForm({
             onChange={handleFileUpload}
             className="sr-only"
           />
+
           {values.fileUrl && !uploading && (
             <span className="truncate text-xs text-foreground/50">
               {values.fileUrl}
             </span>
           )}
         </div>
+
         {uploadError && (
-          <p role="alert" className="mt-1 text-sm font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-sm font-medium text-primary"
+          >
             {uploadError}
           </p>
         )}
       </div>
 
+      {/* Published */}
       <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           checked={isPublished}
-          onChange={(event) => setIsPublished(event.target.checked)}
-          className={cx("h-4 w-4 rounded border-border", focusRing)}
+          onChange={(event) =>
+            setIsPublished(event.target.checked)
+          }
+          className={cx(
+            "h-4 w-4 rounded border-border",
+            focusRing
+          )}
         />
-        {translate("admin.studyPlans.form.isPublished")}
+
+        {translate(
+          "admin.studyPlans.form.isPublished"
+        )}
       </label>
 
       {error && (
-        <p role="alert" className="text-sm font-medium text-primary">
+        <p
+          role="alert"
+          className="text-sm font-medium text-primary"
+        >
           {error}
         </p>
       )}
 
+      {/* Actions */}
       <div className="flex items-center gap-3">
         <button
           type="submit"
@@ -298,9 +539,16 @@ export function DocumentForm({
             focusRing
           )}
         >
-          <Save className="h-4 w-4" aria-hidden="true" />
-          {submitting ? submittingLabel : submitLabel}
+          <Save
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+
+          {submitting
+            ? submittingLabel
+            : submitLabel}
         </button>
+
         {onCancel && (
           <button
             type="button"
@@ -311,7 +559,10 @@ export function DocumentForm({
               focusRing
             )}
           >
-            {cancelLabel ?? translate("admin.studyPlans.form.cancel")}
+            {cancelLabel ??
+              translate(
+                "admin.studyPlans.form.cancel"
+              )}
           </button>
         )}
       </div>

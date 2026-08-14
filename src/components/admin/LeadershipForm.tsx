@@ -17,19 +17,13 @@ interface LeadershipFormProps {
   cancelLabel?: string;
 }
 
-type TextField = "name" | "position" | "bio" | "imageUrl";
+type TextField =
+  | "nameAr"
+  | "nameEn"
+  | "positionAr"
+  | "positionEn"
+  | "imageUrl";
 
-/**
- * Leadership member form (components/admin, Sprint 3.9). Same
- * create/edit shape as CommitteeForm — `LeadershipDoc` is nearly
- * identical to `CommitteeDoc` (name, imageUrl?, order, isActive), with
- * `position` in place of `description` (required, like Committee's
- * description) and an additional optional `bio` field. `order` stays
- * an isolated string state, `isActive` an isolated boolean — same
- * pattern used in every prior form. Image upload wired to the same
- * `uploadImage()`/`isValidImageFile()` as Committee/Announcement/Event,
- * just a different storage path.
- */
 export function LeadershipForm({
   initialValues,
   onSubmit,
@@ -39,6 +33,7 @@ export function LeadershipForm({
   cancelLabel,
 }: LeadershipFormProps) {
   const { translate } = useLanguage();
+
   const [values, setValues] = useState<LeadershipDoc>(initialValues);
   const [orderInput, setOrderInput] = useState(String(initialValues.order));
   const [isActive, setIsActive] = useState(initialValues.isActive);
@@ -46,11 +41,17 @@ export function LeadershipForm({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<TextField | "order", string>>
   >({});
 
-  const REQUIRED_FIELDS: TextField[] = ["name", "position"];
+  const REQUIRED_FIELDS: TextField[] = [
+    "nameAr",
+    "nameEn",
+    "positionAr",
+    "positionEn",
+  ];
 
   function validate(): boolean {
     const errors: Partial<Record<TextField | "order", string>> = {};
@@ -72,30 +73,41 @@ export function LeadershipForm({
     }
 
     const imageUrl = String(values.imageUrl ?? "").trim();
+
     if (imageUrl && !isValidHref(imageUrl)) {
       errors.imageUrl = translate("admin.leadership.form.invalidUrl");
     }
 
     setFieldErrors(errors);
+
     return Object.keys(errors).length === 0;
   }
 
   function updateField(name: TextField, value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }));
+    setValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setFieldErrors((prev) => {
       if (!prev[name]) return prev;
+
       const next = { ...prev };
       delete next[name];
+
       return next;
     });
   }
 
   function updateOrder(value: string) {
     setOrderInput(value);
+
     setFieldErrors((prev) => {
       if (!prev.order) return prev;
+
       const next = { ...prev };
       delete next.order;
+
       return next;
     });
   }
@@ -103,22 +115,31 @@ export function LeadershipForm({
   async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
+
     if (!file) return;
 
     setUploadError(null);
 
     if (!isValidImageFile(file)) {
-      setUploadError(translate("admin.leadership.form.imageInvalid"));
+      setUploadError(
+        translate("admin.leadership.form.imageInvalid")
+      );
       return;
     }
 
     setUploading(true);
+
     try {
       const path = `images/leadership/${Date.now()}-${file.name}`;
       const url = await uploadImage(path, file);
+
       updateField("imageUrl", url);
-    } catch {
-      setUploadError(translate("admin.leadership.form.imageUploadError"));
+    } catch (error) {
+      console.error("[MITSU] Leadership image upload failed:", error);
+
+      setUploadError(
+        translate("admin.leadership.form.imageUploadError")
+      );
     } finally {
       setUploading(false);
     }
@@ -126,16 +147,21 @@ export function LeadershipForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setError(null);
+
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
       await onSubmit({
         ...values,
         order: Number(orderInput),
         isActive,
       });
-    } catch {
+    } catch (error) {
+      console.error("[MITSU] Leadership save failed:", error);
       setError(translate("admin.leadership.form.error"));
     } finally {
       setSubmitting(false);
@@ -145,98 +171,125 @@ export function LeadershipForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div>
-        <label htmlFor="leader-name" className="text-sm font-medium text-foreground">
-          {translate("admin.leadership.form.name")}
+        <label
+          htmlFor="leader-name-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.leadership.form.nameAr")}
         </label>
+
         <input
-          id="leader-name"
+          id="leader-name-ar"
           type="text"
-          value={values.name}
-          onChange={(event) => updateField("name", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.name)}
+          dir="rtl"
+          value={values.nameAr}
+          onChange={(event) =>
+            updateField("nameAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.nameAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.name ? "border-primary" : "border-border",
+            fieldErrors.nameAr ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.name && (
+
+        {fieldErrors.nameAr && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.name}
+            {fieldErrors.nameAr}
           </p>
         )}
       </div>
 
       <div>
         <label
-          htmlFor="leader-position"
+          htmlFor="leader-name-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.leadership.form.position")}
+          {translate("admin.leadership.form.nameEn")}
         </label>
+
         <input
-          id="leader-position"
+          id="leader-name-en"
           type="text"
-          value={values.position}
-          onChange={(event) => updateField("position", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.position)}
+          dir="ltr"
+          value={values.nameEn}
+          onChange={(event) =>
+            updateField("nameEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.nameEn)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.position ? "border-primary" : "border-border",
+            fieldErrors.nameEn ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.position && (
+
+        {fieldErrors.nameEn && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.position}
+            {fieldErrors.nameEn}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="leader-bio" className="text-sm font-medium text-foreground">
-          {translate("admin.leadership.form.bio")}
+        <label
+          htmlFor="leader-position-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.leadership.form.positionAr")}
         </label>
-        <textarea
-          id="leader-bio"
-          rows={3}
-          value={values.bio ?? ""}
-          onChange={(event) => updateField("bio", event.target.value)}
+
+        <input
+          id="leader-position-ar"
+          type="text"
+          dir="rtl"
+          value={values.positionAr}
+          onChange={(event) =>
+            updateField("positionAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.positionAr)}
           className={cx(
-            "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.positionAr ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        <p className="mt-1 text-xs text-foreground/50">
-          {translate("admin.leadership.form.bioHint")}
-        </p>
+
+        {fieldErrors.positionAr && (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.positionAr}
+          </p>
+        )}
       </div>
 
       <div>
-        <label htmlFor="leader-order" className="text-sm font-medium text-foreground">
-          {translate("admin.leadership.form.order")}
+        <label
+          htmlFor="leader-position-en"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.leadership.form.positionEn")}
         </label>
+
         <input
-          id="leader-order"
-          type="number"
-          min={1}
-          step={1}
-          value={orderInput}
-          onChange={(event) => updateOrder(event.target.value)}
-          aria-invalid={Boolean(fieldErrors.order)}
+          id="leader-position-en"
+          type="text"
+          dir="ltr"
+          value={values.positionEn}
+          onChange={(event) =>
+            updateField("positionEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.positionEn)}
           className={cx(
-            "mt-1 w-full max-w-[10rem] rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.order ? "border-primary" : "border-border",
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.positionEn ? "border-primary" : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.order ? (
+
+        {fieldErrors.positionEn && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.order}
-          </p>
-        ) : (
-          <p className="mt-1 text-xs text-foreground/50">
-            {translate("admin.leadership.form.orderHint")}
+            {fieldErrors.positionEn}
           </p>
         )}
       </div>
@@ -248,11 +301,14 @@ export function LeadershipForm({
         >
           {translate("admin.leadership.form.imageUrl")}
         </label>
+
         <input
           id="leader-image-url"
           type="url"
           value={values.imageUrl ?? ""}
-          onChange={(event) => updateField("imageUrl", event.target.value)}
+          onChange={(event) =>
+            updateField("imageUrl", event.target.value)
+          }
           aria-invalid={Boolean(fieldErrors.imageUrl)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
@@ -260,6 +316,7 @@ export function LeadershipForm({
             focusRing
           )}
         />
+
         {fieldErrors.imageUrl && (
           <p role="alert" className="mt-1 text-xs font-medium text-primary">
             {fieldErrors.imageUrl}
@@ -274,6 +331,7 @@ export function LeadershipForm({
         >
           {translate("admin.leadership.form.uploadImage")}
         </label>
+
         <div className="mt-1 flex items-center gap-3">
           <label
             htmlFor="leader-image-upload"
@@ -283,10 +341,12 @@ export function LeadershipForm({
             )}
           >
             <Upload className="h-4 w-4" aria-hidden="true" />
+
             {uploading
               ? translate("admin.leadership.form.uploading")
               : translate("admin.leadership.form.chooseImage")}
           </label>
+
           <input
             id="leader-image-upload"
             type="file"
@@ -295,15 +355,51 @@ export function LeadershipForm({
             onChange={handleImageUpload}
             className="sr-only"
           />
+
           {values.imageUrl && !uploading && (
             <span className="truncate text-xs text-foreground/50">
               {values.imageUrl}
             </span>
           )}
         </div>
+
         {uploadError && (
           <p role="alert" className="mt-1 text-sm font-medium text-primary">
             {uploadError}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="leader-order"
+          className="text-sm font-medium text-foreground"
+        >
+          {translate("admin.leadership.form.order")}
+        </label>
+
+        <input
+          id="leader-order"
+          type="number"
+          min={1}
+          step={1}
+          value={orderInput}
+          onChange={(event) => updateOrder(event.target.value)}
+          aria-invalid={Boolean(fieldErrors.order)}
+          className={cx(
+            "mt-1 w-full max-w-[10rem] rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.order ? "border-primary" : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.order ? (
+          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            {fieldErrors.order}
+          </p>
+        ) : (
+          <p className="mt-1 text-xs text-foreground/50">
+            {translate("admin.leadership.form.orderHint")}
           </p>
         )}
       </div>
@@ -315,6 +411,7 @@ export function LeadershipForm({
           onChange={(event) => setIsActive(event.target.checked)}
           className={cx("h-4 w-4 rounded border-border", focusRing)}
         />
+
         {translate("admin.leadership.form.isActive")}
       </label>
 
@@ -336,6 +433,7 @@ export function LeadershipForm({
           <Save className="h-4 w-4" aria-hidden="true" />
           {submitting ? submittingLabel : submitLabel}
         </button>
+
         {onCancel && (
           <button
             type="button"

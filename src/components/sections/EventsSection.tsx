@@ -11,41 +11,18 @@ import type { QueryOptions } from "@/lib/firebase/query-helpers";
 import { timestampToDate } from "@/lib/firebase/query-helpers";
 import type { WithId } from "@/lib/firebase/services";
 
-/**
- * Module-level constant (not recreated per render) so useFirestoreList's
- * effect dependency stays referentially stable — same convention as
- * Phases 4.0–4.2. Matches the deployed security rule for /events
- * (`isPublished == true`) and the project's existing "soonest first"
- * sort (previously a client-side sort on the static array; the query
- * now does this ordering itself).
- */
 const PUBLISHED_SOONEST_FIRST: QueryOptions<EventDoc> = {
   filters: [{ field: "isPublished", op: "==", value: true }],
   orderByField: { field: "date", direction: "asc" },
 };
 
-/** Firestore's date is a Timestamp; EventCard takes a plain ISO string
- * (kept Firestore-agnostic), so this converts it once here. */
 function toDateIso(doc: WithId<EventDoc>): string {
   return (timestampToDate(doc.date) ?? new Date(0)).toISOString();
 }
 
-/**
- * Events section (components/sections). Renders events sorted
- * soonest-first, via the reusable EventCard component.
- *
- * Sprint 4 — Phase 4.3: the list now reads live from Firestore via
- * eventsService instead of src/data/announcements.ts's `events` export
- * (left in place as historical reference only). The query is already
- * ordered soonest-first, so no client-side re-sort is needed.
- *
- * No date-based "only future events" filtering is added here — the
- * original section never filtered by date either (it only ever sorted
- * ascending), so this preserves that exact behavior rather than
- * introducing new business logic.
- */
 export function EventsSection() {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+
   const {
     data: items,
     loading,
@@ -64,7 +41,6 @@ export function EventsSection() {
           </p>
         </div>
 
-        {/* Loading state */}
         {loading && (
           <div
             role="status"
@@ -80,7 +56,6 @@ export function EventsSection() {
           </div>
         )}
 
-        {/* Error state */}
         {!loading && error && (
           <div
             role="alert"
@@ -96,16 +71,31 @@ export function EventsSection() {
           <>
             {items.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    title={event.title}
-                    description={event.description}
-                    category={event.category}
-                    dateIso={toDateIso(event)}
-                    location={event.location}
-                  />
-                ))}
+                {items.map((event) => {
+                  const title =
+                    language === "ar" ? event.titleAr : event.titleEn;
+
+                  const description =
+                    language === "ar"
+                      ? event.descriptionAr
+                      : event.descriptionEn;
+
+                  const location =
+                    language === "ar"
+                      ? event.locationAr
+                      : event.locationEn;
+
+                  return (
+                    <EventCard
+                      key={event.id}
+                      title={title}
+                      description={description}
+                      category={event.category}
+                      dateIso={toDateIso(event)}
+                      location={location}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <p className="text-center text-foreground/60">

@@ -12,19 +12,12 @@ interface FacultyLeadershipListItemProps {
   onDelete: () => void;
 }
 
-/**
- * Single row in the admin Faculty Leadership list (components/admin,
- * Sprint 7.0). Mirrors LeadershipListItem's structure exactly — same
- * active/inactive + order badges, same edit/delete buttons — with
- * `role` rendered as a subtitle under the name (in place of
- * Leadership's `position`), no bio (not part of this schema).
- */
 export function FacultyLeadershipListItem({
   leader,
   onEdit,
   onDelete,
 }: FacultyLeadershipListItemProps) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
@@ -44,16 +37,19 @@ export function FacultyLeadershipListItem({
                 : "admin.facultyLeadership.status.inactive"
             )}
           </span>
+
           <span className="inline-flex items-center rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
-            {translate("admin.facultyLeadership.list.orderLabel")} {leader.order}
+            {translate("admin.facultyLeadership.list.orderLabel")}{" "}
+            {leader.order}
           </span>
         </div>
 
         <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-          {leader.name}
+          {language === "ar" ? leader.nameAr : leader.nameEn}
         </h3>
+
         <p className="mt-0.5 truncate text-xs font-medium text-primary">
-          {leader.role}
+          {language === "ar" ? leader.roleAr : leader.roleEn}
         </p>
       </div>
 
@@ -69,6 +65,7 @@ export function FacultyLeadershipListItem({
         >
           <Pencil className="h-4 w-4" aria-hidden="true" />
         </button>
+
         <button
           type="button"
           onClick={onDelete}

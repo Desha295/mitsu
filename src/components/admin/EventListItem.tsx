@@ -35,16 +35,11 @@ function isKnownCategory(value: string | undefined): value is EventCategory {
   return Boolean(value) && (value as string) in CATEGORY_ICONS;
 }
 
-/**
- * Single row in the admin Events list (components/admin, Sprint 3.4).
- * Reuses the public EventCard's category vocabulary (same icons/labels)
- * and mirrors Sprint 3.3's AnnouncementListItem structure — same
- * published/draft badge, same edit/delete button style — so the two
- * admin lists feel like the same product per 04_DESIGN_SYSTEM.md #23.
- * Unlike announcements, an event's date is the primary, always-shown
- * fact (not just metadata), and category/location are optional.
- */
-export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
+export function EventListItem({
+  event,
+  onEdit,
+  onDelete,
+}: EventListItemProps) {
   const { translate, language } = useLanguage();
 
   const CategoryIcon = isKnownCategory(event.category)
@@ -58,6 +53,9 @@ export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
 
   const eventDate = timestampToDate(event.date);
 
+  const location =
+    language === "ar" ? event.locationAr : event.locationEn;
+
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0 flex-1">
@@ -70,6 +68,7 @@ export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
               {translate(CATEGORY_LABEL_KEYS[event.category])}
             </span>
           )}
+
           <span
             className={cx(
               "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium",
@@ -87,23 +86,31 @@ export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
         </div>
 
         <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-          {event.title}
+          {language === "ar" ? event.titleAr : event.titleEn}
         </h3>
+
         <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-          {event.description}
+          {language === "ar" ? event.descriptionAr : event.descriptionEn}
         </p>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-foreground/60">
           {eventDate && (
             <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <CalendarDays
+                className="h-3.5 w-3.5 shrink-0"
+                aria-hidden="true"
+              />
               {formatDate(eventDate.toISOString(), language)}
             </span>
           )}
-          {event.location && (
+
+          {location && (
             <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              {event.location}
+              <MapPin
+                className="h-3.5 w-3.5 shrink-0"
+                aria-hidden="true"
+              />
+              {location}
             </span>
           )}
         </div>
@@ -119,8 +126,9 @@ export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
             focusRing
           )}
         >
-          <Pencil className="h-4 w-4" aria-hidden="true" />
+          <Pencil className="h-4 w-4" />
         </button>
+
         <button
           type="button"
           onClick={onDelete}
@@ -130,7 +138,7 @@ export function EventListItem({ event, onEdit, onDelete }: EventListItemProps) {
             focusRing
           )}
         >
-          <Trash2 className="h-4 w-4" aria-hidden="true" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>

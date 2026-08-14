@@ -12,62 +12,18 @@ import type { CommitteeDoc } from "@/lib/firebase/collections";
 import type { QueryOptions } from "@/lib/firebase/query-helpers";
 import { cx, focusRing } from "@/lib/utils";
 
-/**
- * Module-level constant (not recreated per render) so useFirestoreList's
- * effect dependency stays referentially stable — same convention as
- * Phases 4.0–4.5. Matches the deployed security rule for /committees
- * (`isActive == true`) and the project's established "order ascending"
- * convention for this list.
- */
 const ACTIVE_COMMITTEES_ORDERED: QueryOptions<CommitteeDoc> = {
   filters: [{ field: "isActive", op: "==", value: true }],
   orderByField: { field: "order", direction: "asc" },
 };
 
-/**
- * TEMPORARY Sprint 4 compatibility shim — not a permanent pattern, and
- * NOT reused outside this file.
- *
- * `icon` is a presentation-only field that doesn't exist in Firestore's
- * CommitteeDoc (confirmed against collections.ts and CommitteeForm.tsx —
- * fields are only name/description/imageUrl/isActive/order). Per your
- * direction, the current UI must not lose its committee icons during
- * Sprint 4, so `icon` is temporarily still sourced from the static seed
- * data in src/data/union.ts, joined to each Firestore doc by `order` —
- * the only field both models share and are expected to keep in sync
- * (Firestore docs don't carry the static "scientific"/"cultural"/etc.
- * slugs as their document ID).
- *
- * A Firestore committee whose `order` doesn't match any static entry
- * simply renders without an icon — graceful, not guessed.
- *
- * To be migrated properly into Firestore (icon, and the union social
- * links below) in a future content-model revision, once the rest of the
- * public site is on Firebase. This mapping is isolated to
- * CommitteesSection and must not be imported elsewhere.
- */
 const STATIC_ICON_BY_ORDER: Record<number, string> = Object.fromEntries(
   committees.map((committee) => [committee.order, committee.icon])
 );
 
-/**
- * Committees section (components/sections). Renders all committees via
- * the reusable CommitteeCard component, then — per the page composition
- * order in Sprint 1.5 (... → Committees → Social Links) — the official
- * Union social links directly beneath.
- *
- * Sprint 4 — Phase 4.6: name/description/isActive/order now come live
- * from Firestore via unionService instead of src/data/union.ts's
- * `committees` array (left in place as historical reference, and as the
- * temporary source for `icon` — see STATIC_ICON_BY_ORDER above).
- * `unionSocialLinks` has no Firestore field anywhere (checked the unused
- * `settings` collection too, no match) and stays sourced from the same
- * static file, unchanged — these are the official Union channels, kept
- * separate from the President's personal social links (rendered only in
- * LeaderCard, Phase 4.7).
- */
 export function CommitteesSection() {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+
   const {
     data: sortedCommittees,
     loading,
@@ -86,7 +42,6 @@ export function CommitteesSection() {
           </p>
         </div>
 
-        {/* Loading state */}
         {loading && (
           <div
             role="status"
@@ -102,7 +57,6 @@ export function CommitteesSection() {
           </div>
         )}
 
-        {/* Error state */}
         {!loading && error && (
           <div
             role="alert"
@@ -118,14 +72,26 @@ export function CommitteesSection() {
           <>
             {sortedCommittees.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {sortedCommittees.map((committee) => (
-                  <CommitteeCard
-                    key={committee.id}
-                    name={committee.name}
-                    description={committee.description}
-                    icon={STATIC_ICON_BY_ORDER[committee.order]}
-                  />
-                ))}
+                {sortedCommittees.map((committee) => {
+                  const name =
+                    language === "ar"
+                      ? committee.nameAr
+                      : committee.nameEn;
+
+                  const description =
+                    language === "ar"
+                      ? committee.descriptionAr
+                      : committee.descriptionEn;
+
+                  return (
+                    <CommitteeCard
+                      key={committee.id}
+                      name={name}
+                      description={description}
+                      icon={STATIC_ICON_BY_ORDER[committee.order]}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <p className="text-center text-foreground/60">
@@ -135,7 +101,6 @@ export function CommitteesSection() {
           </>
         )}
 
-        {/* Official Union social links */}
         <div className="border-t border-border pt-10 text-center">
           <h2 className="text-2xl font-bold text-foreground">
             {translate("union.socialHeading")}
@@ -152,6 +117,7 @@ export function CommitteesSection() {
                   React.ComponentType<{ className?: string }>
                 >
               )[social.icon];
+
               const label = translate(social.labelKey);
 
               return (

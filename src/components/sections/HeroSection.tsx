@@ -12,49 +12,13 @@ import type { HeroDoc } from "@/lib/firebase/collections";
 import type { QueryOptions } from "@/lib/firebase/query-helpers";
 import { cx, focusRing } from "@/lib/utils";
 
-/**
- * Module-level constant (not recreated per render) so useFirestoreList's
- * effect dependency stays referentially stable — same convention as
- * Phase 4.1's ACTIVE_ITEMS_ORDERED.
- *
- * Required, not optional: firestore.rules only allows public reads on
- * /hero where `resource.data.isActive == true`. A list query can't omit
- * this and still succeed for a signed-out visitor — Firestore rejects a
- * filter-less `list` outright rather than silently returning fewer
- * documents, since it can't verify every possible result satisfies the
- * rule without the constraint being part of the query itself.
- */
 const ACTIVE_HERO: QueryOptions<HeroDoc> = {
   filters: [{ field: "isActive", op: "==", value: true }],
 };
 
-/**
- * Hero Section (components/sections — large page section per 07_COMPONENT_RULES.md §3.3).
- *
- * Sprint 4 — Phase 4.0: now reads its content live from Firestore via
- * heroService instead of src/data/home.ts. The static file is left in
- * place as historical reference only and is no longer imported here.
- *
- * "Current" hero selection intentionally mirrors the admin Hero page's
- * own logic (Sprint 3.2): the doc flagged `isActive`, or the first doc
- * if none is flagged, so the public site and the dashboard always agree
- * on which hero content is live. (In practice, once the isActive filter
- * below is applied, every returned doc already has isActive === true —
- * the fallback to heroDocs[0] only matters when nothing is active at
- * all, in which case the query returns no docs and the empty state
- * below is shown, same as before this fix.)
- *
- * Firestore's HeroDoc stores plain, single-language strings today (no
- * bilingual fields yet — that's a future sprint per the approved Sprint
- * 4 plan), so heading/description/CTA labels render as-is. Only the
- * surrounding UI chrome (loading/empty/error copy, image alt text)
- * still goes through translate(), since that text isn't part of the
- * Firestore document.
- *
- * Supports: responsive (mobile-first), dark mode, EN/AR, RTL/LTR, keyboard navigation.
- */
 export function HeroSection() {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+
   const {
     data: heroDocs,
     loading,
@@ -117,6 +81,18 @@ export function HeroSection() {
     );
   }
 
+  const heading = language === "ar" ? hero.headingAr : hero.headingEn;
+  const description =
+    language === "ar" ? hero.descriptionAr : hero.descriptionEn;
+  const primaryCtaLabel =
+    language === "ar"
+      ? hero.primaryCtaLabelAr
+      : hero.primaryCtaLabelEn;
+  const secondaryCtaLabel =
+    language === "ar"
+      ? hero.secondaryCtaLabelAr
+      : hero.secondaryCtaLabelEn;
+
   return (
     <section className="relative bg-gradient-to-b from-surface to-background py-12 sm:py-16 md:py-20">
       <Container className="grid gap-12 lg:grid-cols-2 lg:gap-8 lg:items-center">
@@ -129,12 +105,12 @@ export function HeroSection() {
 
           {/* Heading */}
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            {hero.heading}
+            {heading}
           </h1>
 
           {/* Description */}
           <p className="text-lg text-foreground/70 leading-relaxed">
-            {hero.description}
+            {description}
           </p>
 
           {/* CTA Buttons */}
@@ -147,7 +123,7 @@ export function HeroSection() {
                 focusRing
               )}
             >
-              {hero.primaryCtaLabel}
+              {primaryCtaLabel}
             </Link>
 
             {/* Secondary CTA */}
@@ -158,7 +134,7 @@ export function HeroSection() {
                 focusRing
               )}
             >
-              {hero.secondaryCtaLabel}
+              {secondaryCtaLabel}
             </Link>
           </div>
         </div>

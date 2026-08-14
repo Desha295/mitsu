@@ -15,36 +15,73 @@ interface HeroFormProps {
   submittingLabel: string;
 }
 
-const FIELD_KEYS: Array<{ name: keyof HeroDoc; labelKey: string; type: "text" | "url" | "textarea" }> = [
-  { name: "heading", labelKey: "admin.hero.form.heading", type: "text" },
-  { name: "description", labelKey: "admin.hero.form.description", type: "textarea" },
-  { name: "primaryCtaLabel", labelKey: "admin.hero.form.primaryCtaLabel", type: "text" },
-  { name: "primaryCtaHref", labelKey: "admin.hero.form.primaryCtaHref", type: "url" },
-  { name: "secondaryCtaLabel", labelKey: "admin.hero.form.secondaryCtaLabel", type: "text" },
-  { name: "secondaryCtaHref", labelKey: "admin.hero.form.secondaryCtaHref", type: "url" },
+const FIELD_KEYS: Array<{
+  name: keyof HeroDoc;
+  labelKey: string;
+  type: "text" | "url" | "textarea";
+}> = [
+  { name: "headingAr", labelKey: "admin.hero.form.heading", type: "text" },
+  { name: "headingEn", labelKey: "admin.hero.form.heading", type: "text" },
+  {
+    name: "descriptionAr",
+    labelKey: "admin.hero.form.description",
+    type: "textarea",
+  },
+  {
+    name: "descriptionEn",
+    labelKey: "admin.hero.form.description",
+    type: "textarea",
+  },
+  {
+    name: "primaryCtaLabelAr",
+    labelKey: "admin.hero.form.primaryCtaLabel",
+    type: "text",
+  },
+  {
+    name: "primaryCtaLabelEn",
+    labelKey: "admin.hero.form.primaryCtaLabel",
+    type: "text",
+  },
+  {
+    name: "primaryCtaHref",
+    labelKey: "admin.hero.form.primaryCtaHref",
+    type: "url",
+  },
+  {
+    name: "secondaryCtaLabelAr",
+    labelKey: "admin.hero.form.secondaryCtaLabel",
+    type: "text",
+  },
+  {
+    name: "secondaryCtaLabelEn",
+    labelKey: "admin.hero.form.secondaryCtaLabel",
+    type: "text",
+  },
+  {
+    name: "secondaryCtaHref",
+    labelKey: "admin.hero.form.secondaryCtaHref",
+    type: "url",
+  },
   { name: "imageUrl", labelKey: "admin.hero.form.imageUrl", type: "url" },
 ];
 
 /**
  * Guarantees every HeroDoc field has a defined value before it's ever
  * handed to useState. Firestore documents are schemaless at runtime —
- * an existing document can be missing a field (e.g. it predates that
- * field, or was written by hand) even though HeroDoc types it as
- * required. Without this, an input's `value` prop could start as
- * `undefined` and later become a string once the user types, which is
- * exactly what triggers React's "component is changing an uncontrolled
- * input to be controlled" warning. Normalizing up front means every
- * input is controlled from its very first render, for its entire
- * lifecycle — no functional change, values are identical to whatever
- * was passed in whenever they're actually present.
+ * an existing document can be missing a field even though HeroDoc
+ * types it as required.
  */
 function normalizeHeroValues(values: HeroDoc): HeroDoc {
   return {
-    heading: values.heading ?? "",
-    description: values.description ?? "",
-    primaryCtaLabel: values.primaryCtaLabel ?? "",
+    headingAr: values.headingAr ?? "",
+    headingEn: values.headingEn ?? "",
+    descriptionAr: values.descriptionAr ?? "",
+    descriptionEn: values.descriptionEn ?? "",
+    primaryCtaLabelAr: values.primaryCtaLabelAr ?? "",
+    primaryCtaLabelEn: values.primaryCtaLabelEn ?? "",
     primaryCtaHref: values.primaryCtaHref ?? "",
-    secondaryCtaLabel: values.secondaryCtaLabel ?? "",
+    secondaryCtaLabelAr: values.secondaryCtaLabelAr ?? "",
+    secondaryCtaLabelEn: values.secondaryCtaLabelEn ?? "",
     secondaryCtaHref: values.secondaryCtaHref ?? "",
     imageUrl: values.imageUrl ?? "",
     isActive: values.isActive ?? false,
@@ -54,8 +91,7 @@ function normalizeHeroValues(values: HeroDoc): HeroDoc {
 
 /**
  * Hero content form (components/admin). Reused for both creating the
- * first hero document and editing an existing one — the caller decides
- * which by passing the right `onSubmit` (heroService.create vs .update).
+ * first hero document and editing an existing one.
  */
 export function HeroForm({
   initialValues,
@@ -72,16 +108,23 @@ export function HeroForm({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof HeroDoc, string>>>({});
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof HeroDoc, string>>
+  >({});
 
   const REQUIRED_FIELDS: Array<keyof HeroDoc> = [
-    "heading",
-    "description",
-    "primaryCtaLabel",
+    "headingAr",
+    "headingEn",
+    "descriptionAr",
+    "descriptionEn",
+    "primaryCtaLabelAr",
+    "primaryCtaLabelEn",
     "primaryCtaHref",
-    "secondaryCtaLabel",
+    "secondaryCtaLabelAr",
+    "secondaryCtaLabelEn",
     "secondaryCtaHref",
   ];
+
   const HREF_FIELDS: Array<keyof HeroDoc> = [
     "primaryCtaHref",
     "secondaryCtaHref",
@@ -160,12 +203,6 @@ export function HeroForm({
     try {
       await onSubmit({ ...values, isActive });
     } catch (error) {
-      // Logged for developer visibility (previously this catch block
-      // discarded the error entirely with no bound variable, which is
-      // exactly why the original bug took this long to diagnose). The
-      // UI message stays generic per PROJECT_RULES.md #21 (don't expose
-      // technical details to end users) — this is the permanent version,
-      // not the diagnostic log-and-rethrow used during root-cause capture.
       console.error("[MITSU] Hero save failed:", error);
       setError(translate("admin.hero.form.error"));
     } finally {
@@ -182,11 +219,15 @@ export function HeroForm({
             className="text-sm font-medium text-foreground"
           >
             {translate(field.labelKey)}
+            {(field.name.endsWith("Ar") || field.name.endsWith("En")) &&
+              ` (${field.name.endsWith("Ar") ? "AR" : "EN"})`}
           </label>
+
           {field.type === "textarea" ? (
             <textarea
               id={`hero-${field.name}`}
               rows={3}
+              dir={field.name.endsWith("Ar") ? "rtl" : "ltr"}
               value={values[field.name] as string}
               onChange={(event) => updateField(field.name, event.target.value)}
               aria-invalid={Boolean(fieldErrors[field.name])}
@@ -200,6 +241,7 @@ export function HeroForm({
             <input
               id={`hero-${field.name}`}
               type={field.type}
+              dir={field.name.endsWith("Ar") ? "rtl" : "ltr"}
               value={values[field.name] as string}
               onChange={(event) => updateField(field.name, event.target.value)}
               aria-invalid={Boolean(fieldErrors[field.name])}
@@ -210,6 +252,7 @@ export function HeroForm({
               )}
             />
           )}
+
           {fieldErrors[field.name] && (
             <p role="alert" className="mt-1 text-xs font-medium text-primary">
               {fieldErrors[field.name]}

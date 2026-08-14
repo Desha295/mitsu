@@ -3,7 +3,10 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Save, Upload } from "lucide-react";
 import type { EventDoc } from "@/lib/firebase/collections";
-import { timestampToDate, dateToTimestamp } from "@/lib/firebase/query-helpers";
+import {
+  timestampToDate,
+  dateToTimestamp,
+} from "@/lib/firebase/query-helpers";
 import type { EventCategory } from "@/data/announcements";
 import { uploadImage } from "@/lib/firebase/storage";
 import { isValidImageFile } from "@/lib/auth/validation";
@@ -19,14 +22,6 @@ interface EventFormProps {
   cancelLabel?: string;
 }
 
-/**
- * Reuses the public site's own event taxonomy (src/data/announcements.ts's
- * EventCategory, src/locales "events.categories.*") instead of inventing a
- * separate admin vocabulary — same values an admin sees on /announcements'
- * Events section are the only ones they can pick here. Unlike Announcement's
- * category, EventDoc.category is optional, so an empty "no category" option
- * is offered first.
- */
 const CATEGORY_VALUES: EventCategory[] = [
   "academic",
   "orientation",
@@ -43,19 +38,16 @@ const CATEGORY_LABEL_KEYS: Record<EventCategory, string> = {
   social: "events.categories.social",
 };
 
-type TextField = "title" | "description" | "location" | "imageUrl" | "category";
+type TextField =
+  | "titleAr"
+  | "titleEn"
+  | "descriptionAr"
+  | "descriptionEn"
+  | "locationAr"
+  | "locationEn"
+  | "imageUrl"
+  | "category";
 
-/**
- * Event content form (components/admin, Sprint 3.4). Reused for both
- * creating and editing (same component, different `onSubmit`) — same
- * shape as Sprint 3.2's HeroForm / Sprint 3.3's AnnouncementForm.
- *
- * EventDoc.date is a Firestore Timestamp, which an <input type="date">
- * can't bind to directly, so it's tracked as its own `dateInput` string
- * state (mirroring how isActive/isPublished are already tracked outside
- * the generic `values` object in HeroForm/AnnouncementForm) and only
- * converted back via the existing dateToTimestamp() helper on submit.
- */
 export function EventForm({
   initialValues,
   onSubmit,
@@ -65,21 +57,33 @@ export function EventForm({
   cancelLabel,
 }: EventFormProps) {
   const { translate } = useLanguage();
+
   const [values, setValues] = useState<EventDoc>(initialValues);
+
   const [dateInput, setDateInput] = useState(() => {
     const date = timestampToDate(initialValues.date);
     return date ? date.toISOString().slice(0, 10) : "";
   });
-  const [isPublished, setIsPublished] = useState(initialValues.isPublished);
+
+  const [isPublished, setIsPublished] = useState(
+    initialValues.isPublished
+  );
+
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<TextField | "date", string>>
   >({});
 
-  const REQUIRED_FIELDS: TextField[] = ["title", "description"];
+  const REQUIRED_FIELDS: TextField[] = [
+    "titleAr",
+    "titleEn",
+    "descriptionAr",
+    "descriptionEn",
+  ];
 
   function validate(): boolean {
     const errors: Partial<Record<TextField | "date", string>> = {};
@@ -97,63 +101,91 @@ export function EventForm({
     }
 
     const imageUrl = String(values.imageUrl ?? "").trim();
+
     if (imageUrl && !isValidHref(imageUrl)) {
       errors.imageUrl = translate("admin.events.form.invalidUrl");
     }
 
     setFieldErrors(errors);
+
     return Object.keys(errors).length === 0;
   }
 
   function updateField(name: TextField, value: string) {
-    setValues((prev) => ({ ...prev, [name]: value }));
+    setValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setFieldErrors((prev) => {
       if (!prev[name]) return prev;
+
       const next = { ...prev };
       delete next[name];
+
       return next;
     });
   }
 
   function updateDate(value: string) {
     setDateInput(value);
+
     setFieldErrors((prev) => {
       if (!prev.date) return prev;
+
       const next = { ...prev };
       delete next.date;
+
       return next;
     });
   }
 
-  async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
     const file = event.target.files?.[0];
+
     event.target.value = "";
+
     if (!file) return;
 
     setUploadError(null);
 
     if (!isValidImageFile(file)) {
-      setUploadError(translate("admin.events.form.imageInvalid"));
+      setUploadError(
+        translate("admin.events.form.imageInvalid")
+      );
       return;
     }
 
     setUploading(true);
+
     try {
       const path = `images/events/${Date.now()}-${file.name}`;
+
       const url = await uploadImage(path, file);
+
       updateField("imageUrl", url);
     } catch {
-      setUploadError(translate("admin.events.form.imageUploadError"));
+      setUploadError(
+        translate("admin.events.form.imageUploadError")
+      );
     } finally {
       setUploading(false);
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
     setError(null);
+
     if (!validate()) return;
+
     setSubmitting(true);
+
     try {
       await onSubmit({
         ...values,
@@ -161,7 +193,9 @@ export function EventForm({
         isPublished,
       });
     } catch {
-      setError(translate("admin.events.form.error"));
+      setError(
+        translate("admin.events.form.error")
+      );
     } finally {
       setSubmitting(false);
     }
@@ -169,121 +203,300 @@ export function EventForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div>
-        <label htmlFor="event-title" className="text-sm font-medium text-foreground">
-          {translate("admin.events.form.title")}
-        </label>
-        <input
-          id="event-title"
-          type="text"
-          value={values.title}
-          onChange={(event) => updateField("title", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.title)}
-          className={cx(
-            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.title ? "border-primary" : "border-border",
-            focusRing
-          )}
-        />
-        {fieldErrors.title && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.title}
-          </p>
-        )}
-      </div>
 
+      {/* Arabic Title */}
       <div>
         <label
-          htmlFor="event-description"
+          htmlFor="event-title-ar"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.events.form.description")}
+          العنوان بالعربية
         </label>
-        <textarea
-          id="event-description"
-          rows={4}
-          value={values.description}
-          onChange={(event) => updateField("description", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.description)}
+
+        <input
+          id="event-title-ar"
+          type="text"
+          dir="rtl"
+          value={values.titleAr}
+          onChange={(event) =>
+            updateField("titleAr", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.description ? "border-primary" : "border-border",
+            fieldErrors.titleAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
-        {fieldErrors.description && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
-            {fieldErrors.description}
+
+        {fieldErrors.titleAr && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.titleAr}
           </p>
         )}
       </div>
 
+      {/* English Title */}
+      <div>
+        <label
+          htmlFor="event-title-en"
+          className="text-sm font-medium text-foreground"
+        >
+          English Title
+        </label>
+
+        <input
+          id="event-title-en"
+          type="text"
+          dir="ltr"
+          value={values.titleEn}
+          onChange={(event) =>
+            updateField("titleEn", event.target.value)
+          }
+          aria-invalid={Boolean(fieldErrors.titleEn)}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.titleEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.titleEn && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.titleEn}
+          </p>
+        )}
+      </div>
+
+      {/* Arabic Description */}
+      <div>
+        <label
+          htmlFor="event-description-ar"
+          className="text-sm font-medium text-foreground"
+        >
+          الوصف بالعربية
+        </label>
+
+        <textarea
+          id="event-description-ar"
+          rows={4}
+          dir="rtl"
+          value={values.descriptionAr}
+          onChange={(event) =>
+            updateField(
+              "descriptionAr",
+              event.target.value
+            )
+          }
+          aria-invalid={Boolean(
+            fieldErrors.descriptionAr
+          )}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionAr
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionAr && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.descriptionAr}
+          </p>
+        )}
+      </div>
+
+      {/* English Description */}
+      <div>
+        <label
+          htmlFor="event-description-en"
+          className="text-sm font-medium text-foreground"
+        >
+          English Description
+        </label>
+
+        <textarea
+          id="event-description-en"
+          rows={4}
+          dir="ltr"
+          value={values.descriptionEn}
+          onChange={(event) =>
+            updateField(
+              "descriptionEn",
+              event.target.value
+            )
+          }
+          aria-invalid={Boolean(
+            fieldErrors.descriptionEn
+          )}
+          className={cx(
+            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+            fieldErrors.descriptionEn
+              ? "border-primary"
+              : "border-border",
+            focusRing
+          )}
+        />
+
+        {fieldErrors.descriptionEn && (
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
+            {fieldErrors.descriptionEn}
+          </p>
+        )}
+      </div>
+
+      {/* Date + Location */}
       <div className="grid gap-5 sm:grid-cols-2">
+
+        {/* Date */}
         <div>
-          <label htmlFor="event-date" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="event-date"
+            className="text-sm font-medium text-foreground"
+          >
             {translate("admin.events.form.date")}
           </label>
+
           <input
             id="event-date"
             type="date"
             value={dateInput}
-            onChange={(event) => updateDate(event.target.value)}
+            onChange={(event) =>
+              updateDate(event.target.value)
+            }
             aria-invalid={Boolean(fieldErrors.date)}
             className={cx(
               "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-              fieldErrors.date ? "border-primary" : "border-border",
+              fieldErrors.date
+                ? "border-primary"
+                : "border-border",
               focusRing
             )}
           />
+
           {fieldErrors.date && (
-            <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
               {fieldErrors.date}
             </p>
           )}
         </div>
 
+        {/* Arabic Location */}
         <div>
           <label
-            htmlFor="event-location"
+            htmlFor="event-location-ar"
             className="text-sm font-medium text-foreground"
           >
-            {translate("admin.events.form.location")}
+            المكان بالعربية
           </label>
+
           <input
-            id="event-location"
+            id="event-location-ar"
             type="text"
-            value={values.location ?? ""}
-            onChange={(event) => updateField("location", event.target.value)}
+            dir="rtl"
+            value={values.locationAr ?? ""}
+            onChange={(event) =>
+              updateField(
+                "locationAr",
+                event.target.value
+              )
+            }
             className={cx(
               "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
               focusRing
             )}
           />
         </div>
+
+        {/* English Location */}
+        <div>
+          <label
+            htmlFor="event-location-en"
+            className="text-sm font-medium text-foreground"
+          >
+            Location in English
+          </label>
+
+          <input
+            id="event-location-en"
+            type="text"
+            dir="ltr"
+            value={values.locationEn ?? ""}
+            onChange={(event) =>
+              updateField(
+                "locationEn",
+                event.target.value
+              )
+            }
+            className={cx(
+              "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+              focusRing
+            )}
+          />
+        </div>
+
       </div>
 
+      {/* Category */}
       <div>
-        <label htmlFor="event-category" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="event-category"
+          className="text-sm font-medium text-foreground"
+        >
           {translate("admin.events.form.category")}
         </label>
+
         <select
           id="event-category"
           value={values.category ?? ""}
-          onChange={(event) => updateField("category", event.target.value)}
+          onChange={(event) =>
+            updateField(
+              "category",
+              event.target.value
+            )
+          }
           className={cx(
             "mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
             focusRing
           )}
         >
-          <option value="">{translate("admin.events.form.noCategory")}</option>
+          <option value="">
+            {translate(
+              "admin.events.form.noCategory"
+            )}
+          </option>
+
           {CATEGORY_VALUES.map((category) => (
             <option key={category} value={category}>
-              {translate(CATEGORY_LABEL_KEYS[category])}
+              {translate(
+                CATEGORY_LABEL_KEYS[category]
+              )}
             </option>
           ))}
         </select>
       </div>
 
+      {/* Image URL */}
       <div>
         <label
           htmlFor="event-image-url"
@@ -291,33 +504,52 @@ export function EventForm({
         >
           {translate("admin.events.form.imageUrl")}
         </label>
+
         <input
           id="event-image-url"
           type="url"
           value={values.imageUrl ?? ""}
-          onChange={(event) => updateField("imageUrl", event.target.value)}
-          aria-invalid={Boolean(fieldErrors.imageUrl)}
+          onChange={(event) =>
+            updateField(
+              "imageUrl",
+              event.target.value
+            )
+          }
+          aria-invalid={Boolean(
+            fieldErrors.imageUrl
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.imageUrl ? "border-primary" : "border-border",
+            fieldErrors.imageUrl
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
+
         {fieldErrors.imageUrl && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.imageUrl}
           </p>
         )}
       </div>
 
+      {/* Image Upload */}
       <div>
         <label
           htmlFor="event-image-upload"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.events.form.uploadImage")}
+          {translate(
+            "admin.events.form.uploadImage"
+          )}
         </label>
+
         <div className="mt-1 flex items-center gap-3">
+
           <label
             htmlFor="event-image-upload"
             className={cx(
@@ -325,11 +557,20 @@ export function EventForm({
               focusRing
             )}
           >
-            <Upload className="h-4 w-4" aria-hidden="true" />
+            <Upload
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+
             {uploading
-              ? translate("admin.events.form.uploading")
-              : translate("admin.events.form.chooseImage")}
+              ? translate(
+                  "admin.events.form.uploading"
+                )
+              : translate(
+                  "admin.events.form.chooseImage"
+                )}
           </label>
+
           <input
             id="event-image-upload"
             type="file"
@@ -338,36 +579,57 @@ export function EventForm({
             onChange={handleImageUpload}
             className="sr-only"
           />
+
           {values.imageUrl && !uploading && (
             <span className="truncate text-xs text-foreground/50">
               {values.imageUrl}
             </span>
           )}
+
         </div>
+
         {uploadError && (
-          <p role="alert" className="mt-1 text-sm font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-sm font-medium text-primary"
+          >
             {uploadError}
           </p>
         )}
       </div>
 
+      {/* Published */}
       <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           checked={isPublished}
-          onChange={(event) => setIsPublished(event.target.checked)}
-          className={cx("h-4 w-4 rounded border-border", focusRing)}
+          onChange={(event) =>
+            setIsPublished(event.target.checked)
+          }
+          className={cx(
+            "h-4 w-4 rounded border-border",
+            focusRing
+          )}
         />
-        {translate("admin.events.form.isPublished")}
+
+        {translate(
+          "admin.events.form.isPublished"
+        )}
       </label>
 
+      {/* Error */}
       {error && (
-        <p role="alert" className="text-sm font-medium text-primary">
+        <p
+          role="alert"
+          className="text-sm font-medium text-primary"
+        >
           {error}
         </p>
       )}
 
+      {/* Actions */}
       <div className="flex items-center gap-3">
+
         <button
           type="submit"
           disabled={submitting || uploading}
@@ -376,9 +638,16 @@ export function EventForm({
             focusRing
           )}
         >
-          <Save className="h-4 w-4" aria-hidden="true" />
-          {submitting ? submittingLabel : submitLabel}
+          <Save
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+
+          {submitting
+            ? submittingLabel
+            : submitLabel}
         </button>
+
         {onCancel && (
           <button
             type="button"
@@ -389,9 +658,13 @@ export function EventForm({
               focusRing
             )}
           >
-            {cancelLabel ?? translate("admin.events.form.cancel")}
+            {cancelLabel ??
+              translate(
+                "admin.events.form.cancel"
+              )}
           </button>
         )}
+
       </div>
     </form>
   );

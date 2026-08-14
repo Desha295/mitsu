@@ -13,16 +13,12 @@ interface SystemListItemProps {
   onDelete: () => void;
 }
 
-/**
- * Single row in the admin Systems list (components/admin, Sprint 3.6).
- * Mirrors CommitteeListItem/EventListItem's structure — active/inactive
- * badge, order shown alongside it, edit/delete buttons. Icon is looked
- * up the same way the public SystemCard does (system.icon as a Lucide
- * component name); an empty officialUrl shows the same "Coming soon"
- * language SystemCard uses rather than a broken link.
- */
-export function SystemListItem({ system, onEdit, onDelete }: SystemListItemProps) {
-  const { translate } = useLanguage();
+export function SystemListItem({
+  system,
+  onEdit,
+  onDelete,
+}: SystemListItemProps) {
+  const { translate, language } = useLanguage();
 
   const IconComponent = system.icon
     ? (
@@ -33,11 +29,17 @@ export function SystemListItem({ system, onEdit, onDelete }: SystemListItemProps
       )[system.icon]
     : undefined;
 
+  const name = language === "ar" ? system.nameAr : system.nameEn;
+  const description =
+    language === "ar" ? system.descriptionAr : system.descriptionEn;
+
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 flex-1 gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-light text-primary">
-          {IconComponent && <IconComponent className="h-5 w-5" aria-hidden="true" />}
+          {IconComponent && (
+            <IconComponent className="h-5 w-5" aria-hidden="true" />
+          )}
         </span>
 
         <div className="min-w-0 flex-1">
@@ -56,16 +58,18 @@ export function SystemListItem({ system, onEdit, onDelete }: SystemListItemProps
                   : "admin.systems.status.inactive"
               )}
             </span>
+
             <span className="inline-flex items-center rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
               {translate("admin.systems.list.orderLabel")} {system.order}
             </span>
           </div>
 
           <h3 className="mt-2 truncate text-sm font-semibold text-foreground">
-            {system.name}
+            {name}
           </h3>
+
           <p className="mt-1 line-clamp-2 text-sm text-foreground/70">
-            {system.description}
+            {description}
           </p>
 
           <div className="mt-2">
@@ -103,6 +107,7 @@ export function SystemListItem({ system, onEdit, onDelete }: SystemListItemProps
         >
           <Pencil className="h-4 w-4" aria-hidden="true" />
         </button>
+
         <button
           type="button"
           onClick={onDelete}

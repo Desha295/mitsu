@@ -64,8 +64,13 @@ export const COLLECTIONS = {
 
 export interface AnnouncementDoc {
   title: string;
+  titleEn: string;
+
   description: string;
+  descriptionEn: string;
+
   category: string;
+
   imageUrl?: string;
 
   mediaImageUrl?: string;
@@ -79,10 +84,13 @@ export interface AnnouncementDoc {
 }
 
 export interface EventDoc {
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   date: Timestamp;
-  location?: string;
+  locationAr?: string;
+  locationEn?: string;
   imageUrl?: string;
   category?: string;
   isPublished: boolean;
@@ -90,27 +98,34 @@ export interface EventDoc {
 }
 
 export interface SystemDoc {
-  name: string;
-  description: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   purpose: string;
   officialUrl: string;
   icon?: string;
-  instructions?: string;
+  instructionsAr?: string;
+  instructionsEn?: string;
   order: number;
   isActive: boolean;
 }
 
 export interface CommitteeDoc {
-  name: string;
-  description: string;
+  nameAr: string;
+  nameEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   imageUrl?: string;
   isActive: boolean;
   order: number;
 }
 
 export interface LeadershipDoc {
-  name: string;
-  position: string;
+  nameAr: string;
+  nameEn: string;
+  positionAr: string;
+  positionEn: string;
   imageUrl?: string;
   bio?: string;
   order: number;
@@ -125,8 +140,10 @@ export interface LeadershipDoc {
  * of the existing collection.
  */
 export interface FacultyLeadershipDoc {
-  name: string;
-  role: string;
+  nameAr: string;
+  nameEn: string;
+  roleAr: string;
+  roleEn: string;
   imageUrl?: string;
   order: number;
   isActive: boolean;
@@ -165,14 +182,16 @@ export interface SettingsDoc {
 }
 
 export interface DocumentResourceDoc {
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   fileUrl: string;
-  category: string;
+  categoryAr: string;
+  categoryEn: string;
   uploadedAt: Timestamp;
   isPublished: boolean;
 }
-
 export interface AdminDoc {
   email: string;
   role: "admin" | "super_admin";
@@ -186,11 +205,15 @@ export interface AdminDoc {
 // ---------------------------------------------------------------------------
 
 export interface HeroDoc {
-  heading: string;
-  description: string;
-  primaryCtaLabel: string;
+  headingAr: string;
+  headingEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  primaryCtaLabelAr: string;
+  primaryCtaLabelEn: string;
   primaryCtaHref: string;
-  secondaryCtaLabel: string;
+  secondaryCtaLabelAr: string;
+  secondaryCtaLabelEn: string;
   secondaryCtaHref: string;
   imageUrl: string;
   isActive: boolean;
@@ -199,8 +222,10 @@ export interface HeroDoc {
 
 /** One document per Quick Access card (src/data/home.ts's quickAccessItems). */
 export interface QuickAccessItemDoc {
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   href: string;
   icon: string;
   order: number;
@@ -210,9 +235,14 @@ export interface QuickAccessItemDoc {
 /** One document per Freshman Guide topic (src/data/guide.ts's guideSections). */
 export interface GuideSectionDoc {
   icon: string;
-  title: string;
-  description: string;
-  facts?: string[];
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  facts?: Array<{
+    ar: string;
+    en: string;
+  }>;
   stats?: Array<{ label: string; value: string }>;
   highlight?: boolean;
   order: number;
