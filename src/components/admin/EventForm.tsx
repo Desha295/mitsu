@@ -46,6 +46,8 @@ type TextField =
   | "locationAr"
   | "locationEn"
   | "imageUrl"
+  | "mediaVideoUrl"
+  | "mediaFileUrl"
   | "category";
 
 export function EventForm({
@@ -101,9 +103,19 @@ export function EventForm({
     }
 
     const imageUrl = String(values.imageUrl ?? "").trim();
+    const mediaVideoUrl = String(values.mediaVideoUrl ?? "").trim();
+    const mediaFileUrl = String(values.mediaFileUrl ?? "").trim();
 
     if (imageUrl && !isValidHref(imageUrl)) {
       errors.imageUrl = translate("admin.events.form.invalidUrl");
+    }
+
+    if (mediaVideoUrl && !isValidHref(mediaVideoUrl)) {
+      errors.mediaVideoUrl = translate("admin.events.form.invalidUrl");
+    }
+
+    if (mediaFileUrl && !isValidHref(mediaFileUrl)) {
+      errors.mediaFileUrl = translate("admin.events.form.invalidUrl");
     }
 
     setFieldErrors(errors);
@@ -202,8 +214,10 @@ export function EventForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-5"
+    >
       {/* Arabic Title */}
       <div>
         <label
@@ -364,7 +378,6 @@ export function EventForm({
 
       {/* Date + Location */}
       <div className="grid gap-5 sm:grid-cols-2">
-
         {/* Date */}
         <div>
           <label
@@ -454,7 +467,6 @@ export function EventForm({
             )}
           />
         </div>
-
       </div>
 
       {/* Category */}
@@ -496,45 +508,136 @@ export function EventForm({
         </select>
       </div>
 
-      {/* Image URL */}
-      <div>
-        <label
-          htmlFor="event-image-url"
-          className="text-sm font-medium text-foreground"
-        >
-          {translate("admin.events.form.imageUrl")}
-        </label>
-
-        <input
-          id="event-image-url"
-          type="url"
-          value={values.imageUrl ?? ""}
-          onChange={(event) =>
-            updateField(
-              "imageUrl",
-              event.target.value
-            )
-          }
-          aria-invalid={Boolean(
-            fieldErrors.imageUrl
-          )}
-          className={cx(
-            "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.imageUrl
-              ? "border-primary"
-              : "border-border",
-            focusRing
-          )}
-        />
-
-        {fieldErrors.imageUrl && (
-          <p
-            role="alert"
-            className="mt-1 text-xs font-medium text-primary"
+      {/* Media URLs */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        {/* Image URL */}
+        <div>
+          <label
+            htmlFor="event-image-url"
+            className="text-sm font-medium text-foreground"
           >
-            {fieldErrors.imageUrl}
-          </p>
-        )}
+            رابط الصورة
+          </label>
+
+          <input
+            id="event-image-url"
+            type="url"
+            dir="ltr"
+            value={values.imageUrl ?? ""}
+            onChange={(event) =>
+              updateField(
+                "imageUrl",
+                event.target.value
+              )
+            }
+            aria-invalid={Boolean(
+              fieldErrors.imageUrl
+            )}
+            className={cx(
+              "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+              fieldErrors.imageUrl
+                ? "border-primary"
+                : "border-border",
+              focusRing
+            )}
+            placeholder="https://..."
+          />
+
+          {fieldErrors.imageUrl && (
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
+              {fieldErrors.imageUrl}
+            </p>
+          )}
+        </div>
+
+        {/* Video URL */}
+        <div>
+          <label
+            htmlFor="event-video-url"
+            className="text-sm font-medium text-foreground"
+          >
+            رابط الفيديو
+          </label>
+
+          <input
+            id="event-video-url"
+            type="url"
+            dir="ltr"
+            value={values.mediaVideoUrl ?? ""}
+            onChange={(event) =>
+              updateField(
+                "mediaVideoUrl",
+                event.target.value
+              )
+            }
+            aria-invalid={Boolean(
+              fieldErrors.mediaVideoUrl
+            )}
+            className={cx(
+              "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+              fieldErrors.mediaVideoUrl
+                ? "border-primary"
+                : "border-border",
+              focusRing
+            )}
+            placeholder="https://..."
+          />
+
+          {fieldErrors.mediaVideoUrl && (
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
+              {fieldErrors.mediaVideoUrl}
+            </p>
+          )}
+        </div>
+
+        {/* File URL */}
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="event-file-url"
+            className="text-sm font-medium text-foreground"
+          >
+            رابط الملف
+          </label>
+
+          <input
+            id="event-file-url"
+            type="url"
+            dir="ltr"
+            value={values.mediaFileUrl ?? ""}
+            onChange={(event) =>
+              updateField(
+                "mediaFileUrl",
+                event.target.value
+              )
+            }
+            aria-invalid={Boolean(
+              fieldErrors.mediaFileUrl
+            )}
+            className={cx(
+              "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
+              fieldErrors.mediaFileUrl
+                ? "border-primary"
+                : "border-border",
+              focusRing
+            )}
+            placeholder="https://..."
+          />
+
+          {fieldErrors.mediaFileUrl && (
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
+              {fieldErrors.mediaFileUrl}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Image Upload */}
@@ -549,7 +652,6 @@ export function EventForm({
         </label>
 
         <div className="mt-1 flex items-center gap-3">
-
           <label
             htmlFor="event-image-upload"
             className={cx(
@@ -585,7 +687,6 @@ export function EventForm({
               {values.imageUrl}
             </span>
           )}
-
         </div>
 
         {uploadError && (
@@ -629,7 +730,6 @@ export function EventForm({
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-
         <button
           type="submit"
           disabled={submitting || uploading}
@@ -664,7 +764,6 @@ export function EventForm({
               )}
           </button>
         )}
-
       </div>
     </form>
   );

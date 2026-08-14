@@ -29,9 +29,35 @@ type FactRow = {
 };
 
 type StatRow = {
-  label: string;
+  labelAr: string;
+  labelEn: string;
   value: string;
 };
+
+function normalizeFacts(
+  facts: GuideSectionDoc["facts"]
+): FactRow[] {
+  if (!Array.isArray(facts)) return [];
+
+  return facts.map((fact) => ({
+    ar: typeof fact?.ar === "string" ? fact.ar : "",
+    en: typeof fact?.en === "string" ? fact.en : "",
+  }));
+}
+
+function normalizeStats(
+  stats: GuideSectionDoc["stats"]
+): StatRow[] {
+  if (!Array.isArray(stats)) return [];
+
+  return stats.map((stat) => ({
+    labelAr:
+      typeof stat?.labelAr === "string" ? stat.labelAr : "",
+    labelEn:
+      typeof stat?.labelEn === "string" ? stat.labelEn : "",
+    value: typeof stat?.value === "string" ? stat.value : "",
+  }));
+}
 
 export function GuideForm({
   initialValues,
@@ -43,19 +69,33 @@ export function GuideForm({
 }: GuideFormProps) {
   const { translate } = useLanguage();
 
-  const [values, setValues] = useState<GuideSectionDoc>(initialValues);
-  const [orderInput, setOrderInput] = useState(String(initialValues.order));
-  const [isActive, setIsActive] = useState(initialValues.isActive);
+  const [values, setValues] = useState<GuideSectionDoc>({
+    ...initialValues,
+    icon: initialValues.icon ?? "",
+    titleAr: initialValues.titleAr ?? "",
+    titleEn: initialValues.titleEn ?? "",
+    descriptionAr: initialValues.descriptionAr ?? "",
+    descriptionEn: initialValues.descriptionEn ?? "",
+  });
+
+  const [orderInput, setOrderInput] = useState(
+    String(initialValues.order ?? 1)
+  );
+
+  const [isActive, setIsActive] = useState(
+    initialValues.isActive ?? true
+  );
+
   const [highlight, setHighlight] = useState(
     initialValues.highlight ?? false
   );
 
   const [facts, setFacts] = useState<FactRow[]>(
-    initialValues.facts ?? []
+    normalizeFacts(initialValues.facts)
   );
 
   const [stats, setStats] = useState<StatRow[]>(
-    initialValues.stats ?? []
+    normalizeStats(initialValues.stats)
   );
 
   const [submitting, setSubmitting] = useState(false);
@@ -167,13 +207,18 @@ export function GuideForm({
     setStats((prev) => [
       ...prev,
       {
-        label: "",
+        labelAr: "",
+        labelEn: "",
         value: "",
       },
     ]);
   }
 
-  function updateStat(index: number, key: keyof StatRow, value: string) {
+  function updateStat(
+    index: number,
+    key: keyof StatRow,
+    value: string
+  ) {
     setStats((prev) =>
       prev.map((stat, i) =>
         i === index
@@ -208,10 +253,14 @@ export function GuideForm({
 
       const cleanedStats = stats
         .map((stat) => ({
-          label: stat.label.trim(),
+          labelAr: stat.labelAr.trim(),
+          labelEn: stat.labelEn.trim(),
           value: stat.value.trim(),
         }))
-        .filter((stat) => stat.label && stat.value);
+        .filter(
+          (stat) =>
+            (stat.labelAr || stat.labelEn) && stat.value
+        );
 
       await onSubmit({
         ...values,
@@ -244,17 +293,24 @@ export function GuideForm({
           type="text"
           dir="rtl"
           value={values.titleAr}
-          onChange={(event) => updateField("titleAr", event.target.value)}
+          onChange={(event) =>
+            updateField("titleAr", event.target.value)
+          }
           aria-invalid={Boolean(fieldErrors.titleAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.titleAr ? "border-primary" : "border-border",
+            fieldErrors.titleAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
 
         {fieldErrors.titleAr && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.titleAr}
           </p>
         )}
@@ -274,17 +330,24 @@ export function GuideForm({
           type="text"
           dir="ltr"
           value={values.titleEn}
-          onChange={(event) => updateField("titleEn", event.target.value)}
+          onChange={(event) =>
+            updateField("titleEn", event.target.value)
+          }
           aria-invalid={Boolean(fieldErrors.titleEn)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.titleEn ? "border-primary" : "border-border",
+            fieldErrors.titleEn
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
 
         {fieldErrors.titleEn && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.titleEn}
           </p>
         )}
@@ -305,18 +368,26 @@ export function GuideForm({
           dir="rtl"
           value={values.descriptionAr}
           onChange={(event) =>
-            updateField("descriptionAr", event.target.value)
+            updateField(
+              "descriptionAr",
+              event.target.value
+            )
           }
           aria-invalid={Boolean(fieldErrors.descriptionAr)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.descriptionAr ? "border-primary" : "border-border",
+            fieldErrors.descriptionAr
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
 
         {fieldErrors.descriptionAr && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.descriptionAr}
           </p>
         )}
@@ -337,18 +408,26 @@ export function GuideForm({
           dir="ltr"
           value={values.descriptionEn}
           onChange={(event) =>
-            updateField("descriptionEn", event.target.value)
+            updateField(
+              "descriptionEn",
+              event.target.value
+            )
           }
           aria-invalid={Boolean(fieldErrors.descriptionEn)}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-            fieldErrors.descriptionEn ? "border-primary" : "border-border",
+            fieldErrors.descriptionEn
+              ? "border-primary"
+              : "border-border",
             focusRing
           )}
         />
 
         {fieldErrors.descriptionEn && (
-          <p role="alert" className="mt-1 text-xs font-medium text-primary">
+          <p
+            role="alert"
+            className="mt-1 text-xs font-medium text-primary"
+          >
             {fieldErrors.descriptionEn}
           </p>
         )}
@@ -369,19 +448,26 @@ export function GuideForm({
               id="guide-icon"
               type="text"
               value={values.icon}
-              onChange={(event) => updateField("icon", event.target.value)}
+              onChange={(event) =>
+                updateField("icon", event.target.value)
+              }
               placeholder="Compass"
               aria-invalid={Boolean(fieldErrors.icon)}
               className={cx(
                 "w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-                fieldErrors.icon ? "border-primary" : "border-border",
+                fieldErrors.icon
+                  ? "border-primary"
+                  : "border-border",
                 focusRing
               )}
             />
 
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-foreground/60">
               {IconPreview ? (
-                <IconPreview className="h-4 w-4" aria-hidden="true" />
+                <IconPreview
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
               ) : (
                 <span className="text-xs">—</span>
               )}
@@ -389,7 +475,10 @@ export function GuideForm({
           </div>
 
           {fieldErrors.icon && (
-            <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
               {fieldErrors.icon}
             </p>
           )}
@@ -409,17 +498,24 @@ export function GuideForm({
             min={1}
             step={1}
             value={orderInput}
-            onChange={(event) => updateOrder(event.target.value)}
+            onChange={(event) =>
+              updateOrder(event.target.value)
+            }
             aria-invalid={Boolean(fieldErrors.order)}
             className={cx(
               "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
-              fieldErrors.order ? "border-primary" : "border-border",
+              fieldErrors.order
+                ? "border-primary"
+                : "border-border",
               focusRing
             )}
           />
 
           {fieldErrors.order ? (
-            <p role="alert" className="mt-1 text-xs font-medium text-primary">
+            <p
+              role="alert"
+              className="mt-1 text-xs font-medium text-primary"
+            >
               {fieldErrors.order}
             </p>
           ) : (
@@ -445,7 +541,10 @@ export function GuideForm({
               focusRing
             )}
           >
-            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            <Plus
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             {translate("admin.guide.form.addFact")}
           </button>
         </div>
@@ -465,9 +564,13 @@ export function GuideForm({
                   <input
                     type="text"
                     dir="rtl"
-                    value={fact.ar}
+                    value={fact.ar ?? ""}
                     onChange={(event) =>
-                      updateFact(index, "ar", event.target.value)
+                      updateFact(
+                        index,
+                        "ar",
+                        event.target.value
+                      )
                     }
                     placeholder="النص بالعربية"
                     className={cx(
@@ -479,9 +582,13 @@ export function GuideForm({
                   <input
                     type="text"
                     dir="ltr"
-                    value={fact.en}
+                    value={fact.en ?? ""}
                     onChange={(event) =>
-                      updateFact(index, "en", event.target.value)
+                      updateFact(
+                        index,
+                        "en",
+                        event.target.value
+                      )
                     }
                     placeholder="English text"
                     className={cx(
@@ -494,14 +601,21 @@ export function GuideForm({
                 <button
                   type="button"
                   onClick={() => removeFact(index)}
-                  aria-label={translate("admin.guide.form.removeFact")}
+                  aria-label={translate(
+                    "admin.guide.form.removeFact"
+                  )}
                   className={cx(
                     "mt-2 inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
                     focusRing
                   )}
                 >
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  {translate("admin.guide.form.removeFact")}
+                  <X
+                    className="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  />
+                  {translate(
+                    "admin.guide.form.removeFact"
+                  )}
                 </button>
               </div>
             ))}
@@ -524,7 +638,10 @@ export function GuideForm({
               focusRing
             )}
           >
-            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            <Plus
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
             {translate("admin.guide.form.addStat")}
           </button>
         </div>
@@ -534,50 +651,87 @@ export function GuideForm({
         </p>
 
         {stats.length > 0 && (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-2 flex flex-col gap-3">
             {stats.map((stat, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={stat.label}
-                  onChange={(event) =>
-                    updateStat(index, "label", event.target.value)
-                  }
-                  placeholder={translate(
-                    "admin.guide.form.statLabelPlaceholder"
-                  )}
-                  className={cx(
-                    "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                    focusRing
-                  )}
-                />
+              <div
+                key={index}
+                className="rounded-md border border-border bg-surface-muted p-3"
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    dir="rtl"
+                    value={stat.labelAr ?? ""}
+                    onChange={(event) =>
+                      updateStat(
+                        index,
+                        "labelAr",
+                        event.target.value
+                      )
+                    }
+                    placeholder="العنوان بالعربية"
+                    className={cx(
+                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                      focusRing
+                    )}
+                  />
 
-                <input
-                  type="text"
-                  value={stat.value}
-                  onChange={(event) =>
-                    updateStat(index, "value", event.target.value)
-                  }
-                  placeholder={translate(
-                    "admin.guide.form.statValuePlaceholder"
-                  )}
-                  className={cx(
-                    "w-full max-w-[6rem] rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                    focusRing
-                  )}
-                />
+                  <input
+                    type="text"
+                    dir="ltr"
+                    value={stat.labelEn ?? ""}
+                    onChange={(event) =>
+                      updateStat(
+                        index,
+                        "labelEn",
+                        event.target.value
+                      )
+                    }
+                    placeholder="English label"
+                    className={cx(
+                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                      focusRing
+                    )}
+                  />
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => removeStat(index)}
-                  aria-label={translate("admin.guide.form.removeStat")}
-                  className={cx(
-                    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
-                    focusRing
-                  )}
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={stat.value ?? ""}
+                    onChange={(event) =>
+                      updateStat(
+                        index,
+                        "value",
+                        event.target.value
+                      )
+                    }
+                    placeholder={translate(
+                      "admin.guide.form.statValuePlaceholder"
+                    )}
+                    className={cx(
+                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                      focusRing
+                    )}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => removeStat(index)}
+                    aria-label={translate(
+                      "admin.guide.form.removeStat"
+                    )}
+                    className={cx(
+                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
+                      focusRing
+                    )}
+                  >
+                    <X
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -590,8 +744,13 @@ export function GuideForm({
           <input
             type="checkbox"
             checked={isActive}
-            onChange={(event) => setIsActive(event.target.checked)}
-            className={cx("h-4 w-4 rounded border-border", focusRing)}
+            onChange={(event) =>
+              setIsActive(event.target.checked)
+            }
+            className={cx(
+              "h-4 w-4 rounded border-border",
+              focusRing
+            )}
           />
           {translate("admin.guide.form.isActive")}
         </label>
@@ -600,15 +759,23 @@ export function GuideForm({
           <input
             type="checkbox"
             checked={highlight}
-            onChange={(event) => setHighlight(event.target.checked)}
-            className={cx("h-4 w-4 rounded border-border", focusRing)}
+            onChange={(event) =>
+              setHighlight(event.target.checked)
+            }
+            className={cx(
+              "h-4 w-4 rounded border-border",
+              focusRing
+            )}
           />
           {translate("admin.guide.form.highlight")}
         </label>
       </div>
 
       {error && (
-        <p role="alert" className="text-sm font-medium text-primary">
+        <p
+          role="alert"
+          className="text-sm font-medium text-primary"
+        >
           {error}
         </p>
       )}
@@ -623,8 +790,13 @@ export function GuideForm({
             focusRing
           )}
         >
-          <Save className="h-4 w-4" aria-hidden="true" />
-          {submitting ? submittingLabel : submitLabel}
+          <Save
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+          {submitting
+            ? submittingLabel
+            : submitLabel}
         </button>
 
         {onCancel && (
@@ -637,7 +809,8 @@ export function GuideForm({
               focusRing
             )}
           >
-            {cancelLabel ?? translate("admin.guide.form.cancel")}
+            {cancelLabel ??
+              translate("admin.guide.form.cancel")}
           </button>
         )}
       </div>

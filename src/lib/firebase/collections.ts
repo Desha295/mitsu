@@ -92,6 +92,8 @@ export interface EventDoc {
   locationAr?: string;
   locationEn?: string;
   imageUrl?: string;
+  mediaVideoUrl?: string;
+  mediaFileUrl?: string;
   category?: string;
   isPublished: boolean;
   createdAt: Timestamp;
@@ -239,11 +241,18 @@ export interface GuideSectionDoc {
   titleEn: string;
   descriptionAr: string;
   descriptionEn: string;
+
   facts?: Array<{
     ar: string;
     en: string;
   }>;
-  stats?: Array<{ label: string; value: string }>;
+
+  stats?: Array<{
+    labelAr: string;
+    labelEn: string;
+    value: string;
+  }>;
+
   highlight?: boolean;
   order: number;
   isActive: boolean;

@@ -93,6 +93,9 @@ export function EventsSection() {
                       category={event.category}
                       dateIso={toDateIso(event)}
                       location={location}
+                      imageUrl={event.imageUrl}
+                      mediaVideoUrl={event.mediaVideoUrl}
+                      mediaFileUrl={event.mediaFileUrl}
                     />
                   );
                 })}

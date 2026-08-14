@@ -86,6 +86,14 @@ export function FreshmanGuideSection() {
                     language === "ar" ? fact.ar : fact.en
                   );
 
+                  const stats = section.stats?.map((stat) => ({
+                    label:
+                      language === "ar"
+                        ? stat.labelAr
+                        : stat.labelEn,
+                    value: stat.value,
+                  }));
+
                   return (
                     <GuideCard
                       key={section.id}
@@ -93,7 +101,7 @@ export function FreshmanGuideSection() {
                       description={description}
                       icon={section.icon}
                       facts={facts}
-                      stats={section.stats}
+                      stats={stats}
                       highlight={section.highlight}
                       stepNumber={index + 1}
                     />
