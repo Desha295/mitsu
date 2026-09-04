@@ -12,8 +12,8 @@ rules_version = '2';
 // project or the Firebase Emulator Suite — do so before first deploy.
 //
 // Out of scope this sprint: no admin dashboard/login page exists to
-// exercise the write paths yet; these rules define the boundary ahead of
-// that work, per CURRENT_SPRINT.md.
+// exercise the write paths yet; these rules define the boundary ahead
+// of that work, per CURRENT_SPRINT.md.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -61,7 +61,12 @@ service cloud.firestore {
     }
 
     match /committees/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /committeeMembers/{id} {
+      allow read: if true;
       allow write: if isAdmin();
     }
 

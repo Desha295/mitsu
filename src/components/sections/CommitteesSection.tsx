@@ -7,8 +7,14 @@ import { CommitteeCard } from "@/components/shared/CommitteeCard";
 import { committees, unionSocialLinks } from "@/data/union";
 import { useFirestoreList } from "@/hooks/useFirestoreList";
 import { useLanguage } from "@/hooks/useLanguage";
-import { unionService } from "@/lib/firebase/services";
-import type { CommitteeDoc } from "@/lib/firebase/collections";
+import {
+  unionService,
+  committeeMembersService,
+} from "@/lib/firebase/services";
+import type {
+  CommitteeDoc,
+  CommitteeMemberDoc,
+} from "@/lib/firebase/collections";
 import type { QueryOptions } from "@/lib/firebase/query-helpers";
 import { cx, focusRing } from "@/lib/utils";
 
@@ -16,6 +22,8 @@ const ACTIVE_COMMITTEES_ORDERED: QueryOptions<CommitteeDoc> = {
   filters: [{ field: "isActive", op: "==", value: true }],
   orderByField: { field: "order", direction: "asc" },
 };
+
+const ALL_COMMITTEE_MEMBERS: QueryOptions<CommitteeMemberDoc> = {};
 
 const STATIC_ICON_BY_ORDER: Record<number, string> = Object.fromEntries(
   committees.map((committee) => [committee.order, committee.icon])
@@ -26,9 +34,21 @@ export function CommitteesSection() {
 
   const {
     data: sortedCommittees,
-    loading,
-    error,
+    loading: committeesLoading,
+    error: committeesError,
   } = useFirestoreList(unionService, ACTIVE_COMMITTEES_ORDERED);
+
+  const {
+    data: committeeMembers,
+    loading: membersLoading,
+    error: membersError,
+  } = useFirestoreList(
+    committeeMembersService,
+    ALL_COMMITTEE_MEMBERS
+  );
+
+  const loading = committeesLoading || membersLoading;
+  const error = committeesError || membersError;
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -37,6 +57,7 @@ export function CommitteesSection() {
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             {translate("union.committeesHeading")}
           </h2>
+
           <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground/70">
             {translate("union.committeesSubheading")}
           </p>
@@ -51,6 +72,7 @@ export function CommitteesSection() {
               className="h-8 w-8 animate-spin text-primary"
               aria-hidden="true"
             />
+
             <p className="text-sm text-foreground/60">
               {translate("common.loading")}
             </p>
@@ -83,12 +105,18 @@ export function CommitteesSection() {
                       ? committee.descriptionAr
                       : committee.descriptionEn;
 
+                  const members = committeeMembers.filter(
+                    (member) =>
+                      member.committeeId === committee.id
+                  );
+
                   return (
                     <CommitteeCard
                       key={committee.id}
                       name={name}
                       description={description}
                       icon={STATIC_ICON_BY_ORDER[committee.order]}
+                      members={members}
                     />
                   );
                 })}
@@ -105,6 +133,7 @@ export function CommitteesSection() {
           <h2 className="text-2xl font-bold text-foreground">
             {translate("union.socialHeading")}
           </h2>
+
           <p className="mx-auto mt-3 max-w-xl text-foreground/70">
             {translate("union.socialSubheading")}
           </p>
@@ -114,7 +143,9 @@ export function CommitteesSection() {
               const IconComponent = (
                 Icons as unknown as Record<
                   string,
-                  React.ComponentType<{ className?: string }>
+                  React.ComponentType<{
+                    className?: string;
+                  }>
                 >
               )[social.icon];
 
@@ -132,8 +163,12 @@ export function CommitteesSection() {
                   )}
                 >
                   {IconComponent && (
-                    <IconComponent className="h-4 w-4" aria-hidden="true" />
+                    <IconComponent
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    />
                   )}
+
                   {label}
                 </a>
               );

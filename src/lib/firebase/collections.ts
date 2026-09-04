@@ -1,26 +1,7 @@
 /**
  * Typed Firestore collection reference helpers.
  *
- * Originally created in Sprint 2.1 — Firebase Foundation with 8
- * collections (announcements/events/systems/committees/leadership/
- * settings/documents/admins). Extended in Sprint 2.2 — Firebase Services
- * with 3 more (hero/homepage/guide), needed to back the Hero, Homepage,
- * and Freshman Guide services. All Sprint 2.1 exports are unchanged;
- * this file was only appended to, never rewritten.
- *
- * These functions only return typed `CollectionReference`/`DocumentReference`
- * objects — they do NOT call `getDocs`, `addDoc`, `setDoc`, `onSnapshot`,
- * or any other read/write operation themselves. Actual CRUD lives in
- * services/createFirestoreService.ts (Sprint 2.2), which wraps these
- * references with getAll/getById/create/update/remove.
- *
- * Document field shapes mirror 06_FIREBASE_SCHEMA.md exactly for the
- * original 8 collections; the 3 Sprint 2.2 additions mirror their
- * equivalent local data files (src/data/home.ts, guide.ts) instead, since
- * they predate any formal schema entry. All getters return `null` when
- * Firebase isn't configured yet, matching config.ts's existing safety
- * pattern — calling code must handle the `null` case rather than assume
- * a connection exists.
+ * Firebase collection references and document shapes.
  */
 import {
   collection,
@@ -41,25 +22,19 @@ export const COLLECTIONS = {
   events: "events",
   systems: "systems",
   committees: "committees",
+  committeeMembers: "committeeMembers",
   leadership: "leadership",
   settings: "settings",
   documents: "documents",
   admins: "admins",
-  // Added in Sprint 2.2 to back the Hero/Homepage/Guide services — these
-  // domains didn't have a dedicated collection in the original Phase 0
-  // schema (06_FIREBASE_SCHEMA.md documents the original 8 above; adding
-  // new collections as the app grows is expected — see that doc's own
-  // "Future Collections" section).
   hero: "hero",
   homepage: "homepage",
   guide: "guide",
-  // Added in Sprint 7.0 — Faculty Leadership CMS. Distinct from
-  // `leadership` (Student Union leadership) above; not a rename.
   facultyLeadership: "facultyLeadership",
 } as const;
 
 // ---------------------------------------------------------------------------
-// Document shapes (06_FIREBASE_SCHEMA.md #5-12)
+// Document shapes
 // ---------------------------------------------------------------------------
 
 export interface AnnouncementDoc {
@@ -123,6 +98,20 @@ export interface CommitteeDoc {
   order: number;
 }
 
+/**
+ * Individual member of a Student Union committee.
+ *
+ * Each member belongs to exactly one committee through `committeeId`.
+ */
+export interface CommitteeMemberDoc {
+  nameAr: string;
+  nameEn: string;
+  roleAr: string;
+  roleEn: string;
+  committeeId: string;
+  order: number;
+}
+
 export interface LeadershipDoc {
   nameAr: string;
   nameEn: string;
@@ -135,11 +124,8 @@ export interface LeadershipDoc {
 }
 
 /**
- * Faculty Leadership (Sprint 7.0 — new collection, distinct from
- * `leadership` above). `leadership` is Student Union leadership
- * (President/Vice President); this is Faculty-level leadership (e.g.
- * Dean, Vice Deans) — a different concept, not a rename or replacement
- * of the existing collection.
+ * Faculty Leadership.
+ * Distinct from Student Union leadership.
  */
 export interface FacultyLeadershipDoc {
   nameAr: string;
@@ -151,7 +137,7 @@ export interface FacultyLeadershipDoc {
   isActive: boolean;
 }
 
-/** Single document at /settings/general, not a queried collection. */
+/** Single document at /settings/general. */
 export interface SettingsDoc {
   projectName: string;
   universityName: string;
@@ -161,24 +147,9 @@ export interface SettingsDoc {
   whatsappCommunityUrl: string;
   facebookUrl?: string;
   instagramUrl?: string;
-  /**
-   * Sprint 5.0 — additive. No admin page or public consumer existed for
-   * this collection before this sprint, so extending the schema here
-   * doesn't touch any established behavior. Left optional and unset by
-   * default (never invented) per 00_PROJECT_RULES.md #17/#27 — the
-   * admin fills these in once real office contact details are
-   * confirmed; until then, public consumers fall back to their
-   * existing "Coming soon" treatment exactly as before this sprint.
-   */
   contactEmail?: string;
   contactPhone?: string;
   officeLocation?: string;
-  /**
-   * Sprint 6.1 — additive, same reasoning as the three fields above:
-   * no existing consumer depended on the prior shape. Used by
-   * UnionHeroSection to override its existing static hero-image slot
-   * when set.
-   */
   unionLogoUrl?: string;
   updatedAt: Timestamp;
 }
@@ -194,6 +165,7 @@ export interface DocumentResourceDoc {
   uploadedAt: Timestamp;
   isPublished: boolean;
 }
+
 export interface AdminDoc {
   email: string;
   role: "admin" | "super_admin";
@@ -201,9 +173,7 @@ export interface AdminDoc {
 }
 
 // ---------------------------------------------------------------------------
-// Document shapes added in Sprint 2.2 (Hero/Homepage/Guide services).
-// Mirror the equivalent local data files (src/data/home.ts, guide.ts)
-// field-for-field, so a future migration sprint can map them 1:1.
+// Hero / Homepage / Guide
 // ---------------------------------------------------------------------------
 
 export interface HeroDoc {
@@ -222,7 +192,6 @@ export interface HeroDoc {
   updatedAt: Timestamp;
 }
 
-/** One document per Quick Access card (src/data/home.ts's quickAccessItems). */
 export interface QuickAccessItemDoc {
   titleAr: string;
   titleEn: string;
@@ -234,7 +203,6 @@ export interface QuickAccessItemDoc {
   isActive: boolean;
 }
 
-/** One document per Freshman Guide topic (src/data/guide.ts's guideSections). */
 export interface GuideSectionDoc {
   icon: string;
   titleAr: string;
@@ -262,17 +230,12 @@ export interface GuideSectionDoc {
 // Generic typed converter + reference helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Pass-through Firestore converter. Its only job is to give
- * `CollectionReference`/`DocumentReference` a concrete TypeScript type via
- * `withConverter`, so Sprint 2.2's services get typed reads/writes for
- * free instead of redefining this boilerplate per collection.
- */
 function createConverter<T extends DocumentData>(): FirestoreDataConverter<T> {
   return {
     toFirestore(data: T): DocumentData {
       return data;
     },
+
     fromFirestore(
       snapshot: QueryDocumentSnapshot,
       options: SnapshotOptions
@@ -286,6 +249,7 @@ function getTypedCollection<T extends DocumentData>(
   path: string
 ): CollectionReference<T> | null {
   if (!db) return null;
+
   return collection(db, path).withConverter(createConverter<T>());
 }
 
@@ -294,6 +258,7 @@ function getTypedDoc<T extends DocumentData>(
   id: string
 ): DocumentReference<T> | null {
   if (!db) return null;
+
   return doc(db, path, id).withConverter(createConverter<T>());
 }
 
@@ -302,7 +267,9 @@ function getTypedDoc<T extends DocumentData>(
 // ---------------------------------------------------------------------------
 
 export function getAnnouncementsCollection(): CollectionReference<AnnouncementDoc> | null {
-  return getTypedCollection<AnnouncementDoc>(COLLECTIONS.announcements);
+  return getTypedCollection<AnnouncementDoc>(
+    COLLECTIONS.announcements
+  );
 }
 
 export function getEventsCollection(): CollectionReference<EventDoc> | null {
@@ -314,32 +281,49 @@ export function getSystemsCollection(): CollectionReference<SystemDoc> | null {
 }
 
 export function getCommitteesCollection(): CollectionReference<CommitteeDoc> | null {
-  return getTypedCollection<CommitteeDoc>(COLLECTIONS.committees);
+  return getTypedCollection<CommitteeDoc>(
+    COLLECTIONS.committees
+  );
+}
+
+export function getCommitteeMembersCollection(): CollectionReference<CommitteeMemberDoc> | null {
+  return getTypedCollection<CommitteeMemberDoc>(
+    COLLECTIONS.committeeMembers
+  );
 }
 
 export function getLeadershipCollection(): CollectionReference<LeadershipDoc> | null {
-  return getTypedCollection<LeadershipDoc>(COLLECTIONS.leadership);
+  return getTypedCollection<LeadershipDoc>(
+    COLLECTIONS.leadership
+  );
 }
 
 export function getFacultyLeadershipCollection(): CollectionReference<FacultyLeadershipDoc> | null {
-  return getTypedCollection<FacultyLeadershipDoc>(COLLECTIONS.facultyLeadership);
+  return getTypedCollection<FacultyLeadershipDoc>(
+    COLLECTIONS.facultyLeadership
+  );
 }
 
 export function getDocumentsCollection(): CollectionReference<DocumentResourceDoc> | null {
-  return getTypedCollection<DocumentResourceDoc>(COLLECTIONS.documents);
+  return getTypedCollection<DocumentResourceDoc>(
+    COLLECTIONS.documents
+  );
 }
 
 export function getAdminsCollection(): CollectionReference<AdminDoc> | null {
   return getTypedCollection<AdminDoc>(COLLECTIONS.admins);
 }
 
-/** /settings/general is a single document, so this returns a DocumentReference, not a CollectionReference. */
+/** /settings/general is a single document. */
 export function getSettingsDocRef(): DocumentReference<SettingsDoc> | null {
-  return getTypedDoc<SettingsDoc>(COLLECTIONS.settings, "general");
+  return getTypedDoc<SettingsDoc>(
+    COLLECTIONS.settings,
+    "general"
+  );
 }
 
 // ---------------------------------------------------------------------------
-// Collection reference helpers added in Sprint 2.2
+// Hero / Homepage / Guide
 // ---------------------------------------------------------------------------
 
 export function getHeroCollection(): CollectionReference<HeroDoc> | null {
@@ -347,9 +331,13 @@ export function getHeroCollection(): CollectionReference<HeroDoc> | null {
 }
 
 export function getHomepageCollection(): CollectionReference<QuickAccessItemDoc> | null {
-  return getTypedCollection<QuickAccessItemDoc>(COLLECTIONS.homepage);
+  return getTypedCollection<QuickAccessItemDoc>(
+    COLLECTIONS.homepage
+  );
 }
 
 export function getGuideCollection(): CollectionReference<GuideSectionDoc> | null {
-  return getTypedCollection<GuideSectionDoc>(COLLECTIONS.guide);
+  return getTypedCollection<GuideSectionDoc>(
+    COLLECTIONS.guide
+  );
 }

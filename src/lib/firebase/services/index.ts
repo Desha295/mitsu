@@ -11,6 +11,7 @@ export * from "./homepage.service";
 export * from "./announcements.service";
 export * from "./events.service";
 export * from "./union.service";
+export * from "./committeeMembers.service";
 export * from "./systems.service";
 export * from "./guide.service";
 export * from "./leadership.service";
