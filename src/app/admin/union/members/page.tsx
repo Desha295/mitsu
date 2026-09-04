@@ -30,6 +30,7 @@ const EMPTY_MEMBER: CommitteeMemberDoc = {
   roleAr: "عضو",
   roleEn: "Member",
   committeeId: "",
+  order: 0,
 };
 
 function stripId(item: MemberWithId): CommitteeMemberDoc {
