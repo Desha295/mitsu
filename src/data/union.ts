@@ -104,7 +104,18 @@ export const vicePresident: UnionLeader = {
   positionKey: "union.leadership.vicePresident.position",
   imagePath: "/images/union/vice-president.jpg",
   imageAltKey: "union.leadership.vicePresident.imageAlt",
-  socialLinks: [],
+  socialLinks: [
+    {
+      labelKey: "union.social.linkedin",
+      href: "https://www.linkedin.com/in/nourhan-waleed-4b98a0320/",
+      icon: "Briefcase",
+    },
+    {
+      labelKey: "union.social.email",
+      href: "mailto:200039746@must.edu.eg",
+      icon: "Mail",
+    },
+  ],
 };
 
 export const committees: UnionCommittee[] = [

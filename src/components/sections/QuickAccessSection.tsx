@@ -28,9 +28,10 @@ export function QuickAccessSection() {
       <Container className="flex flex-col gap-12">
         {/* Section heading */}
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             {translate("home.quickAccess.heading")}
           </h2>
+
           <p className="mt-4 text-lg text-foreground/70">
             {translate("home.quickAccess.subheading")}
           </p>
@@ -46,6 +47,7 @@ export function QuickAccessSection() {
               className="h-8 w-8 animate-spin text-primary"
               aria-hidden="true"
             />
+
             <p className="text-sm text-foreground/60">
               {translate("common.loading")}
             </p>
@@ -73,9 +75,9 @@ export function QuickAccessSection() {
           </div>
         )}
 
-        {/* Cards Grid */}
+        {/* Cards */}
         {!loading && !error && items.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-wrap justify-center gap-6">
             {items.map((item) => {
               const title =
                 language === "ar" ? item.titleAr : item.titleEn;
@@ -86,13 +88,17 @@ export function QuickAccessSection() {
                   : item.descriptionEn;
 
               return (
-                <QuickAccessCard
+                <div
                   key={item.id}
-                  title={title}
-                  description={description}
-                  href={item.href}
-                  iconName={item.icon}
-                />
+                  className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                >
+                  <QuickAccessCard
+                    title={title}
+                    description={description}
+                    href={item.href}
+                    iconName={item.icon}
+                  />
+                </div>
               );
             })}
           </div>

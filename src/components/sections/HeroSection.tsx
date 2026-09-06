@@ -93,28 +93,23 @@ export function HeroSection() {
       ? hero.secondaryCtaLabelAr
       : hero.secondaryCtaLabelEn;
 
-  return (
-    <section className="relative bg-gradient-to-b from-surface to-background py-12 sm:py-16 md:py-20">
-      <Container className="grid gap-12 lg:grid-cols-2 lg:gap-8 lg:items-center">
+   return (
+    <section className="relative bg-gradient-to-b from-surface to-background py-10 sm:py-14 md:py-16">
+      <Container className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
         {/* Left: Content */}
-        <div className="flex flex-col gap-6">
-          {/* Logo & Branding */}
-          <div>
-            <Logo showIdentity={true} />
-          </div>
-
+        <div className="flex flex-col gap-5">
           {/* Heading */}
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+          <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-[2.7rem]">
             {heading}
           </h1>
 
           {/* Description */}
-          <p className="text-lg text-foreground/70 leading-relaxed">
+          <p className="max-w-2xl text-base leading-7 text-foreground/70 sm:text-lg">
             {description}
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <div className="flex flex-col gap-3 pt-3 sm:flex-row">
             {/* Primary CTA */}
             <Link
               href={hero.primaryCtaHref || "#"}
@@ -140,15 +135,15 @@ export function HeroSection() {
         </div>
 
         {/* Right: Hero Image */}
-        <div className="relative h-[520px] rounded-lg overflow-hidden border border-border shadow-sm bg-surface-muted">
+        <div className="relative mx-auto h-[360px] w-full max-w-[420px] overflow-hidden rounded-xl bg-transparent sm:h-[400px] lg:h-[420px]">
           {hero.imageUrl ? (
             <Image
               src={hero.imageUrl}
               alt={translate("home.hero.imageAlt")}
               fill
-              className="object-contain p-4"
+              className="object-contain"
               priority
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 420px"
             />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-foreground/40">

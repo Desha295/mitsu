@@ -12,7 +12,8 @@ import type { SystemDoc } from "@/lib/firebase/collections";
 import type { QueryOptions } from "@/lib/firebase/query-helpers";
 import { cx, focusRing } from "@/lib/utils";
 
-export const ACTIVE_SYSTEMS_ORDERED: QueryOptions<SystemDoc> = {  filters: [{ field: "isActive", op: "==", value: true }],
+export const ACTIVE_SYSTEMS_ORDERED: QueryOptions<SystemDoc> = {
+  filters: [{ field: "isActive", op: "==", value: true }],
   orderByField: { field: "order", direction: "asc" },
 };
 
@@ -34,6 +35,17 @@ export function SystemsSection() {
     loading,
     error,
   } = useFirestoreList(systemsService, ACTIVE_SYSTEMS_ORDERED);
+
+  const systemsCount = activeSystems.length;
+
+  const gridClassName = cx(
+    "grid gap-6",
+    systemsCount === 1 && "mx-auto w-full max-w-md",
+    systemsCount === 2 && "mx-auto w-full max-w-3xl sm:grid-cols-2",
+    systemsCount === 3 && "sm:grid-cols-2 lg:grid-cols-3",
+    systemsCount === 4 && "mx-auto w-full max-w-4xl sm:grid-cols-2",
+    systemsCount >= 5 && "sm:grid-cols-2 lg:grid-cols-3"
+  );
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -77,8 +89,8 @@ export function SystemsSection() {
 
         {!loading && !error && (
           <>
-            {activeSystems.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {systemsCount > 0 ? (
+              <div className={gridClassName}>
                 {activeSystems.map((system) => {
                   const presentation =
                     STATIC_PRESENTATION_BY_ORDER[system.order];
@@ -95,19 +107,19 @@ export function SystemsSection() {
 
                   return (
                     <SystemCard
-                    key={system.id}
-                    name={name}
-                    description={description}
-                    officialUrl={system.officialUrl}
-                    icon={system.icon}
-                    instructions={
-                      language === "ar"
-                        ? system.instructionsAr
-                        : system.instructionsEn
-                    }
-                    category={presentation?.category}
-                    required={presentation?.required}
-/>
+                      key={system.id}
+                      name={name}
+                      description={description}
+                      officialUrl={system.officialUrl}
+                      icon={system.icon}
+                      instructions={
+                        language === "ar"
+                          ? system.instructionsAr
+                          : system.instructionsEn
+                      }
+                      category={presentation?.category}
+                      required={presentation?.required}
+                    />
                   );
                 })}
               </div>

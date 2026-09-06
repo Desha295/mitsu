@@ -9,6 +9,7 @@ export const mainNavigation: NavigationItem[] = [
   { labelKey: "nav.home", href: "/" },
   { labelKey: "nav.guide", href: "/guide" },
   { labelKey: "nav.systems", href: "/systems" },
+  { labelKey: "nav.advisors", href: "/academic-advisors" },
   { labelKey: "nav.announcements", href: "/announcements" },
   { labelKey: "nav.union", href: "/union" },
   { labelKey: "nav.about", href: "/about" },

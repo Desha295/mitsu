@@ -8,9 +8,10 @@
   },
   "nav": {
     "home": "Home",
-    "guide": "Freshman Guide",
+    "guide": "Student Guide",
     "systems": "University Systems",
     "announcements": "Announcements",
+    "advisors": "Academic Advisors",
     "union": "Student Union",
     "about": "About MITSU",
     "contact": "Contact"
@@ -29,6 +30,13 @@
     "switchToArabic": "العربية",
     "switchToEnglish": "English"
   },
+  "academicAdvisors": {
+  "heading": "Academic Advisors",
+  "subheading": "Find your academic advisor’s details and connect with them easily",
+  "searchPlaceholder": "Search by advisor name",
+  "chatButton": "Chat on Microsoft Teams",
+  "noResults": "No advisor found with this name."
+},
   "footer": {
     "aboutText": "The official digital gateway for MUST Information Technology freshmen — one platform, one community, one trusted start.",
     "linksHeading": "Quick Links",
@@ -46,7 +54,7 @@
       "heading": "Welcome to MITSU",
       "description": "Your official digital gateway to university life. One platform, one community, one trusted start.",
       "primaryCta": "Join WhatsApp Community",
-      "secondaryCta": "Explore Freshman Guide",
+      "secondaryCta": "Explore Student Guide",
       "imageAlt": "MUST Campus",
       "empty": "Homepage content isn't available yet. Please check back soon.",
       "error": "We couldn't load this section right now. Please try again later."
@@ -57,7 +65,7 @@
       "empty": "No quick access items are available yet. Please check back soon.",
       "error": "We couldn't load this section right now. Please try again later.",
       "guide": {
-        "title": "Freshman Guide",
+        "title": "Student Guide",
         "description": "Your step-by-step guide to starting university life"
       },
       "systems": {
@@ -140,12 +148,12 @@
     }
   },
   "guide": {
-    "heading": "Freshman Guide",
+    "heading": "Student Guide",
     "subheading": "Everything you need to know to start your university journey with confidence.",
     "learnMore": "Learn more",
     "showLess": "Show less",
     "emptyState": "No guide sections are available yet.",
-    "errorState": "We couldn't load the freshman guide right now. Please try again later.",
+    "errorState": "We couldn't load the student guide right now. Please try again later.",
     "sections": {
       "introduction": {
         "title": "Introduction",
@@ -504,7 +512,7 @@
       "leadership": "Leadership",
       "facultyLeadership": "Faculty Leadership",
       "systems": "University Systems",
-      "guide": "Freshman Guide",
+      "guide": "Student Guide",
       "studyPlans": "Study Plans",
       "contact": "Contact",
       "about": "About",
@@ -988,8 +996,8 @@
       }
     },
     "guide": {
-      "heading": "Freshman Guide",
-      "subheading": "Create, edit, and reorder the step-by-step Freshman Guide sections.",
+      "heading": "Student Guide",
+      "subheading": "Create, edit, and reorder the step-by-step Student Guide sections.",
       "newButton": "New Section",
       "breadcrumb": {
         "new": "New",
