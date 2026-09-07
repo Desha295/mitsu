@@ -39,8 +39,13 @@ interface ActivityItem {
 
 const RECENT_ACTIVITY_LIMIT = 6;
 
-function announcementToActivity(doc: WithId<AnnouncementDoc>): ActivityItem {
-  const date = timestampToDate(doc.updatedAt) ?? timestampToDate(doc.createdAt);
+function announcementToActivity(
+  doc: WithId<AnnouncementDoc>
+): ActivityItem {
+  const date =
+    timestampToDate(doc.updatedAt) ??
+    timestampToDate(doc.createdAt);
+
   return {
     id: doc.id,
     title: doc.title,
@@ -49,8 +54,11 @@ function announcementToActivity(doc: WithId<AnnouncementDoc>): ActivityItem {
   };
 }
 
-function eventToActivity(doc: WithId<EventDoc>): ActivityItem {
+function eventToActivity(
+  doc: WithId<EventDoc>
+): ActivityItem {
   const date = timestampToDate(doc.createdAt);
+
   return {
     id: doc.id,
     title: doc.titleAr,
@@ -60,41 +68,21 @@ function eventToActivity(doc: WithId<EventDoc>): ActivityItem {
 }
 
 /**
- * Dashboard home (Sprint 6.0 — Dashboard Improvements). Replaces the
- * Sprint 3.1 placeholder with a real overview, reusing every existing
- * service/hook/component — no new Firestore query shape, no schema
- * change, no new UI primitive.
+ * Dashboard home (Sprint 6.0 — Dashboard Improvements).
  *
- * Six collections are fetched via the existing useFirestoreList hook,
- * unfiltered (matching every admin list page's own fetch — admins see
- * drafts/inactive items too, unlike the public site). Each hook call
- * fires its own effect independently, so all six requests are already
- * concurrent without needing a custom Promise.all wrapper. Every
- * derived number (totals, published/active subsets, the recent-activity
- * feed) is computed client-side from this single set of six fetches —
- * no additional Firestore requests for anything shown on this page.
- *
- * Recent Activity only draws from Announcements and Events, the two of
- * the six required collections whose Firestore schema actually has a
- * timestamp field (SystemDoc/CommitteeDoc/LeadershipDoc/GuideSectionDoc
- * have none) — not a bug, a real schema constraint. Those four still
- * get accurate live counts in the stat cards above, which only need a
- * count, not a "when was this last touched" answer.
- *
- * Quick Actions are derived directly from adminNavigation.ts (filtered
- * to implemented pages, excluding the dashboard itself) instead of the
- * separate, easily-stale `quickActions` array in data/adminDashboard.ts
- * (which only ever listed 4 of the 10 implemented admin pages — a gap
- * already flagged in PROJECT_STATE.md's Outstanding Items). This can't
- * drift out of sync with real navigation again.
+ * The dashboard reuses the existing admin navigation for implemented
+ * quick actions and also exposes the Academic Advisors / Student Data
+ * importer directly so admins can easily access the Excel import page.
  */
 export default function AdminDashboardPage() {
   const { user } = useAuth();
   const { translate, language } = useLanguage();
 
-  const displayName = user?.displayName || user?.email || "";
+  const displayName =
+    user?.displayName || user?.email || "";
 
-  const announcements = useFirestoreList(announcementsService);
+  const announcements =
+    useFirestoreList(announcementsService);
   const events = useFirestoreList(eventsService);
   const systems = useFirestoreList(systemsService);
   const committees = useFirestoreList(unionService);
@@ -127,36 +115,57 @@ export default function AdminDashboardPage() {
   };
 
   const quickActionItems = adminNavigation.filter(
-    (item) => item.isImplemented && item.id !== "dashboard"
+    (item) =>
+      item.isImplemented &&
+      item.id !== "dashboard" &&
+      item.href !== "/admin/academic-advisors"
   );
 
-  const recentActivity: ActivityItem[] = !loading && !error
-    ? [
-        ...announcements.data.map(announcementToActivity),
-        ...events.data.map(eventToActivity),
-      ]
-        .sort((a, b) => new Date(b.dateIso).getTime() - new Date(a.dateIso).getTime())
-        .slice(0, RECENT_ACTIVITY_LIMIT)
-    : [];
+  const recentActivity: ActivityItem[] =
+    !loading && !error
+      ? [
+          ...announcements.data.map(
+            announcementToActivity
+          ),
+          ...events.data.map(eventToActivity),
+        ]
+          .sort(
+            (a, b) =>
+              new Date(b.dateIso).getTime() -
+              new Date(a.dateIso).getTime()
+          )
+          .slice(0, RECENT_ACTIVITY_LIMIT)
+      : [];
 
-  const publishedAnnouncements = announcements.data.filter((a) => a.isPublished).length;
-  const publishedEvents = events.data.filter((e) => e.isPublished).length;
-  const activeCollectionsCount = !loading && !error
-    ? [
-        announcements.data.some((a) => a.isPublished),
-        events.data.some((e) => e.isPublished),
-        systems.data.some((s) => s.isActive),
-        committees.data.some((c) => c.isActive),
-        leadership.data.some((l) => l.isActive),
-        guide.data.some((g) => g.isActive),
-      ].filter(Boolean).length
-    : 0;
+  const publishedAnnouncements =
+    announcements.data.filter(
+      (a) => a.isPublished
+    ).length;
+
+  const publishedEvents = events.data.filter(
+    (e) => e.isPublished
+  ).length;
+
+  const activeCollectionsCount =
+    !loading && !error
+      ? [
+          announcements.data.some(
+            (a) => a.isPublished
+          ),
+          events.data.some((e) => e.isPublished),
+          systems.data.some((s) => s.isActive),
+          committees.data.some((c) => c.isActive),
+          leadership.data.some((l) => l.isActive),
+          guide.data.some((g) => g.isActive),
+        ].filter(Boolean).length
+      : 0;
 
   const firebaseStatus = !isFirebaseConfigured
     ? "notConnected"
     : error
       ? "error"
       : "connected";
+
   const firebaseStatusColor =
     firebaseStatus === "connected"
       ? "text-secondary-dark"
@@ -169,25 +178,32 @@ export default function AdminDashboardPage() {
       <AdminHeader
         title={translate("admin.dashboard.heading")}
         breadcrumbs={[
-          { label: translate("admin.breadcrumb.root") },
-          { label: translate("admin.dashboard.heading") },
+          {
+            label: translate("admin.breadcrumb.root"),
+          },
+          {
+            label: translate(
+              "admin.dashboard.heading"
+            ),
+          },
         ]}
       />
 
-      {/* Welcome section with logged-in user information */}
       <div>
         <h2 className="text-lg font-semibold text-foreground">
-          {translate("admin.dashboard.welcomeHeading")}
+          {translate(
+            "admin.dashboard.welcomeHeading"
+          )}
           {displayName ? `, ${displayName}` : ""}
         </h2>
+
         <p className="mt-1 text-sm text-foreground/70">
-          {translate("admin.dashboard.welcomeSubheading")}
+          {translate(
+            "admin.dashboard.welcomeSubheading"
+          )}
         </p>
       </div>
 
-      {/* Loading state — one aggregate spinner rather than six
-          independent ones, since every section below depends on the
-          same six fetches finishing together. */}
       {loading && (
         <div
           role="status"
@@ -197,13 +213,13 @@ export default function AdminDashboardPage() {
             className="h-8 w-8 animate-spin text-primary"
             aria-hidden="true"
           />
+
           <p className="text-sm text-foreground/60">
             {translate("common.loading")}
           </p>
         </div>
       )}
 
-      {/* Error state */}
       {!loading && error && (
         <div
           role="alert"
@@ -217,41 +233,70 @@ export default function AdminDashboardPage() {
 
       {!loading && !error && (
         <>
-          {/* Live statistics */}
           <div>
-            <SectionHeader title={translate("admin.dashboard.statsHeading")} />
+            <SectionHeader
+              title={translate(
+                "admin.dashboard.statsHeading"
+              )}
+            />
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {dashboardStats.map((stat) => (
                 <StatCard
                   key={stat.id}
                   icon={stat.icon}
                   label={translate(stat.labelKey)}
-                  value={String(statValues[stat.id] ?? 0)}
+                  value={String(
+                    statValues[stat.id] ?? 0
+                  )}
                 />
               ))}
             </div>
           </div>
 
-          {/* Quick Actions — derived from adminNavigation.ts */}
           <div>
-            <SectionHeader title={translate("admin.dashboard.quickActionsHeading")} />
+            <SectionHeader
+              title={translate(
+                "admin.dashboard.quickActionsHeading"
+              )}
+            />
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {quickActionItems.map((item) => (
                 <QuickActionCard
                   key={item.id}
                   icon={item.icon}
                   label={translate(item.labelKey)}
-                  comingSoonLabel={translate("admin.sidebar.comingSoon")}
+                  comingSoonLabel={translate(
+                    "admin.sidebar.comingSoon"
+                  )}
                   href={item.href}
                 />
               ))}
+
+              <QuickActionCard
+                icon="GraduationCap"
+                label={
+                  language === "ar"
+                    ? "المرشدون والطلاب"
+                    : "Academic Advisors & Students"
+                }
+                comingSoonLabel={translate(
+                  "admin.sidebar.comingSoon"
+                )}
+                href="/admin/academic-advisors"
+              />
             </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Recent Activity */}
             <div>
-              <SectionHeader title={translate("admin.dashboard.recentActivityHeading")} />
+              <SectionHeader
+                title={translate(
+                  "admin.dashboard.recentActivityHeading"
+                )}
+              />
+
               {recentActivity.length > 0 ? (
                 <ul className="flex flex-col gap-2">
                   {recentActivity.map((item) => (
@@ -266,56 +311,93 @@ export default function AdminDashboardPage() {
                         <p className="truncate text-sm font-medium text-foreground">
                           {item.title}
                         </p>
+
                         <p className="text-xs text-foreground/60">
-                          {translate(item.collectionLabelKey)}
+                          {translate(
+                            item.collectionLabelKey
+                          )}
                         </p>
                       </div>
+
                       <time
                         dateTime={item.dateIso}
                         className="shrink-0 text-xs text-foreground/50"
                       >
-                        {formatDate(item.dateIso, language)}
+                        {formatDate(
+                          item.dateIso,
+                          language
+                        )}
                       </time>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <EmptyState title={translate("admin.dashboard.recentActivityEmpty")} />
+                <EmptyState
+                  title={translate(
+                    "admin.dashboard.recentActivityEmpty"
+                  )}
+                />
               )}
             </div>
 
-            {/* System Status — every value here is real, never fabricated */}
             <div>
-              <SectionHeader title={translate("admin.dashboard.systemStatusHeading")} />
+              <SectionHeader
+                title={translate(
+                  "admin.dashboard.systemStatusHeading"
+                )}
+              />
+
               <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground/70">
-                    {translate("admin.dashboard.systemStatus.firebase")}
+                    {translate(
+                      "admin.dashboard.systemStatus.firebase"
+                    )}
                   </span>
-                  <span className={cx("font-medium", firebaseStatusColor)}>
-                    {translate(`admin.dashboard.systemStatus.${firebaseStatus}`)}
+
+                  <span
+                    className={cx(
+                      "font-medium",
+                      firebaseStatusColor
+                    )}
+                  >
+                    {translate(
+                      `admin.dashboard.systemStatus.${firebaseStatus}`
+                    )}
                   </span>
                 </div>
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground/70">
-                    {translate("admin.dashboard.systemStatus.activeCollections")}
+                    {translate(
+                      "admin.dashboard.systemStatus.activeCollections"
+                    )}
                   </span>
+
                   <span className="font-medium text-foreground">
-                    {activeCollectionsCount + "/6"}
+                    {activeCollectionsCount}/6
                   </span>
                 </div>
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground/70">
-                    {translate("admin.dashboard.systemStatus.publishedAnnouncements")}
+                    {translate(
+                      "admin.dashboard.systemStatus.publishedAnnouncements"
+                    )}
                   </span>
+
                   <span className="font-medium text-foreground">
                     {publishedAnnouncements}
                   </span>
                 </div>
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground/70">
-                    {translate("admin.dashboard.systemStatus.publishedEvents")}
+                    {translate(
+                      "admin.dashboard.systemStatus.publishedEvents"
+                    )}
                   </span>
+
                   <span className="font-medium text-foreground">
                     {publishedEvents}
                   </span>

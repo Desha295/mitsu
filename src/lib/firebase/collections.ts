@@ -31,6 +31,7 @@ export const COLLECTIONS = {
   homepage: "homepage",
   guide: "guide",
   facultyLeadership: "facultyLeadership",
+  students: "students",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -170,6 +171,32 @@ export interface AdminDoc {
   email: string;
   role: "admin" | "super_admin";
   createdAt: Timestamp;
+}
+
+/**
+ * Student academic advisor record.
+ *
+ * Firestore document ID:
+ * - Student ID
+ *
+ * Excel mapping:
+ * - اسم المرشد الأكاديمي → advisorName
+ * - الرقم الجامعي → studentId
+ * - اسم الطالب → studentName
+ * - الفرقة → semester
+ *
+ * `semester` represents the student's current semester
+ * and ranges from 1 to 8.
+ */
+export interface StudentDoc {
+  studentId: string;
+  studentName: string;
+  advisorName: string;
+  semester: number;
+  academicTerm: string;
+  isActive: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 // ---------------------------------------------------------------------------
@@ -312,6 +339,10 @@ export function getDocumentsCollection(): CollectionReference<DocumentResourceDo
 
 export function getAdminsCollection(): CollectionReference<AdminDoc> | null {
   return getTypedCollection<AdminDoc>(COLLECTIONS.admins);
+}
+
+export function getStudentsCollection(): CollectionReference<StudentDoc> | null {
+  return getTypedCollection<StudentDoc>(COLLECTIONS.students);
 }
 
 /** /settings/general is a single document. */

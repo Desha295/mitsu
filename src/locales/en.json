@@ -35,6 +35,8 @@
   "subheading": "Find your academic advisor’s details and connect with them easily",
   "searchPlaceholder": "Search by advisor name",
   "chatButton": "Chat on Microsoft Teams",
+  "myAdvisor": "My Academic Advisor",
+  "allAdvisors": "All Advisors",
   "noResults": "No advisor found with this name."
 },
   "footer": {

@@ -18,3 +18,4 @@ export * from "./leadership.service";
 export * from "./facultyLeadership.service";
 export * from "./documents.service";
 export * from "./settings.service";
+export * from "./students.service";
