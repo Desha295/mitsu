@@ -200,4 +200,9 @@ export const academicAdvisors: AcademicAdvisor[] = [
     nameEn: "Aya Taha Mohamed Hussien",
     email: "aya.nada@must.edu.eg",
   },
+  {
+  id: "mohamed-ahmed-aboghonaim",
+  nameEn: "Mohamed Ahmed Aboghonaim",
+  email: "mohamed.aboghonaim@must.edu.eg",
+  },
 ];
