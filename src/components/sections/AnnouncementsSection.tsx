@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { AnnouncementCard } from "@/components/shared/AnnouncementCard";
@@ -57,6 +57,9 @@ export function AnnouncementsSection() {
   const [activeFilter, setActiveFilter] =
     useState<AnnouncementCategory | "all">("all");
 
+  const [highlightedId, setHighlightedId] =
+    useState<string | null>(null);
+
   const {
     data: items,
     loading,
@@ -90,6 +93,52 @@ export function AnnouncementsSection() {
 
     return matchesSearch && matchesCategory;
   });
+
+  useEffect(() => {
+    if (loading || error || items.length === 0) {
+      return;
+    }
+
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const highlightId =
+      params.get("highlight");
+
+    if (!highlightId) {
+      return;
+    }
+
+    const targetId =
+      `announcement-${highlightId}`;
+
+    const target =
+      document.getElementById(targetId);
+
+    if (!target) {
+      return;
+    }
+
+    setHighlightedId(highlightId);
+
+    const scrollTimer = window.setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+
+    const highlightTimer =
+      window.setTimeout(() => {
+        setHighlightedId(null);
+      }, 4000);
+
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(highlightTimer);
+    };
+  }, [loading, error, items]);
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -227,9 +276,18 @@ export function AnnouncementsSection() {
                         ? announcement.descriptionEn
                         : announcement.description;
 
+                    const isNotificationTarget =
+                      highlightedId === announcement.id;
+
                     return (
                       <AnnouncementCard
                         key={announcement.id}
+                        id={`announcement-${announcement.id}`}
+                        className={
+                          isNotificationTarget
+                            ? "relative z-10 ring-2 ring-primary ring-offset-4 ring-offset-background shadow-xl scale-[1.01]"
+                            : undefined
+                        }
                         title={title}
                         titleEn={announcement.titleEn}
                         description={description}

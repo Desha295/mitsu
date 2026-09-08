@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Save } from "lucide-react";
+import { Bell, Save } from "lucide-react";
 import type { AnnouncementDoc } from "@/lib/firebase/collections";
 import type {
   AnnouncementCategory,
@@ -12,7 +12,12 @@ import { cx, focusRing, isValidHref } from "@/lib/utils";
 
 interface AnnouncementFormProps {
   initialValues: AnnouncementDoc;
-  onSubmit: (values: AnnouncementDoc) => Promise<void>;
+  onSubmit: (
+    values: AnnouncementDoc,
+    options?: {
+      notify: boolean;
+    }
+  ) => Promise<void>;
   onCancel?: () => void;
   submitLabel: string;
   submittingLabel: string;
@@ -57,10 +62,30 @@ export function AnnouncementForm({
 }: AnnouncementFormProps) {
   const { translate } = useLanguage();
 
-  const [values, setValues] = useState<AnnouncementDoc>(initialValues);
-  const [isPublished, setIsPublished] = useState(initialValues.isPublished);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [values, setValues] =
+    useState<AnnouncementDoc>(initialValues);
+
+  const [isPublished, setIsPublished] = useState(
+    initialValues.isPublished
+  );
+
+  /*
+   * A new announcement has no createdAt value.
+   * Existing announcements have createdAt from Firestore.
+   *
+   * The notification option is therefore only shown
+   * when editing an existing announcement.
+   */
+  const isEditing = Boolean(initialValues.createdAt);
+
+  const [sendNotification, setSendNotification] =
+    useState(false);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [error, setError] =
+    useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<keyof AnnouncementDoc, string>>
@@ -74,7 +99,9 @@ export function AnnouncementForm({
   ];
 
   function validate(): boolean {
-    const errors: Partial<Record<keyof AnnouncementDoc, string>> = {};
+    const errors: Partial<
+      Record<keyof AnnouncementDoc, string>
+    > = {};
 
     for (const field of REQUIRED_FIELDS) {
       if (!String(values[field] ?? "").trim()) {
@@ -84,9 +111,14 @@ export function AnnouncementForm({
       }
     }
 
-    const imageUrl = String(values.imageUrl ?? "").trim();
+    const imageUrl = String(
+      values.imageUrl ?? ""
+    ).trim();
 
-    if (imageUrl && !isValidHref(imageUrl)) {
+    if (
+      imageUrl &&
+      !isValidHref(imageUrl)
+    ) {
       errors.imageUrl = translate(
         "admin.announcements.form.invalidUrl"
       );
@@ -125,14 +157,18 @@ export function AnnouncementForm({
     });
   }
 
-  function updatePriority(value: AnnouncementPriority) {
+  function updatePriority(
+    value: AnnouncementPriority
+  ) {
     setValues((prev) => ({
       ...prev,
       priority: value,
     }));
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setError(null);
@@ -142,13 +178,27 @@ export function AnnouncementForm({
     setSubmitting(true);
 
     try {
-      await onSubmit({
-        ...values,
-        isPublished,
-      });
+      await onSubmit(
+        {
+          ...values,
+          isPublished,
+        },
+        {
+          /*
+           * New announcements don't need this flag.
+           * Their notification behavior is handled
+           * automatically by the service.
+           */
+          notify:
+            isEditing &&
+            sendNotification,
+        }
+      );
     } catch {
       setError(
-        translate("admin.announcements.form.error")
+        translate(
+          "admin.announcements.form.error"
+        )
       );
     } finally {
       setSubmitting(false);
@@ -175,9 +225,14 @@ export function AnnouncementForm({
           dir="rtl"
           value={values.title}
           onChange={(event) =>
-            updateField("title", event.target.value)
+            updateField(
+              "title",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.title)}
+          aria-invalid={Boolean(
+            fieldErrors.title
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.title
@@ -212,9 +267,14 @@ export function AnnouncementForm({
           dir="ltr"
           value={values.titleEn}
           onChange={(event) =>
-            updateField("titleEn", event.target.value)
+            updateField(
+              "titleEn",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.titleEn)}
+          aria-invalid={Boolean(
+            fieldErrors.titleEn
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.titleEn
@@ -254,7 +314,9 @@ export function AnnouncementForm({
               event.target.value
             )
           }
-          aria-invalid={Boolean(fieldErrors.description)}
+          aria-invalid={Boolean(
+            fieldErrors.description
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.description
@@ -294,7 +356,9 @@ export function AnnouncementForm({
               event.target.value
             )
           }
-          aria-invalid={Boolean(fieldErrors.descriptionEn)}
+          aria-invalid={Boolean(
+            fieldErrors.descriptionEn
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.descriptionEn
@@ -338,16 +402,20 @@ export function AnnouncementForm({
               focusRing
             )}
           >
-            {CATEGORY_VALUES.map((category) => (
-              <option
-                key={category}
-                value={category}
-              >
-                {translate(
-                  CATEGORY_LABEL_KEYS[category]
-                )}
-              </option>
-            ))}
+            {CATEGORY_VALUES.map(
+              (category) => (
+                <option
+                  key={category}
+                  value={category}
+                >
+                  {translate(
+                    CATEGORY_LABEL_KEYS[
+                      category
+                    ]
+                  )}
+                </option>
+              )
+            )}
           </select>
         </div>
 
@@ -372,16 +440,20 @@ export function AnnouncementForm({
               focusRing
             )}
           >
-            {PRIORITY_VALUES.map((priority) => (
-              <option
-                key={priority}
-                value={priority}
-              >
-                {translate(
-                  PRIORITY_LABEL_KEYS[priority]
-                )}
-              </option>
-            ))}
+            {PRIORITY_VALUES.map(
+              (priority) => (
+                <option
+                  key={priority}
+                  value={priority}
+                >
+                  {translate(
+                    PRIORITY_LABEL_KEYS[
+                      priority
+                    ]
+                  )}
+                </option>
+              )
+            )}
           </select>
         </div>
       </div>
@@ -401,7 +473,9 @@ export function AnnouncementForm({
             id="announcement-media-image-url"
             type="url"
             dir="ltr"
-            value={values.mediaImageUrl ?? ""}
+            value={
+              values.mediaImageUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "mediaImageUrl",
@@ -429,7 +503,9 @@ export function AnnouncementForm({
             id="announcement-media-file-url"
             type="url"
             dir="ltr"
-            value={values.mediaFileUrl ?? ""}
+            value={
+              values.mediaFileUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "mediaFileUrl",
@@ -457,7 +533,9 @@ export function AnnouncementForm({
             id="announcement-media-video-url"
             type="url"
             dir="ltr"
-            value={values.mediaVideoUrl ?? ""}
+            value={
+              values.mediaVideoUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "mediaVideoUrl",
@@ -479,7 +557,9 @@ export function AnnouncementForm({
           type="checkbox"
           checked={isPublished}
           onChange={(event) =>
-            setIsPublished(event.target.checked)
+            setIsPublished(
+              event.target.checked
+            )
           }
           className={cx(
             "h-4 w-4 rounded border-border",
@@ -491,6 +571,48 @@ export function AnnouncementForm({
           "admin.announcements.form.isPublished"
         )}
       </label>
+
+      {/* Notification Option - Edit Only */}
+      {isEditing && (
+        <div className="rounded-lg border border-border bg-surface-muted p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={sendNotification}
+              onChange={(event) =>
+                setSendNotification(
+                  event.target.checked
+                )
+              }
+              disabled={submitting}
+              className={cx(
+                "mt-0.5 h-4 w-4 shrink-0 rounded border-border",
+                focusRing
+              )}
+            />
+
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Bell
+                  className="h-4 w-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+
+                إرسال إشعار للطلاب
+              </span>
+
+              <span className="text-xs leading-5 text-muted-foreground">
+                Notify students about this update
+              </span>
+
+              <span className="text-xs leading-5 text-muted-foreground">
+                فعّل هذا الخيار فقط إذا كان التعديل مهمًا
+                ويحتاج إلى تنبيه الطلاب.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
 
       {/* Error */}
       {error && (

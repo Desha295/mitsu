@@ -3,21 +3,41 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
+
 import { PageContainer } from "@/components/admin/PageContainer";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { EventForm } from "@/components/admin/EventForm";
 import { EventListItem } from "@/components/admin/EventListItem";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+
 import { eventsService } from "@/lib/firebase/services";
+
+import {
+  createEvent,
+  removeEvent,
+  updateEvent,
+} from "@/lib/firebase/services/events.service";
+
 import type { EventDoc } from "@/lib/firebase/collections";
 import type { WithId } from "@/lib/firebase/services";
-import { useAuthGuard, canAccess } from "@/lib/auth/routeGuard";
+
+import {
+  useAuthGuard,
+  canAccess,
+} from "@/lib/auth/routeGuard";
+
 import { PERMISSIONS } from "@/lib/auth/constants";
+
 import { Unauthorized } from "@/components/admin/Unauthorized";
 import { LoadingDashboard } from "@/components/admin/LoadingDashboard";
+
 import { useLanguage } from "@/hooks/useLanguage";
-import { cx, focusRing } from "@/lib/utils";
+
+import {
+  cx,
+  focusRing,
+} from "@/lib/utils";
 
 const EMPTY_EVENT: EventDoc = {
   titleAr: "",
@@ -30,46 +50,85 @@ const EMPTY_EVENT: EventDoc = {
   imageUrl: "",
   category: "",
   isPublished: false,
-  createdAt: undefined as unknown as EventDoc["createdAt"],
+  createdAt:
+    undefined as unknown as EventDoc["createdAt"],
 };
 
-function stripId(item: WithId<EventDoc>): EventDoc {
+function stripId(
+  item: WithId<EventDoc>
+): EventDoc {
   const { id, ...rest } = item;
+
   void id;
+
   return rest;
 }
 
-type FormTarget = WithId<EventDoc> | "new" | null;
-type Feedback = "created" | "updated" | "deleted" | null;
+type FormTarget =
+  | WithId<EventDoc>
+  | "new"
+  | null;
+
+type Feedback =
+  | "created"
+  | "updated"
+  | "deleted"
+  | null;
+
+type SubmitOptions = {
+  notify: boolean;
+};
 
 /**
  * Events management page.
  *
- * Uses the bilingual EventDoc schema:
- * - titleAr / titleEn
- * - descriptionAr / descriptionEn
- *
- * The current language is used when displaying the event title
- * inside the delete confirmation dialog.
+ * Notification behavior:
+ * - New published events create notifications automatically.
+ * - Normal edits do not notify students.
+ * - Important edits can explicitly send a notification.
+ * - Unpublishing removes the associated notification.
  */
 export default function AdminEventsPage() {
-  const { translate, language } = useLanguage();
+  const {
+    translate,
+    language,
+  } = useLanguage();
 
-  const { loading: authLoading, admin } = useAuthGuard();
+  const {
+    loading: authLoading,
+    admin,
+  } = useAuthGuard();
 
-  const [items, setItems] = useState<Array<WithId<EventDoc>>>([]);
-  const [hasFetched, setHasFetched] = useState(false);
-  const [formTarget, setFormTarget] = useState<FormTarget>(null);
-  const [feedback, setFeedback] = useState<Feedback>(null);
+  const [items, setItems] = useState<
+    Array<WithId<EventDoc>>
+  >([]);
+
+  const [hasFetched, setHasFetched] =
+    useState(false);
+
+  const [formTarget, setFormTarget] =
+    useState<FormTarget>(null);
+
+  const [feedback, setFeedback] =
+    useState<Feedback>(null);
+
   const [deleteTarget, setDeleteTarget] =
-    useState<WithId<EventDoc> | null>(null);
-  const [deleting, setDeleting] = useState(false);
+    useState<WithId<EventDoc> | null>(
+      null
+    );
+
+  const [deleting, setDeleting] =
+    useState(false);
 
   const allowed = admin
-    ? canAccess(admin, PERMISSIONS.manageEvents)
+    ? canAccess(
+        admin,
+        PERMISSIONS.manageEvents
+      )
     : false;
 
-  const loadingList = allowed && !hasFetched;
+  const loadingList =
+    allowed && !hasFetched;
 
   useEffect(() => {
     if (!allowed) return;
@@ -95,7 +154,10 @@ export default function AdminEventsPage() {
     };
   }, [allowed]);
 
-  if (authLoading || loadingList) {
+  if (
+    authLoading ||
+    loadingList
+  ) {
     return <LoadingDashboard />;
   }
 
@@ -103,13 +165,17 @@ export default function AdminEventsPage() {
     return <Unauthorized />;
   }
 
-  async function handleCreate(values: EventDoc) {
+  async function handleCreate(
+    values: EventDoc,
+    _options?: SubmitOptions
+  ) {
     const payload: EventDoc = {
       ...values,
       createdAt: Timestamp.now(),
     };
 
-    const id = await eventsService.create(payload);
+    const id =
+      await createEvent(payload);
 
     setItems((prev) => [
       ...prev,
@@ -123,12 +189,28 @@ export default function AdminEventsPage() {
     setFeedback("created");
   }
 
-  async function handleUpdate(values: EventDoc) {
-    if (formTarget === null || formTarget === "new") return;
+  async function handleUpdate(
+    values: EventDoc,
+    options?: SubmitOptions
+  ) {
+    if (
+      formTarget === null ||
+      formTarget === "new"
+    ) {
+      return;
+    }
 
-    const id = formTarget.id;
+    const id =
+      formTarget.id;
 
-    await eventsService.update(id, values);
+    await updateEvent(
+      id,
+      values,
+      {
+        notify:
+          options?.notify ?? false,
+      }
+    );
 
     setItems((prev) =>
       prev.map((item) =>
@@ -151,10 +233,16 @@ export default function AdminEventsPage() {
     setDeleting(true);
 
     try {
-      await eventsService.remove(deleteTarget.id);
+      await removeEvent(
+        deleteTarget.id
+      );
 
       setItems((prev) =>
-        prev.filter((item) => item.id !== deleteTarget.id)
+        prev.filter(
+          (item) =>
+            item.id !==
+            deleteTarget.id
+        )
       );
 
       setFeedback("deleted");
@@ -164,42 +252,60 @@ export default function AdminEventsPage() {
     }
   }
 
-  const inForm = formTarget !== null;
-  const isCreating = formTarget === "new";
+  const inForm =
+    formTarget !== null;
 
-  const deleteTitle = deleteTarget
-    ? language === "en"
-      ? deleteTarget.titleEn
-      : deleteTarget.titleAr
-    : undefined;
+  const isCreating =
+    formTarget === "new";
+
+  const deleteTitle =
+    deleteTarget
+      ? language === "en"
+        ? deleteTarget.titleEn
+        : deleteTarget.titleAr
+      : undefined;
 
   return (
     <PageContainer className="flex flex-col gap-8">
       <AdminHeader
         title={
           !inForm
-            ? translate("admin.events.heading")
+            ? translate(
+                "admin.events.heading"
+              )
             : isCreating
-              ? translate("admin.events.form.createHeading")
-              : translate("admin.events.form.editHeading")
+              ? translate(
+                  "admin.events.form.createHeading"
+                )
+              : translate(
+                  "admin.events.form.editHeading"
+                )
         }
         description={
           !inForm
-            ? translate("admin.events.subheading")
+            ? translate(
+                "admin.events.subheading"
+              )
             : undefined
         }
         breadcrumbs={[
           {
-            label: translate("admin.breadcrumb.root"),
+            label: translate(
+              "admin.breadcrumb.root"
+            ),
             href: "/admin",
           },
 
           !inForm
             ? {
-                label: translate("admin.events.heading"),
+                label: translate(
+                  "admin.events.heading"
+                ),
               }
             : {
-                label: translate("admin.events.heading"),
+                label: translate(
+                  "admin.events.heading"
+                ),
                 href: "/admin/events",
               },
 
@@ -207,8 +313,12 @@ export default function AdminEventsPage() {
             ? [
                 {
                   label: isCreating
-                    ? translate("admin.events.breadcrumb.new")
-                    : translate("admin.events.breadcrumb.edit"),
+                    ? translate(
+                        "admin.events.breadcrumb.new"
+                      )
+                    : translate(
+                        "admin.events.breadcrumb.edit"
+                      ),
                 },
               ]
             : []),
@@ -217,7 +327,9 @@ export default function AdminEventsPage() {
           !inForm ? (
             <button
               type="button"
-              onClick={() => setFormTarget("new")}
+              onClick={() =>
+                setFormTarget("new")
+              }
               className={cx(
                 "inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark",
                 focusRing
@@ -228,7 +340,9 @@ export default function AdminEventsPage() {
                 aria-hidden="true"
               />
 
-              {translate("admin.events.newButton")}
+              {translate(
+                "admin.events.newButton"
+              )}
             </button>
           ) : undefined
         }
@@ -236,7 +350,9 @@ export default function AdminEventsPage() {
 
       {feedback && (
         <p className="rounded-md bg-secondary-light px-4 py-2 text-sm font-medium text-secondary-dark">
-          {translate(`admin.events.feedback.${feedback}`)}
+          {translate(
+            `admin.events.feedback.${feedback}`
+          )}
         </p>
       )}
 
@@ -247,15 +363,21 @@ export default function AdminEventsPage() {
               <EventListItem
                 key={item.id}
                 event={item}
-                onEdit={() => setFormTarget(item)}
-                onDelete={() => setDeleteTarget(item)}
+                onEdit={() =>
+                  setFormTarget(item)
+                }
+                onDelete={() =>
+                  setDeleteTarget(item)
+                }
               />
             ))}
           </div>
         ) : (
           <EmptyState
             icon="CalendarDays"
-            title={translate("admin.events.empty.title")}
+            title={translate(
+              "admin.events.empty.title"
+            )}
             description={translate(
               "admin.events.empty.description"
             )}
@@ -266,7 +388,9 @@ export default function AdminEventsPage() {
           key={
             isCreating
               ? "new"
-              : (formTarget as WithId<EventDoc>).id
+              : (
+                  formTarget as WithId<EventDoc>
+                ).id
           }
           initialValues={
             isCreating
@@ -280,10 +404,14 @@ export default function AdminEventsPage() {
               ? handleCreate
               : handleUpdate
           }
-          onCancel={() => setFormTarget(null)}
+          onCancel={() =>
+            setFormTarget(null)
+          }
           submitLabel={
             isCreating
-              ? translate("admin.events.form.create")
+              ? translate(
+                  "admin.events.form.create"
+                )
               : translate(
                   "admin.events.form.saveChanges"
                 )
@@ -295,9 +423,15 @@ export default function AdminEventsPage() {
       )}
 
       <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.events.delete.title")}
-        description={deleteTitle}
+        open={
+          deleteTarget !== null
+        }
+        title={translate(
+          "admin.events.delete.title"
+        )}
+        description={
+          deleteTitle
+        }
         confirmLabel={translate(
           "admin.events.delete.confirm"
         )}
@@ -309,8 +443,12 @@ export default function AdminEventsPage() {
         )}
         destructive
         confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
+        onConfirm={
+          handleDeleteConfirm
+        }
+        onCancel={() =>
+          setDeleteTarget(null)
+        }
       />
     </PageContainer>
   );

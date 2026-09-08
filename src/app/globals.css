@@ -3,45 +3,51 @@
 /*
   MITSU Design Tokens
   Source of truth: 04_DESIGN_SYSTEM.md
-
-  NOTE: Exact brand hex values have not been provided yet.
-  The values below are a professional, accessible interpretation of
-  "Blue / Green / White / Dark Gray" and should be swapped for the
-  official brand hex codes as soon as they are provided.
 */
 
 :root {
   /* Brand colors */
-  --color-primary: #1D5FB8;       /* Blue - main branding, primary actions */
+  --color-primary: #1D5FB8;
   --color-primary-dark: #164A8F;
   --color-primary-light: #E8F0FC;
 
-  --color-secondary: #2E9E5B;     /* Green - success, highlights, secondary actions */
+  --color-secondary: #2E9E5B;
   --color-secondary-dark: #227A45;
   --color-secondary-light: #E7F6ED;
 
+  /* Neutral scale */
   --color-neutral-white: #FFFFFF;
-  --color-neutral-gray-50: #F7F8FA;
-  --color-neutral-gray-100: #EEF0F3;
-  --color-neutral-gray-300: #D3D7DE;
-  --color-neutral-gray-600: #5B6270;
-  --color-neutral-dark: #1A1D23;  /* Main text */
+  --color-neutral-gray-50: #F5F7FA;
+  --color-neutral-gray-100: #E9EDF2;
+  --color-neutral-gray-300: #C8CED8;
+  --color-neutral-gray-600: #4B5563;
+  --color-neutral-dark: #161A20;
 
-  /* Semantic surface tokens (light mode) */
-  --background: var(--color-neutral-white);
-  --foreground: var(--color-neutral-dark);
-  --surface: var(--color-neutral-white);
-  --surface-muted: var(--color-neutral-gray-50);
-  --border: var(--color-neutral-gray-300);
-  --overlay: rgb(26 29 35 / 45%);
+  /* Semantic surface tokens — Light Mode */
+  --background: #FFFFFF;
+  --foreground: #161A20;
 
-  /* Radius scale (04_DESIGN_SYSTEM.md #9) */
+  /*
+    Slightly tinted surface makes cards visually distinct
+    from the page without looking gray.
+  */
+  --surface: #FFFFFF;
+  --surface-muted: #F5F7FA;
+
+  /*
+    Stronger border for clearer separation in light mode.
+  */
+  --border: #C8CED8;
+
+  --overlay: rgb(22 26 32 / 45%);
+
+  /* Radius scale */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  /* Spacing base unit: 8px (04_DESIGN_SYSTEM.md #7) */
+  /* Spacing base unit: 8px */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 16px;
@@ -68,7 +74,7 @@
   --color-secondary-light: #1B2E22;
 }
 
-/* Class-based dark mode driven by ThemeContext (not prefers-color-scheme) */
+/* Class-based dark mode driven by ThemeContext */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
@@ -107,14 +113,16 @@ html[dir="rtl"] body {
 }
 
 /*
-  Motion (04_DESIGN_SYSTEM.md #20): fast, smooth, purposeful, 150-300ms.
-  Used by MobileMenu's dropdown panel and backdrop.
+  Motion (04_DESIGN_SYSTEM.md #20):
+  fast, smooth, purposeful, 150–300ms.
 */
+
 @keyframes fade-slide-down {
   from {
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -125,6 +133,7 @@ html[dir="rtl"] body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

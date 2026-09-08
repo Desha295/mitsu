@@ -8,6 +8,7 @@ import { NavLinks } from "@/components/layout/NavLinks";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { ThemeSwitcher } from "@/components/shared/ThemeSwitcher";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 import { useLanguage } from "@/hooks/useLanguage";
 import { IconButton } from "@/components/ui/IconButton";
 import { focusRing } from "@/lib/utils";
@@ -15,7 +16,8 @@ import { focusRing } from "@/lib/utils";
 /**
  * Global navbar (components/layout). Desktop-first: shows full navigation
  * on md and up, hamburger menu + mobile drawer on smaller screens. Logo,
- * nav items, theme/language switchers all present in both views.
+ * nav items, notification bell, theme/language switchers all present in
+ * both views.
  *
  * No hardcoded navigation — all links come from data/navigation.ts per
  * Sprint 1.1 Navbar requirements.
@@ -50,9 +52,12 @@ export function Navbar() {
           <NavLinks orientation="horizontal" />
         </nav>
 
-        {/* Right controls (theme, language, mobile menu button) */}
+        {/* Right controls */}
         <div className="flex items-center gap-2">
+          <NotificationBell />
+
           <LanguageSwitcher />
+
           <ThemeSwitcher />
 
           {/* Mobile hamburger button */}

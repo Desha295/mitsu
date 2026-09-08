@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
+
 import { PageContainer } from "@/components/admin/PageContainer";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
@@ -10,6 +11,11 @@ import { AnnouncementForm } from "@/components/admin/AnnouncementForm";
 import { AnnouncementListItem } from "@/components/admin/AnnouncementListItem";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { announcementsService } from "@/lib/firebase/services";
+import {
+  createAnnouncement,
+  removeAnnouncement,
+  updateAnnouncement,
+} from "@/lib/firebase/services/announcements.service";
 import type { AnnouncementDoc } from "@/lib/firebase/collections";
 import type { WithId } from "@/lib/firebase/services";
 import { useAuthGuard, canAccess } from "@/lib/auth/routeGuard";
@@ -28,56 +34,97 @@ const EMPTY_ANNOUNCEMENT: AnnouncementDoc = {
   priority: "normal",
   imageUrl: "",
   isPublished: false,
-  createdAt: undefined as unknown as AnnouncementDoc["createdAt"],
-  updatedAt: undefined as unknown as AnnouncementDoc["updatedAt"],
+  createdAt:
+    undefined as unknown as AnnouncementDoc["createdAt"],
+  updatedAt:
+    undefined as unknown as AnnouncementDoc["updatedAt"],
 };
 
-function stripId(item: WithId<AnnouncementDoc>): AnnouncementDoc {
+function stripId(
+  item: WithId<AnnouncementDoc>
+): AnnouncementDoc {
   const { id, ...rest } = item;
   void id;
   return rest;
 }
 
-type FormTarget = WithId<AnnouncementDoc> | "new" | null;
-type Feedback = "created" | "updated" | "deleted" | null;
+type FormTarget =
+  | WithId<AnnouncementDoc>
+  | "new"
+  | null;
+
+type Feedback =
+  | "created"
+  | "updated"
+  | "deleted"
+  | null;
+
+type SubmitOptions = {
+  notify: boolean;
+};
 
 /**
- * Announcements management page (Sprint 3.3). Second real CRUD admin
- * page — reads/writes through Sprint 2.2's announcementsService, gated
- * by the manageAnnouncements permission (already defined in Sprint 2.3's
- * constants, unused until now). Extends Sprint 3.2's Hero pattern to a
- * true list (multiple documents) instead of a singleton: list view with
- * per-item edit/delete, plus a shared create/edit AnnouncementForm and a
- * new reusable ConfirmDialog for delete confirmation.
+ * Announcements management page.
+ *
+ * Notification behavior:
+ * - Creating a published announcement automatically creates a notification.
+ * - Creating a draft does not create a notification.
+ * - Updating an announcement does NOT notify students by default.
+ * - When editing, the admin can explicitly enable "Notify students".
+ * - Unpublishing removes the associated notification.
+ * - Deleting removes the associated notification.
  */
 export default function AdminAnnouncementsPage() {
   const { translate } = useLanguage();
   const { loading: authLoading, admin } = useAuthGuard();
-  const [items, setItems] = useState<Array<WithId<AnnouncementDoc>>>([]);
+
+  const [items, setItems] = useState<
+    Array<WithId<AnnouncementDoc>>
+  >([]);
+
   const [hasFetched, setHasFetched] = useState(false);
-  const [formTarget, setFormTarget] = useState<FormTarget>(null);
-  const [feedback, setFeedback] = useState<Feedback>(null);
-  const [deleteTarget, setDeleteTarget] = useState<WithId<AnnouncementDoc> | null>(
-    null
-  );
-  const [deleting, setDeleting] = useState(false);
+
+  const [formTarget, setFormTarget] =
+    useState<FormTarget>(null);
+
+  const [feedback, setFeedback] =
+    useState<Feedback>(null);
+
+  const [deleteTarget, setDeleteTarget] =
+    useState<WithId<AnnouncementDoc> | null>(null);
+
+  const [deleting, setDeleting] =
+    useState(false);
 
   const allowed = admin
-    ? canAccess(admin, PERMISSIONS.manageAnnouncements)
+    ? canAccess(
+        admin,
+        PERMISSIONS.manageAnnouncements
+      )
     : false;
-  const loadingList = allowed && !hasFetched;
+
+  const loadingList =
+    allowed && !hasFetched;
 
   useEffect(() => {
     if (!allowed) return;
 
     let cancelled = false;
+
     announcementsService
-      .getAll({ orderByField: { field: "createdAt", direction: "desc" } })
+      .getAll({
+        orderByField: {
+          field: "createdAt",
+          direction: "desc",
+        },
+      })
       .then((docs) => {
         if (cancelled) return;
+
         setItems(docs);
         setHasFetched(true);
       });
+
     return () => {
       cancelled = true;
     };
@@ -91,34 +138,94 @@ export default function AdminAnnouncementsPage() {
     return <Unauthorized />;
   }
 
-  async function handleCreate(values: AnnouncementDoc) {
+  async function handleCreate(
+    values: AnnouncementDoc,
+    _options?: SubmitOptions
+  ) {
     const now = Timestamp.now();
-    const payload: AnnouncementDoc = { ...values, createdAt: now, updatedAt: now };
-    const id = await announcementsService.create(payload);
-    setItems((prev) => [{ id, ...payload }, ...prev]);
+
+    const payload: AnnouncementDoc = {
+      ...values,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const id =
+      await createAnnouncement(payload);
+
+    setItems((prev) => [
+      {
+        id,
+        ...payload,
+      },
+      ...prev,
+    ]);
+
     setFormTarget(null);
     setFeedback("created");
   }
 
-  async function handleUpdate(values: AnnouncementDoc) {
-    if (formTarget === null || formTarget === "new") return;
+  async function handleUpdate(
+    values: AnnouncementDoc,
+    options?: SubmitOptions
+  ) {
+    if (
+      formTarget === null ||
+      formTarget === "new"
+    ) {
+      return;
+    }
+
     const id = formTarget.id;
+
     const updatedAt = Timestamp.now();
-    const payload = { ...values, updatedAt };
-    await announcementsService.update(id, payload);
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...payload } : item))
+
+    const payload = {
+      ...values,
+      updatedAt,
+    };
+
+    await updateAnnouncement(
+      id,
+      payload,
+      {
+        notify:
+          options?.notify ?? false,
+      }
     );
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...payload,
+            }
+          : item
+      )
+    );
+
     setFormTarget(null);
     setFeedback("updated");
   }
 
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
+
     setDeleting(true);
+
     try {
-      await announcementsService.remove(deleteTarget.id);
-      setItems((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      await removeAnnouncement(
+        deleteTarget.id
+      );
+
+      setItems((prev) =>
+        prev.filter(
+          (item) =>
+            item.id !== deleteTarget.id
+        )
+      );
+
       setFeedback("deleted");
     } finally {
       setDeleting(false);
@@ -126,34 +233,66 @@ export default function AdminAnnouncementsPage() {
     }
   }
 
-  const inForm = formTarget !== null;
-  const isCreating = formTarget === "new";
+  const inForm =
+    formTarget !== null;
+
+  const isCreating =
+    formTarget === "new";
 
   return (
     <PageContainer className="flex flex-col gap-8">
       <AdminHeader
         title={
           !inForm
-            ? translate("admin.announcements.heading")
+            ? translate(
+                "admin.announcements.heading"
+              )
             : isCreating
-              ? translate("admin.announcements.form.createHeading")
-              : translate("admin.announcements.form.editHeading")
+              ? translate(
+                  "admin.announcements.form.createHeading"
+                )
+              : translate(
+                  "admin.announcements.form.editHeading"
+                )
         }
-        description={!inForm ? translate("admin.announcements.subheading") : undefined}
-        breadcrumbs={[
-          { label: translate("admin.breadcrumb.root"), href: "/admin" },
+        description={
           !inForm
-            ? { label: translate("admin.announcements.heading") }
+            ? translate(
+                "admin.announcements.subheading"
+              )
+            : undefined
+        }
+        breadcrumbs={[
+          {
+            label: translate(
+              "admin.breadcrumb.root"
+            ),
+            href: "/admin",
+          },
+
+          !inForm
+            ? {
+                label: translate(
+                  "admin.announcements.heading"
+                ),
+              }
             : {
-                label: translate("admin.announcements.heading"),
+                label: translate(
+                  "admin.announcements.heading"
+                ),
                 href: "/admin/announcements",
               },
+
           ...(inForm
             ? [
                 {
                   label: isCreating
-                    ? translate("admin.announcements.breadcrumb.new")
-                    : translate("admin.announcements.breadcrumb.edit"),
+                    ? translate(
+                        "admin.announcements.breadcrumb.new"
+                      )
+                    : translate(
+                        "admin.announcements.breadcrumb.edit"
+                      ),
                 },
               ]
             : []),
@@ -162,14 +301,22 @@ export default function AdminAnnouncementsPage() {
           !inForm ? (
             <button
               type="button"
-              onClick={() => setFormTarget("new")}
+              onClick={() =>
+                setFormTarget("new")
+              }
               className={cx(
                 "inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark",
                 focusRing
               )}
             >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {translate("admin.announcements.newButton")}
+              <Plus
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+
+              {translate(
+                "admin.announcements.newButton"
+              )}
             </button>
           ) : undefined
         }
@@ -177,7 +324,9 @@ export default function AdminAnnouncementsPage() {
 
       {feedback && (
         <p className="rounded-md bg-secondary-light px-4 py-2 text-sm font-medium text-secondary-dark">
-          {translate(`admin.announcements.feedback.${feedback}`)}
+          {translate(
+            `admin.announcements.feedback.${feedback}`
+          )}
         </p>
       )}
 
@@ -188,48 +337,92 @@ export default function AdminAnnouncementsPage() {
               <AnnouncementListItem
                 key={item.id}
                 announcement={item}
-                onEdit={() => setFormTarget(item)}
-                onDelete={() => setDeleteTarget(item)}
+                onEdit={() =>
+                  setFormTarget(item)
+                }
+                onDelete={() =>
+                  setDeleteTarget(item)
+                }
               />
             ))}
           </div>
         ) : (
           <EmptyState
             icon="Megaphone"
-            title={translate("admin.announcements.empty.title")}
-            description={translate("admin.announcements.empty.description")}
+            title={translate(
+              "admin.announcements.empty.title"
+            )}
+            description={translate(
+              "admin.announcements.empty.description"
+            )}
           />
         )
       ) : (
         <AnnouncementForm
-          key={isCreating ? "new" : (formTarget as WithId<AnnouncementDoc>).id}
+          key={
+            isCreating
+              ? "new"
+              : (
+                  formTarget as WithId<AnnouncementDoc>
+                ).id
+          }
           initialValues={
             isCreating
               ? EMPTY_ANNOUNCEMENT
-              : stripId(formTarget as WithId<AnnouncementDoc>)
+              : stripId(
+                  formTarget as WithId<AnnouncementDoc>
+                )
           }
-          onSubmit={isCreating ? handleCreate : handleUpdate}
-          onCancel={() => setFormTarget(null)}
+          onSubmit={
+            isCreating
+              ? handleCreate
+              : handleUpdate
+          }
+          onCancel={() =>
+            setFormTarget(null)
+          }
           submitLabel={
             isCreating
-              ? translate("admin.announcements.form.create")
-              : translate("admin.announcements.form.saveChanges")
+              ? translate(
+                  "admin.announcements.form.create"
+                )
+              : translate(
+                  "admin.announcements.form.saveChanges"
+                )
           }
-          submittingLabel={translate("admin.announcements.form.saving")}
+          submittingLabel={translate(
+            "admin.announcements.form.saving"
+          )}
         />
       )}
 
       <ConfirmDialog
-        open={deleteTarget !== null}
-        title={translate("admin.announcements.delete.title")}
-        description={deleteTarget?.title}
-        confirmLabel={translate("admin.announcements.delete.confirm")}
-        confirmingLabel={translate("admin.announcements.delete.confirming")}
-        cancelLabel={translate("admin.announcements.delete.cancel")}
+        open={
+          deleteTarget !== null
+        }
+        title={translate(
+          "admin.announcements.delete.title"
+        )}
+        description={
+          deleteTarget?.title
+        }
+        confirmLabel={translate(
+          "admin.announcements.delete.confirm"
+        )}
+        confirmingLabel={translate(
+          "admin.announcements.delete.confirming"
+        )}
+        cancelLabel={translate(
+          "admin.announcements.delete.cancel"
+        )}
         destructive
         confirming={deleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
+        onConfirm={
+          handleDeleteConfirm
+        }
+        onCancel={() =>
+          setDeleteTarget(null)
+        }
       />
     </PageContainer>
   );

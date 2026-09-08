@@ -1,10 +1,15 @@
 "use client";
 
 import * as Icons from "lucide-react";
-import { CalendarDays, MapPin, FileText, Play } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  FileText,
+  Play,
+} from "lucide-react";
 import type { EventCategory } from "@/data/announcements";
 import { useLanguage } from "@/hooks/useLanguage";
-import { formatDate } from "@/lib/utils";
+import { cx, formatDate } from "@/lib/utils";
 
 interface EventCardProps {
   title: string;
@@ -15,6 +20,8 @@ interface EventCardProps {
   imageUrl?: string;
   mediaVideoUrl?: string;
   mediaFileUrl?: string;
+  id?: string;
+  className?: string;
 }
 
 const CATEGORY_ICONS: Record<EventCategory, string> = {
@@ -33,7 +40,9 @@ const CATEGORY_LABEL_KEYS: Record<EventCategory, string> = {
   social: "events.categories.social",
 };
 
-function isKnownCategory(value: string | undefined): value is EventCategory {
+function isKnownCategory(
+  value: string | undefined
+): value is EventCategory {
   return Boolean(value) && (value as string) in CATEGORY_ICONS;
 }
 
@@ -46,6 +55,8 @@ export function EventCard({
   imageUrl,
   mediaVideoUrl,
   mediaFileUrl,
+  id,
+  className,
 }: EventCardProps) {
   const { translate, language } = useLanguage();
 
@@ -53,14 +64,21 @@ export function EventCard({
     ? (
         Icons as unknown as Record<
           string,
-          React.ComponentType<{ className?: string }>
+          React.ComponentType<{
+            className?: string;
+          }>
         >
       )[CATEGORY_ICONS[category]]
     : undefined;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-shadow duration-200 hover:shadow-md">
-
+    <div
+      id={id}
+      className={cx(
+        "flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-all duration-300 hover:shadow-md",
+        className
+      )}
+    >
       {/* Image */}
       {imageUrl && (
         <img
@@ -79,7 +97,9 @@ export function EventCard({
                 aria-hidden="true"
               />
             )}
-            {translate(CATEGORY_LABEL_KEYS[category])}
+            {translate(
+              CATEGORY_LABEL_KEYS[category]
+            )}
           </span>
         )}
 
@@ -116,7 +136,9 @@ export function EventCard({
               className="h-4 w-4"
               aria-hidden="true"
             />
-            {language === "ar" ? "عرض الملف" : "View File"}
+            {language === "ar"
+              ? "عرض الملف"
+              : "View File"}
           </a>
         )}
 
@@ -127,7 +149,10 @@ export function EventCard({
               aria-hidden="true"
             />
             <time dateTime={dateIso}>
-              {formatDate(dateIso, language)}
+              {formatDate(
+                dateIso,
+                language
+              )}
             </time>
           </div>
 

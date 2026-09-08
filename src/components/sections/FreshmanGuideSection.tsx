@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { GuideCard } from "@/components/shared/GuideCard";
@@ -21,7 +22,59 @@ export function FreshmanGuideSection() {
     data: sortedSections,
     loading,
     error,
-  } = useFirestoreList(guideService, ACTIVE_SECTIONS_ORDERED);
+  } = useFirestoreList(
+    guideService,
+    ACTIVE_SECTIONS_ORDERED
+  );
+
+  const [highlightedId, setHighlightedId] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    if (loading || error || sortedSections.length === 0) {
+      return;
+    }
+
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const highlightId =
+      params.get("highlight");
+
+    if (!highlightId) {
+      return;
+    }
+
+    const targetId =
+      `guide-${highlightId}`;
+
+    const target =
+      document.getElementById(targetId);
+
+    if (!target) {
+      return;
+    }
+
+    setHighlightedId(highlightId);
+
+    const scrollTimer = window.setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+
+    const highlightTimer =
+      window.setTimeout(() => {
+        setHighlightedId(null);
+      }, 4000);
+
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(highlightTimer);
+    };
+  }, [loading, error, sortedSections]);
 
   return (
     <section className="bg-background py-12 sm:py-16 md:py-20">
@@ -82,21 +135,29 @@ export function FreshmanGuideSection() {
                       ? section.descriptionAr
                       : section.descriptionEn;
 
-                  const facts = section.facts?.map((fact) =>
-                    language === "ar" ? fact.ar : fact.en
-                  );
-
-                  const stats = section.stats?.map((stat) => ({
-                    label:
+                  const facts =
+                    section.facts?.map((fact) =>
                       language === "ar"
-                        ? stat.labelAr
-                        : stat.labelEn,
-                    value: stat.value,
-                  }));
+                        ? fact.ar
+                        : fact.en
+                    );
+
+                  const stats =
+                    section.stats?.map((stat) => ({
+                      label:
+                        language === "ar"
+                          ? stat.labelAr
+                          : stat.labelEn,
+                      value: stat.value,
+                    }));
+
+                  const isNotificationTarget =
+                    highlightedId === section.id;
 
                   return (
                     <GuideCard
                       key={section.id}
+                      id={`guide-${section.id}`}
                       title={title}
                       description={description}
                       icon={section.icon}
@@ -104,6 +165,11 @@ export function FreshmanGuideSection() {
                       stats={stats}
                       highlight={section.highlight}
                       stepNumber={index + 1}
+                      className={
+                        isNotificationTarget
+                          ? "relative z-10 ring-2 ring-primary ring-offset-4 ring-offset-background shadow-xl scale-[1.01]"
+                          : undefined
+                      }
                     />
                   );
                 })}

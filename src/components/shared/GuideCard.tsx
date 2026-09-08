@@ -17,22 +17,20 @@ interface GuideCardProps {
   /** Visually highlighted card — used for Important Notes. */
   highlight?: boolean;
   stepNumber: number;
+
+  /** Optional DOM id used for deep-linking from notifications. */
+  id?: string;
+
+  /** Optional additional classes for temporary notification highlighting. */
+  className?: string;
 }
 
 /**
- * Freshman Guide step card (components/shared — feature component per
- * 07_COMPONENT_RULES.md §3.4).
+ * Freshman Guide step card.
  *
- * Sprint 4 — Phase 4.5: props changed from a whole static `GuideSection`
- * (translation-key based) object to resolved primitives, since the
- * caller now reads these from Firestore's GuideSectionDoc — plain
- * strings/arrays, not translation keys.
- *
- * "Learn more" toggles an inline facts/stats panel rather than a modal,
- * matching the pattern already used in SystemCard's "How to Use" toggle
- * (avoids duplicating a new disclosure pattern — 13_CHANGE_POLICY.md).
- * `highlight` gives Important Notes a distinct look per UI_GUIDELINES.md
- * ("Important notes should be highlighted").
+ * Supports deep-linking through an optional DOM id and custom className,
+ * allowing notifications to scroll directly to a specific guide section
+ * and temporarily highlight it.
  */
 export function GuideCard({
   title,
@@ -42,6 +40,8 @@ export function GuideCard({
   stats,
   highlight,
   stepNumber,
+  id,
+  className,
 }: GuideCardProps) {
   const { translate } = useLanguage();
   const [expanded, setExpanded] = useState(false);
@@ -55,15 +55,18 @@ export function GuideCard({
         >
       )[icon]
     : undefined;
+
   const hasDetails = Boolean(facts?.length || stats?.length);
 
   return (
     <div
+      id={id}
       className={cx(
-        "flex flex-col rounded-lg border p-6 shadow-sm transition-shadow duration-200 hover:shadow-md",
+        "flex flex-col rounded-lg border p-6 shadow-sm transition-all duration-300 hover:shadow-md",
         highlight
           ? "border-secondary bg-secondary-light"
-          : "border-border bg-surface"
+          : "border-border bg-surface",
+        className
       )}
     >
       <div className="flex items-start gap-4">
@@ -71,7 +74,9 @@ export function GuideCard({
         <span
           className={cx(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-            highlight ? "bg-secondary text-white" : "bg-primary-light text-primary"
+            highlight
+              ? "bg-secondary text-white"
+              : "bg-primary-light text-primary"
           )}
           aria-hidden="true"
         >
@@ -84,16 +89,22 @@ export function GuideCard({
               <IconComponent
                 className={cx(
                   "h-5 w-5",
-                  highlight ? "text-secondary-dark" : "text-primary"
+                  highlight
+                    ? "text-secondary-dark"
+                    : "text-primary"
                 )}
                 aria-hidden="true"
               />
             )}
+
             <h3 className="text-base font-semibold text-foreground">
               {title}
             </h3>
           </div>
-          <p className="mt-2 text-sm text-foreground/70">{description}</p>
+
+          <p className="mt-2 text-sm text-foreground/70">
+            {description}
+          </p>
         </div>
       </div>
 
@@ -109,7 +120,10 @@ export function GuideCard({
               focusRing
             )}
           >
-            {expanded ? translate("guide.showLess") : translate("guide.learnMore")}
+            {expanded
+              ? translate("guide.showLess")
+              : translate("guide.learnMore")}
+
             <ChevronDown
               className={cx(
                 "h-4 w-4 transition-transform duration-200",
@@ -120,7 +134,10 @@ export function GuideCard({
           </button>
 
           {expanded && (
-            <div id={detailsId} className="mt-3 animate-fade-in">
+            <div
+              id={detailsId}
+              className="mt-3 animate-fade-in"
+            >
               {stats && stats.length > 0 && (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {stats.map((stat, index) => (
@@ -131,6 +148,7 @@ export function GuideCard({
                       <div className="text-lg font-bold text-primary">
                         {stat.value}
                       </div>
+
                       <div className="mt-1 text-xs text-foreground/60">
                         {stat.label}
                       </div>
@@ -150,6 +168,7 @@ export function GuideCard({
                         className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                         aria-hidden="true"
                       />
+
                       {fact}
                     </li>
                   ))}

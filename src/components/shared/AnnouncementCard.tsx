@@ -18,6 +18,12 @@ interface AnnouncementCardProps {
   mediaFileUrl?: string;
   mediaVideoUrl?: string;
   featured?: boolean;
+
+  /** Optional DOM id used for deep-linking from notifications. */
+  id?: string;
+
+  /** Optional additional classes for temporary notification highlighting. */
+  className?: string;
 }
 
 const CATEGORY_ICONS: Record<AnnouncementCategory, string> = {
@@ -52,6 +58,8 @@ export function AnnouncementCard({
   mediaFileUrl,
   mediaVideoUrl,
   featured = false,
+  id,
+  className,
 }: AnnouncementCardProps) {
   const { translate, language } = useLanguage();
 
@@ -78,13 +86,15 @@ export function AnnouncementCard({
 
   return (
     <div
+      id={id}
       className={cx(
-        "flex flex-col rounded-lg border bg-surface p-6 shadow-sm transition-shadow duration-200 hover:shadow-md",
+        "flex flex-col rounded-lg border bg-surface p-6 shadow-sm transition-all duration-300 hover:shadow-md",
         isUrgent
           ? "border-2 border-primary bg-primary-light"
           : isImportant
             ? "border-secondary"
-            : "border-border"
+            : "border-border",
+        className
       )}
     >
       <div className="flex flex-wrap items-center gap-2">

@@ -32,7 +32,7 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "faris-emam",
-    nameAr: "فارس إمام",
+    nameAr: "فارس التومي",
     nameEn: "Faris Emedeldin Youssef Emam",
     email: "faris.eltomy@must.edu.eg",
   },

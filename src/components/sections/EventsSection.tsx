@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Container } from "@/components/layout/Container";
 import { EventCard } from "@/components/shared/EventCard";
@@ -23,11 +24,60 @@ function toDateIso(doc: WithId<EventDoc>): string {
 export function EventsSection() {
   const { translate, language } = useLanguage();
 
+  const [highlightedId, setHighlightedId] =
+    useState<string | null>(null);
+
   const {
     data: items,
     loading,
     error,
   } = useFirestoreList(eventsService, PUBLISHED_SOONEST_FIRST);
+
+  useEffect(() => {
+    if (loading || error || items.length === 0) {
+      return;
+    }
+
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const highlightId =
+      params.get("highlight");
+
+    if (!highlightId) {
+      return;
+    }
+
+    const targetId =
+      `event-${highlightId}`;
+
+    const target =
+      document.getElementById(targetId);
+
+    if (!target) {
+      return;
+    }
+
+    setHighlightedId(highlightId);
+
+    const scrollTimer = window.setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+
+    const highlightTimer =
+      window.setTimeout(() => {
+        setHighlightedId(null);
+      }, 4000);
+
+    return () => {
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(highlightTimer);
+    };
+  }, [loading, error, items]);
 
   return (
     <section className="bg-surface-muted py-12 sm:py-16 md:py-20">
@@ -36,6 +86,7 @@ export function EventsSection() {
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
             {translate("events.upcomingHeading")}
           </h2>
+
           <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground/70">
             {translate("events.subheading")}
           </p>
@@ -50,6 +101,7 @@ export function EventsSection() {
               className="h-8 w-8 animate-spin text-primary"
               aria-hidden="true"
             />
+
             <p className="text-sm text-foreground/60">
               {translate("common.loading")}
             </p>
@@ -73,7 +125,9 @@ export function EventsSection() {
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((event) => {
                   const title =
-                    language === "ar" ? event.titleAr : event.titleEn;
+                    language === "ar"
+                      ? event.titleAr
+                      : event.titleEn;
 
                   const description =
                     language === "ar"
@@ -85,9 +139,18 @@ export function EventsSection() {
                       ? event.locationAr
                       : event.locationEn;
 
+                  const isNotificationTarget =
+                    highlightedId === event.id;
+
                   return (
                     <EventCard
                       key={event.id}
+                      id={`event-${event.id}`}
+                      className={
+                        isNotificationTarget
+                          ? "relative z-10 ring-2 ring-primary ring-offset-4 ring-offset-background shadow-xl scale-[1.01]"
+                          : undefined
+                      }
                       title={title}
                       description={description}
                       category={event.category}

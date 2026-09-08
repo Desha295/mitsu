@@ -9,7 +9,12 @@ import { cx, focusRing } from "@/lib/utils";
 
 interface GuideFormProps {
   initialValues: GuideSectionDoc;
-  onSubmit: (values: GuideSectionDoc) => Promise<void>;
+  onSubmit: (
+    values: GuideSectionDoc,
+    options?: {
+      notify: boolean;
+    }
+  ) => Promise<void>;
   onCancel?: () => void;
   submitLabel: string;
   submittingLabel: string;
@@ -55,7 +60,8 @@ function normalizeStats(
       typeof stat?.labelAr === "string" ? stat.labelAr : "",
     labelEn:
       typeof stat?.labelEn === "string" ? stat.labelEn : "",
-    value: typeof stat?.value === "string" ? stat.value : "",
+    value:
+      typeof stat?.value === "string" ? stat.value : "",
   }));
 }
 
@@ -101,9 +107,23 @@ export function GuideForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [sendNotification, setSendNotification] =
+    useState(false);
+
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<TextField | "order", string>>
   >({});
+
+  /*
+   * GuideSectionDoc does not have createdAt/id fields.
+   * New guide sections start with empty title fields,
+   * while existing sections always contain their content.
+   */
+  const isEditing =
+    Boolean(
+      initialValues.titleAr?.trim() ||
+      initialValues.titleEn?.trim()
+    );
 
   const REQUIRED_FIELDS: TextField[] = [
     "icon",
@@ -127,25 +147,34 @@ export function GuideForm({
 
     for (const field of REQUIRED_FIELDS) {
       if (!String(values[field] ?? "").trim()) {
-        errors[field] = translate("admin.guide.form.required");
+        errors[field] = translate(
+          "admin.guide.form.required"
+        );
       }
     }
 
     if (!orderInput.trim()) {
-      errors.order = translate("admin.guide.form.required");
+      errors.order = translate(
+        "admin.guide.form.required"
+      );
     } else if (
       Number.isNaN(Number(orderInput)) ||
       !Number.isInteger(Number(orderInput)) ||
       Number(orderInput) < 1
     ) {
-      errors.order = translate("admin.guide.form.invalidOrder");
+      errors.order = translate(
+        "admin.guide.form.invalidOrder"
+      );
     }
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
 
-  function updateField(name: TextField, value: string) {
+  function updateField(
+    name: TextField,
+    value: string
+  ) {
     setValues((prev) => ({
       ...prev,
       [name]: value,
@@ -200,7 +229,9 @@ export function GuideForm({
   }
 
   function removeFact(index: number) {
-    setFacts((prev) => prev.filter((_, i) => i !== index));
+    setFacts((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   }
 
   function addStat() {
@@ -232,10 +263,14 @@ export function GuideForm({
   }
 
   function removeStat(index: number) {
-    setStats((prev) => prev.filter((_, i) => i !== index));
+    setStats((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
     setError(null);
 
@@ -249,7 +284,9 @@ export function GuideForm({
           ar: fact.ar.trim(),
           en: fact.en.trim(),
         }))
-        .filter((fact) => fact.ar || fact.en);
+        .filter(
+          (fact) => fact.ar || fact.en
+        );
 
       const cleanedStats = stats
         .map((stat) => ({
@@ -259,33 +296,52 @@ export function GuideForm({
         }))
         .filter(
           (stat) =>
-            (stat.labelAr || stat.labelEn) && stat.value
+            (stat.labelAr ||
+              stat.labelEn) &&
+            stat.value
         );
 
-      await onSubmit({
-        ...values,
-        order: Number(orderInput),
-        isActive,
-        highlight,
-        facts: cleanedFacts,
-        stats: cleanedStats,
-      });
+      await onSubmit(
+        {
+          ...values,
+          order: Number(orderInput),
+          isActive,
+          highlight,
+          facts: cleanedFacts,
+          stats: cleanedStats,
+        },
+        {
+          notify:
+            isEditing &&
+            sendNotification,
+        }
+      );
     } catch {
-      setError(translate("admin.guide.form.error"));
+      setError(
+        translate(
+          "admin.guide.form.error"
+        )
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-5"
+    >
       {/* Title AR */}
       <div>
         <label
           htmlFor="guide-title-ar"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.guide.form.title")} (AR)
+          {translate(
+            "admin.guide.form.title"
+          )}{" "}
+          (AR)
         </label>
 
         <input
@@ -294,9 +350,14 @@ export function GuideForm({
           dir="rtl"
           value={values.titleAr}
           onChange={(event) =>
-            updateField("titleAr", event.target.value)
+            updateField(
+              "titleAr",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.titleAr)}
+          aria-invalid={Boolean(
+            fieldErrors.titleAr
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.titleAr
@@ -322,7 +383,10 @@ export function GuideForm({
           htmlFor="guide-title-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.guide.form.title")} (EN)
+          {translate(
+            "admin.guide.form.title"
+          )}{" "}
+          (EN)
         </label>
 
         <input
@@ -331,9 +395,14 @@ export function GuideForm({
           dir="ltr"
           value={values.titleEn}
           onChange={(event) =>
-            updateField("titleEn", event.target.value)
+            updateField(
+              "titleEn",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.titleEn)}
+          aria-invalid={Boolean(
+            fieldErrors.titleEn
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.titleEn
@@ -359,7 +428,10 @@ export function GuideForm({
           htmlFor="guide-description-ar"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.guide.form.description")} (AR)
+          {translate(
+            "admin.guide.form.description"
+          )}{" "}
+          (AR)
         </label>
 
         <textarea
@@ -373,7 +445,9 @@ export function GuideForm({
               event.target.value
             )
           }
-          aria-invalid={Boolean(fieldErrors.descriptionAr)}
+          aria-invalid={Boolean(
+            fieldErrors.descriptionAr
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.descriptionAr
@@ -399,7 +473,10 @@ export function GuideForm({
           htmlFor="guide-description-en"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.guide.form.description")} (EN)
+          {translate(
+            "admin.guide.form.description"
+          )}{" "}
+          (EN)
         </label>
 
         <textarea
@@ -413,7 +490,9 @@ export function GuideForm({
               event.target.value
             )
           }
-          aria-invalid={Boolean(fieldErrors.descriptionEn)}
+          aria-invalid={Boolean(
+            fieldErrors.descriptionEn
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.descriptionEn
@@ -440,7 +519,9 @@ export function GuideForm({
             htmlFor="guide-icon"
             className="text-sm font-medium text-foreground"
           >
-            {translate("admin.guide.form.icon")}
+            {translate(
+              "admin.guide.form.icon"
+            )}
           </label>
 
           <div className="mt-1 flex items-center gap-3">
@@ -449,10 +530,15 @@ export function GuideForm({
               type="text"
               value={values.icon}
               onChange={(event) =>
-                updateField("icon", event.target.value)
+                updateField(
+                  "icon",
+                  event.target.value
+                )
               }
               placeholder="Compass"
-              aria-invalid={Boolean(fieldErrors.icon)}
+              aria-invalid={Boolean(
+                fieldErrors.icon
+              )}
               className={cx(
                 "w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
                 fieldErrors.icon
@@ -469,7 +555,9 @@ export function GuideForm({
                   aria-hidden="true"
                 />
               ) : (
-                <span className="text-xs">—</span>
+                <span className="text-xs">
+                  —
+                </span>
               )}
             </span>
           </div>
@@ -489,7 +577,9 @@ export function GuideForm({
             htmlFor="guide-order"
             className="text-sm font-medium text-foreground"
           >
-            {translate("admin.guide.form.order")}
+            {translate(
+              "admin.guide.form.order"
+            )}
           </label>
 
           <input
@@ -499,9 +589,13 @@ export function GuideForm({
             step={1}
             value={orderInput}
             onChange={(event) =>
-              updateOrder(event.target.value)
+              updateOrder(
+                event.target.value
+              )
             }
-            aria-invalid={Boolean(fieldErrors.order)}
+            aria-invalid={Boolean(
+              fieldErrors.order
+            )}
             className={cx(
               "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
               fieldErrors.order
@@ -520,7 +614,9 @@ export function GuideForm({
             </p>
           ) : (
             <p className="mt-1 text-xs text-foreground/50">
-              {translate("admin.guide.form.orderHint")}
+              {translate(
+                "admin.guide.form.orderHint"
+              )}
             </p>
           )}
         </div>
@@ -530,7 +626,9 @@ export function GuideForm({
       <div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">
-            {translate("admin.guide.form.facts")}
+            {translate(
+              "admin.guide.form.facts"
+            )}
           </span>
 
           <button
@@ -545,80 +643,100 @@ export function GuideForm({
               className="h-3.5 w-3.5"
               aria-hidden="true"
             />
-            {translate("admin.guide.form.addFact")}
+            {translate(
+              "admin.guide.form.addFact"
+            )}
           </button>
         </div>
 
         <p className="mt-1 text-xs text-foreground/50">
-          {translate("admin.guide.form.factsHint")}
+          {translate(
+            "admin.guide.form.factsHint"
+          )}
         </p>
 
         {facts.length > 0 && (
           <div className="mt-2 flex flex-col gap-3">
-            {facts.map((fact, index) => (
-              <div
-                key={index}
-                className="rounded-md border border-border bg-surface-muted p-3"
-              >
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    dir="rtl"
-                    value={fact.ar ?? ""}
-                    onChange={(event) =>
-                      updateFact(
-                        index,
-                        "ar",
-                        event.target.value
-                      )
-                    }
-                    placeholder="النص بالعربية"
-                    className={cx(
-                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                      focusRing
-                    )}
-                  />
-
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={fact.en ?? ""}
-                    onChange={(event) =>
-                      updateFact(
-                        index,
-                        "en",
-                        event.target.value
-                      )
-                    }
-                    placeholder="English text"
-                    className={cx(
-                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                      focusRing
-                    )}
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeFact(index)}
-                  aria-label={translate(
-                    "admin.guide.form.removeFact"
-                  )}
-                  className={cx(
-                    "mt-2 inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
-                    focusRing
-                  )}
+            {facts.map(
+              (fact, index) => (
+                <div
+                  key={index}
+                  className="rounded-md border border-border bg-surface-muted p-3"
                 >
-                  <X
-                    className="h-3.5 w-3.5"
-                    aria-hidden="true"
-                  />
-                  {translate(
-                    "admin.guide.form.removeFact"
-                  )}
-                </button>
-              </div>
-            ))}
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={
+                        fact.ar ?? ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateFact(
+                          index,
+                          "ar",
+                          event.target
+                            .value
+                        )
+                      }
+                      placeholder="النص بالعربية"
+                      className={cx(
+                        "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                        focusRing
+                      )}
+                    />
+
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={
+                        fact.en ?? ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateFact(
+                          index,
+                          "en",
+                          event.target
+                            .value
+                        )
+                      }
+                      placeholder="English text"
+                      className={cx(
+                        "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                        focusRing
+                      )}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeFact(
+                        index
+                      )
+                    }
+                    aria-label={translate(
+                      "admin.guide.form.removeFact"
+                    )}
+                    className={cx(
+                      "mt-2 inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
+                      focusRing
+                    )}
+                  >
+                    <X
+                      className="h-3.5 w-3.5"
+                      aria-hidden="true"
+                    />
+                    {translate(
+                      "admin.guide.form.removeFact"
+                    )}
+                  </button>
+                </div>
+              )
+            )}
           </div>
         )}
       </div>
@@ -627,7 +745,9 @@ export function GuideForm({
       <div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-foreground">
-            {translate("admin.guide.form.stats")}
+            {translate(
+              "admin.guide.form.stats"
+            )}
           </span>
 
           <button
@@ -642,98 +762,126 @@ export function GuideForm({
               className="h-3.5 w-3.5"
               aria-hidden="true"
             />
-            {translate("admin.guide.form.addStat")}
+            {translate(
+              "admin.guide.form.addStat"
+            )}
           </button>
         </div>
 
         <p className="mt-1 text-xs text-foreground/50">
-          {translate("admin.guide.form.statsHint")}
+          {translate(
+            "admin.guide.form.statsHint"
+          )}
         </p>
 
         {stats.length > 0 && (
           <div className="mt-2 flex flex-col gap-3">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="rounded-md border border-border bg-surface-muted p-3"
-              >
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    dir="rtl"
-                    value={stat.labelAr ?? ""}
-                    onChange={(event) =>
-                      updateStat(
-                        index,
-                        "labelAr",
-                        event.target.value
-                      )
-                    }
-                    placeholder="العنوان بالعربية"
-                    className={cx(
-                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                      focusRing
-                    )}
-                  />
-
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={stat.labelEn ?? ""}
-                    onChange={(event) =>
-                      updateStat(
-                        index,
-                        "labelEn",
-                        event.target.value
-                      )
-                    }
-                    placeholder="English label"
-                    className={cx(
-                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                      focusRing
-                    )}
-                  />
-                </div>
-
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={stat.value ?? ""}
-                    onChange={(event) =>
-                      updateStat(
-                        index,
-                        "value",
-                        event.target.value
-                      )
-                    }
-                    placeholder={translate(
-                      "admin.guide.form.statValuePlaceholder"
-                    )}
-                    className={cx(
-                      "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
-                      focusRing
-                    )}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => removeStat(index)}
-                    aria-label={translate(
-                      "admin.guide.form.removeStat"
-                    )}
-                    className={cx(
-                      "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
-                      focusRing
-                    )}
-                  >
-                    <X
-                      className="h-4 w-4"
-                      aria-hidden="true"
+            {stats.map(
+              (stat, index) => (
+                <div
+                  key={index}
+                  className="rounded-md border border-border bg-surface-muted p-3"
+                >
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={
+                        stat.labelAr ??
+                        ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateStat(
+                          index,
+                          "labelAr",
+                          event.target
+                            .value
+                        )
+                      }
+                      placeholder="العنوان بالعربية"
+                      className={cx(
+                        "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                        focusRing
+                      )}
                     />
-                  </button>
+
+                    <input
+                      type="text"
+                      dir="ltr"
+                      value={
+                        stat.labelEn ??
+                        ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateStat(
+                          index,
+                          "labelEn",
+                          event.target
+                            .value
+                        )
+                      }
+                      placeholder="English label"
+                      className={cx(
+                        "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                        focusRing
+                      )}
+                    />
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={
+                        stat.value ??
+                        ""
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateStat(
+                          index,
+                          "value",
+                          event.target
+                            .value
+                        )
+                      }
+                      placeholder={translate(
+                        "admin.guide.form.statValuePlaceholder"
+                      )}
+                      className={cx(
+                        "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground",
+                        focusRing
+                      )}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeStat(
+                          index
+                        )
+                      }
+                      aria-label={translate(
+                        "admin.guide.form.removeStat"
+                      )}
+                      className={cx(
+                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-foreground/60 transition-colors duration-150 hover:bg-surface-muted",
+                        focusRing
+                      )}
+                    >
+                      <X
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         )}
       </div>
@@ -745,14 +893,18 @@ export function GuideForm({
             type="checkbox"
             checked={isActive}
             onChange={(event) =>
-              setIsActive(event.target.checked)
+              setIsActive(
+                event.target.checked
+              )
             }
             className={cx(
               "h-4 w-4 rounded border-border",
               focusRing
             )}
           />
-          {translate("admin.guide.form.isActive")}
+          {translate(
+            "admin.guide.form.isActive"
+          )}
         </label>
 
         <label className="flex items-center gap-2 text-sm text-foreground">
@@ -760,16 +912,55 @@ export function GuideForm({
             type="checkbox"
             checked={highlight}
             onChange={(event) =>
-              setHighlight(event.target.checked)
+              setHighlight(
+                event.target.checked
+              )
             }
             className={cx(
               "h-4 w-4 rounded border-border",
               focusRing
             )}
           />
-          {translate("admin.guide.form.highlight")}
+          {translate(
+            "admin.guide.form.highlight"
+          )}
         </label>
       </div>
+
+      {/* Notification */}
+      {isEditing && (
+        <div className="rounded-md border border-border bg-surface-muted p-3">
+          <label className="flex items-start gap-3 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={sendNotification}
+              onChange={(event) =>
+                setSendNotification(
+                  event.target.checked
+                )
+              }
+              className={cx(
+                "mt-0.5 h-4 w-4 shrink-0 rounded border-border",
+                focusRing
+              )}
+            />
+
+            <span className="flex flex-col gap-1">
+              <span className="font-medium">
+                إرسال إشعار للطلاب
+              </span>
+
+              <span className="text-foreground/60">
+                Notify students about this update
+              </span>
+
+              <span className="text-xs text-foreground/50">
+                فعّل هذا الخيار فقط إذا كان التعديل مهمًا ويحتاج إلى تنبيه الطلاب.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
 
       {error && (
         <p
@@ -794,6 +985,7 @@ export function GuideForm({
             className="h-4 w-4"
             aria-hidden="true"
           />
+
           {submitting
             ? submittingLabel
             : submitLabel}
@@ -810,7 +1002,9 @@ export function GuideForm({
             )}
           >
             {cancelLabel ??
-              translate("admin.guide.form.cancel")}
+              translate(
+                "admin.guide.form.cancel"
+              )}
           </button>
         )}
       </div>

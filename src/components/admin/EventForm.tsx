@@ -15,7 +15,12 @@ import { cx, focusRing, isValidHref } from "@/lib/utils";
 
 interface EventFormProps {
   initialValues: EventDoc;
-  onSubmit: (values: EventDoc) => Promise<void>;
+  onSubmit: (
+    values: EventDoc,
+    options?: {
+      notify: boolean;
+    }
+  ) => Promise<void>;
   onCancel?: () => void;
   submitLabel: string;
   submittingLabel: string;
@@ -60,25 +65,47 @@ export function EventForm({
 }: EventFormProps) {
   const { translate } = useLanguage();
 
-  const [values, setValues] = useState<EventDoc>(initialValues);
+  const [values, setValues] =
+    useState<EventDoc>(initialValues);
 
   const [dateInput, setDateInput] = useState(() => {
     const date = timestampToDate(initialValues.date);
-    return date ? date.toISOString().slice(0, 10) : "";
+    return date
+      ? date.toISOString().slice(0, 10)
+      : "";
   });
 
-  const [isPublished, setIsPublished] = useState(
-    initialValues.isPublished
+  const [isPublished, setIsPublished] =
+    useState(initialValues.isPublished);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [uploadError, setUploadError] =
+    useState<string | null>(null);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [sendNotification, setSendNotification] =
+    useState(false);
+
+  const [fieldErrors, setFieldErrors] =
+    useState<
+      Partial<Record<TextField | "date", string>>
+    >({});
+
+  /*
+   * An existing EventDoc has a createdAt value.
+   * New events use the empty/default initial values
+   * and therefore do not show the update notification option.
+   */
+  const isEditing = Boolean(
+    initialValues.createdAt
   );
-
-  const [submitting, setSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const [fieldErrors, setFieldErrors] = useState<
-    Partial<Record<TextField | "date", string>>
-  >({});
 
   const REQUIRED_FIELDS: TextField[] = [
     "titleAr",
@@ -88,34 +115,68 @@ export function EventForm({
   ];
 
   function validate(): boolean {
-    const errors: Partial<Record<TextField | "date", string>> = {};
+    const errors: Partial<
+      Record<TextField | "date", string>
+    > = {};
 
     for (const field of REQUIRED_FIELDS) {
-      if (!String(values[field] ?? "").trim()) {
-        errors[field] = translate("admin.events.form.required");
+      if (
+        !String(values[field] ?? "").trim()
+      ) {
+        errors[field] = translate(
+          "admin.events.form.required"
+        );
       }
     }
 
     if (!dateInput.trim()) {
-      errors.date = translate("admin.events.form.required");
-    } else if (Number.isNaN(new Date(dateInput).getTime())) {
-      errors.date = translate("admin.events.form.invalidDate");
+      errors.date = translate(
+        "admin.events.form.required"
+      );
+    } else if (
+      Number.isNaN(
+        new Date(dateInput).getTime()
+      )
+    ) {
+      errors.date = translate(
+        "admin.events.form.invalidDate"
+      );
     }
 
-    const imageUrl = String(values.imageUrl ?? "").trim();
-    const mediaVideoUrl = String(values.mediaVideoUrl ?? "").trim();
-    const mediaFileUrl = String(values.mediaFileUrl ?? "").trim();
+    const imageUrl =
+      String(values.imageUrl ?? "").trim();
 
-    if (imageUrl && !isValidHref(imageUrl)) {
-      errors.imageUrl = translate("admin.events.form.invalidUrl");
+    const mediaVideoUrl =
+      String(values.mediaVideoUrl ?? "").trim();
+
+    const mediaFileUrl =
+      String(values.mediaFileUrl ?? "").trim();
+
+    if (
+      imageUrl &&
+      !isValidHref(imageUrl)
+    ) {
+      errors.imageUrl = translate(
+        "admin.events.form.invalidUrl"
+      );
     }
 
-    if (mediaVideoUrl && !isValidHref(mediaVideoUrl)) {
-      errors.mediaVideoUrl = translate("admin.events.form.invalidUrl");
+    if (
+      mediaVideoUrl &&
+      !isValidHref(mediaVideoUrl)
+    ) {
+      errors.mediaVideoUrl = translate(
+        "admin.events.form.invalidUrl"
+      );
     }
 
-    if (mediaFileUrl && !isValidHref(mediaFileUrl)) {
-      errors.mediaFileUrl = translate("admin.events.form.invalidUrl");
+    if (
+      mediaFileUrl &&
+      !isValidHref(mediaFileUrl)
+    ) {
+      errors.mediaFileUrl = translate(
+        "admin.events.form.invalidUrl"
+      );
     }
 
     setFieldErrors(errors);
@@ -123,7 +184,10 @@ export function EventForm({
     return Object.keys(errors).length === 0;
   }
 
-  function updateField(name: TextField, value: string) {
+  function updateField(
+    name: TextField,
+    value: string
+  ) {
     setValues((prev) => ({
       ...prev,
       [name]: value,
@@ -155,7 +219,8 @@ export function EventForm({
   async function handleImageUpload(
     event: ChangeEvent<HTMLInputElement>
   ) {
-    const file = event.target.files?.[0];
+    const file =
+      event.target.files?.[0];
 
     event.target.value = "";
 
@@ -165,7 +230,9 @@ export function EventForm({
 
     if (!isValidImageFile(file)) {
       setUploadError(
-        translate("admin.events.form.imageInvalid")
+        translate(
+          "admin.events.form.imageInvalid"
+        )
       );
       return;
     }
@@ -173,14 +240,18 @@ export function EventForm({
     setUploading(true);
 
     try {
-      const path = `images/events/${Date.now()}-${file.name}`;
+      const path =
+        `images/events/${Date.now()}-${file.name}`;
 
-      const url = await uploadImage(path, file);
+      const url =
+        await uploadImage(path, file);
 
       updateField("imageUrl", url);
     } catch {
       setUploadError(
-        translate("admin.events.form.imageUploadError")
+        translate(
+          "admin.events.form.imageUploadError"
+        )
       );
     } finally {
       setUploading(false);
@@ -199,14 +270,30 @@ export function EventForm({
     setSubmitting(true);
 
     try {
-      await onSubmit({
-        ...values,
-        date: dateToTimestamp(new Date(dateInput)),
-        isPublished,
-      });
+      await onSubmit(
+        {
+          ...values,
+          date: dateToTimestamp(
+            new Date(dateInput)
+          ),
+          isPublished,
+        },
+        {
+          /*
+           * Notification on update is explicit.
+           * New events are handled automatically
+           * by createEvent().
+           */
+          notify:
+            isEditing &&
+            sendNotification,
+        }
+      );
     } catch {
       setError(
-        translate("admin.events.form.error")
+        translate(
+          "admin.events.form.error"
+        )
       );
     } finally {
       setSubmitting(false);
@@ -233,9 +320,14 @@ export function EventForm({
           dir="rtl"
           value={values.titleAr}
           onChange={(event) =>
-            updateField("titleAr", event.target.value)
+            updateField(
+              "titleAr",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.titleAr)}
+          aria-invalid={Boolean(
+            fieldErrors.titleAr
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.titleAr
@@ -270,9 +362,14 @@ export function EventForm({
           dir="ltr"
           value={values.titleEn}
           onChange={(event) =>
-            updateField("titleEn", event.target.value)
+            updateField(
+              "titleEn",
+              event.target.value
+            )
           }
-          aria-invalid={Boolean(fieldErrors.titleEn)}
+          aria-invalid={Boolean(
+            fieldErrors.titleEn
+          )}
           className={cx(
             "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
             fieldErrors.titleEn
@@ -384,7 +481,9 @@ export function EventForm({
             htmlFor="event-date"
             className="text-sm font-medium text-foreground"
           >
-            {translate("admin.events.form.date")}
+            {translate(
+              "admin.events.form.date"
+            )}
           </label>
 
           <input
@@ -392,9 +491,13 @@ export function EventForm({
             type="date"
             value={dateInput}
             onChange={(event) =>
-              updateDate(event.target.value)
+              updateDate(
+                event.target.value
+              )
             }
-            aria-invalid={Boolean(fieldErrors.date)}
+            aria-invalid={Boolean(
+              fieldErrors.date
+            )}
             className={cx(
               "mt-1 w-full rounded-md border bg-surface px-3 py-2 text-sm text-foreground",
               fieldErrors.date
@@ -427,7 +530,9 @@ export function EventForm({
             id="event-location-ar"
             type="text"
             dir="rtl"
-            value={values.locationAr ?? ""}
+            value={
+              values.locationAr ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "locationAr",
@@ -454,7 +559,9 @@ export function EventForm({
             id="event-location-en"
             type="text"
             dir="ltr"
-            value={values.locationEn ?? ""}
+            value={
+              values.locationEn ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "locationEn",
@@ -475,7 +582,9 @@ export function EventForm({
           htmlFor="event-category"
           className="text-sm font-medium text-foreground"
         >
-          {translate("admin.events.form.category")}
+          {translate(
+            "admin.events.form.category"
+          )}
         </label>
 
         <select
@@ -498,13 +607,20 @@ export function EventForm({
             )}
           </option>
 
-          {CATEGORY_VALUES.map((category) => (
-            <option key={category} value={category}>
-              {translate(
-                CATEGORY_LABEL_KEYS[category]
-              )}
-            </option>
-          ))}
+          {CATEGORY_VALUES.map(
+            (category) => (
+              <option
+                key={category}
+                value={category}
+              >
+                {translate(
+                  CATEGORY_LABEL_KEYS[
+                    category
+                  ]
+                )}
+              </option>
+            )
+          )}
         </select>
       </div>
 
@@ -523,7 +639,9 @@ export function EventForm({
             id="event-image-url"
             type="url"
             dir="ltr"
-            value={values.imageUrl ?? ""}
+            value={
+              values.imageUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "imageUrl",
@@ -566,7 +684,9 @@ export function EventForm({
             id="event-video-url"
             type="url"
             dir="ltr"
-            value={values.mediaVideoUrl ?? ""}
+            value={
+              values.mediaVideoUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "mediaVideoUrl",
@@ -609,7 +729,9 @@ export function EventForm({
             id="event-file-url"
             type="url"
             dir="ltr"
-            value={values.mediaFileUrl ?? ""}
+            value={
+              values.mediaFileUrl ?? ""
+            }
             onChange={(event) =>
               updateField(
                 "mediaFileUrl",
@@ -682,11 +804,12 @@ export function EventForm({
             className="sr-only"
           />
 
-          {values.imageUrl && !uploading && (
-            <span className="truncate text-xs text-foreground/50">
-              {values.imageUrl}
-            </span>
-          )}
+          {values.imageUrl &&
+            !uploading && (
+              <span className="truncate text-xs text-foreground/50">
+                {values.imageUrl}
+              </span>
+            )}
         </div>
 
         {uploadError && (
@@ -705,7 +828,9 @@ export function EventForm({
           type="checkbox"
           checked={isPublished}
           onChange={(event) =>
-            setIsPublished(event.target.checked)
+            setIsPublished(
+              event.target.checked
+            )
           }
           className={cx(
             "h-4 w-4 rounded border-border",
@@ -717,6 +842,41 @@ export function EventForm({
           "admin.events.form.isPublished"
         )}
       </label>
+
+      {/* Notify students on update */}
+      {isEditing && (
+        <div className="rounded-lg border border-border bg-surface-muted p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={sendNotification}
+              onChange={(event) =>
+                setSendNotification(
+                  event.target.checked
+                )
+              }
+              className={cx(
+                "mt-0.5 h-4 w-4 shrink-0 rounded border-border",
+                focusRing
+              )}
+            />
+
+            <span className="flex flex-col gap-1">
+              <span className="text-sm font-semibold text-foreground">
+                إرسال إشعار للطلاب
+              </span>
+
+              <span className="text-sm font-medium text-foreground">
+                Notify students about this update
+              </span>
+
+              <span className="text-xs leading-5 text-foreground/60">
+                فعّل هذا الخيار فقط إذا كان التعديل مهمًا ويحتاج إلى تنبيه الطلاب.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -732,7 +892,10 @@ export function EventForm({
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={submitting || uploading}
+          disabled={
+            submitting ||
+            uploading
+          }
           className={cx(
             "inline-flex w-fit items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark disabled:opacity-60",
             focusRing

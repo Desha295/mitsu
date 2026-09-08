@@ -4,6 +4,7 @@
  * built on, so future code can `import { announcementsService } from
  * "@/lib/firebase/services"`.
  */
+
 export * from "./createFirestoreService";
 export * from "./createFirestoreDocService";
 export * from "./hero.service";
@@ -19,3 +20,4 @@ export * from "./facultyLeadership.service";
 export * from "./documents.service";
 export * from "./settings.service";
 export * from "./students.service";
+export * from "./notificationService";

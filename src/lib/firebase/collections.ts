@@ -32,6 +32,7 @@ export const COLLECTIONS = {
   guide: "guide",
   facultyLeadership: "facultyLeadership",
   students: "students",
+  notifications: "notifications",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -200,6 +201,65 @@ export interface StudentDoc {
 }
 
 // ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+/**
+ * Notification type.
+ *
+ * Used to identify the source/content category of the notification.
+ */
+export type NotificationType =
+  | "announcement"
+  | "event"
+  | "guide"
+  | "system"
+  | "document"
+  | "general";
+
+/**
+ * Site notification.
+ *
+ * Read/unread state is intentionally NOT stored here.
+ * It will be tracked per browser/device using localStorage.
+ */
+export interface NotificationDoc {
+  titleAr: string;
+  titleEn: string;
+
+  descriptionAr: string;
+  descriptionEn: string;
+
+  type: NotificationType;
+
+  /**
+   * Internal site route or external URL that the notification opens.
+   */
+  href: string;
+
+  /**
+   * Optional image/icon associated with the notification.
+   */
+  imageUrl?: string;
+
+  /**
+   * Controls whether the notification is visible to users.
+   */
+  isPublished: boolean;
+
+  /**
+   * Creation timestamp used for ordering notifications.
+   */
+  createdAt: Timestamp;
+
+  /**
+   * Optional expiration date.
+   * If provided, the notification can be hidden after this timestamp.
+   */
+  expiresAt?: Timestamp;
+}
+
+// ---------------------------------------------------------------------------
 // Hero / Homepage / Guide
 // ---------------------------------------------------------------------------
 
@@ -343,6 +403,12 @@ export function getAdminsCollection(): CollectionReference<AdminDoc> | null {
 
 export function getStudentsCollection(): CollectionReference<StudentDoc> | null {
   return getTypedCollection<StudentDoc>(COLLECTIONS.students);
+}
+
+export function getNotificationsCollection(): CollectionReference<NotificationDoc> | null {
+  return getTypedCollection<NotificationDoc>(
+    COLLECTIONS.notifications
+  );
 }
 
 /** /settings/general is a single document. */

@@ -8,131 +8,143 @@ rules_version = '2';
 // are restricted to admins.
 
 service cloud.firestore {
-  match /databases/{database}/documents {
+match /databases/{database}/documents {
 
-    // -------------------------------------------------------------------
-    // Helper functions
-    // -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// Helper functions
+// -------------------------------------------------------------------
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
+function isSignedIn() {
+  return request.auth != null;
+}
 
-    function isAdmin() {
-      return isSignedIn() &&
-        exists(
-          /databases/$(database)/documents/admins/$(request.auth.uid)
-        );
-    }
+function isAdmin() {
+  return isSignedIn() &&
+    exists(
+      /databases/$(database)/documents/admins/$(request.auth.uid)
+    );
+}
 
-    function isSuperAdmin() {
-      return isAdmin() &&
-        get(
-          /databases/$(database)/documents/admins/$(request.auth.uid)
-        ).data.role == 'super_admin';
-    }
+function isSuperAdmin() {
+  return isAdmin() &&
+    get(
+      /databases/$(database)/documents/admins/$(request.auth.uid)
+    ).data.role == 'super_admin';
+}
 
-    // -------------------------------------------------------------------
-    // Public content collections
-    // -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// Public content collections
+// -------------------------------------------------------------------
 
-    match /announcements/{id} {
-      allow read: if resource.data.isPublished == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /announcements/{id} {
+  allow read: if resource.data.isPublished == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /events/{id} {
-      allow read: if resource.data.isPublished == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /events/{id} {
+  allow read: if resource.data.isPublished == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /systems/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /systems/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /committees/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+match /committees/{id} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
 
-    match /committeeMembers/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+match /committeeMembers/{id} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
 
-    match /leadership/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /leadership/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /facultyLeadership/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /facultyLeadership/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /documents/{id} {
-      allow read: if resource.data.isPublished == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /documents/{id} {
+  allow read: if resource.data.isPublished == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /hero/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /hero/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /homepage/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /homepage/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    match /guide/{id} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+match /guide/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    // -------------------------------------------------------------------
-    // Academic Advisors / Students
-    // -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// Notifications
+// -------------------------------------------------------------------
 
-    // Students can look up active student records by Student ID.
-    // Admins can read all student records and manage them.
-    match /students/{studentId} {
-      allow read: if resource.data.isActive == true || isAdmin();
-      allow write: if isAdmin();
-    }
+// Public users can read published notifications.
+// Admins can read all notifications and manage them.
+match /notifications/{id} {
+  allow read: if resource.data.isPublished == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    // -------------------------------------------------------------------
-    // Settings
-    // -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// Academic Advisors / Students
+// -------------------------------------------------------------------
 
-    match /settings/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+// Students can look up active student records by Student ID.
+// Admins can read all student records and manage them.
+match /students/{studentId} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 
-    // -------------------------------------------------------------------
-    // Admins
-    // -------------------------------------------------------------------
+// -------------------------------------------------------------------
+// Settings
+// -------------------------------------------------------------------
 
-    // A signed-in user can read their own admin document.
-    // A super admin can read any admin document.
-    match /admins/{userId} {
-      allow read: if isSignedIn() &&
-        (
-          request.auth.uid == userId ||
-          isSuperAdmin()
-        );
+match /settings/{id} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
 
-      allow write: if isSuperAdmin();
-    }
+// -------------------------------------------------------------------
+// Admins
+// -------------------------------------------------------------------
 
-    // -------------------------------------------------------------------
-    // Deny everything else by default
-    // -------------------------------------------------------------------
+// A signed-in user can read their own admin document.
+// A super admin can read any admin document.
+match /admins/{userId} {
+  allow read: if isSignedIn() &&
+    (
+      request.auth.uid == userId ||
+      isSuperAdmin()
+    );
 
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
+  allow write: if isSuperAdmin();
+}
+
+// -------------------------------------------------------------------
+// Deny everything else by default
+// -------------------------------------------------------------------
+
+match /{document=**} {
+  allow read, write: if false;
+}
+
+}
 }
