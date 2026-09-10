@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Target, ArrowUpRight } from "lucide-react";
+import { Eye, Target, ArrowUpRight, Sparkles } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
 import { aboutContent } from "@/data/about";
@@ -28,58 +28,135 @@ export function VisionMissionSection() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-surface-muted py-16 sm:py-20 md:py-24">
-      {/* Background decoration */}
+    <section className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
+      {/* Ambient background */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-      >
-        <div className="absolute start-1/4 top-0 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-0 end-1/4 h-64 w-64 rounded-full bg-secondary/5 blur-3xl" />
-      </div>
+        className="pointer-events-none absolute -start-40 top-24 h-80 w-80 rounded-full bg-primary/5 blur-3xl"
+      />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -end-40 bottom-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl"
+      />
+
+      {/* Grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.035]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+          backgroundSize: "42px 42px",
+        }}
+      />
 
       <Container className="relative">
-        {/* Section heading */}
-        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-14">
-          <span className="text-xs font-black uppercase tracking-[0.2em] text-primary">
-            {isArabic
-              ? "إلى أين نتجه؟"
-              : "WHERE WE ARE HEADING"}
-          </span>
+        {/* Section Header */}
+        <div className="mx-auto mb-10 max-w-3xl sm:mb-14">
+          <div
+            className={`mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary ${
+              isArabic ? "justify-end" : ""
+            }`}
+          >
+            <span className="h-px w-8 bg-primary/50" />
+            <span>
+              {isArabic
+                ? "إلى أين نتجه؟"
+                : "WHERE WE ARE HEADING"}
+            </span>
+          </div>
 
-          <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-            {isArabic
-              ? "رؤية ورسالة MITSU"
-              : "MITSU Vision & Mission"}
-          </h2>
+          <div
+            className={`flex flex-col gap-5 md:flex-row md:items-end md:justify-between ${
+              isArabic ? "md:flex-row-reverse" : ""
+            }`}
+          >
+            <div className={isArabic ? "text-end" : "text-start"}>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <Eye
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
+                <span>
+                  {isArabic
+                    ? "رؤية ورسالة MITSU"
+                    : "MITSU Vision & Mission"}
+                </span>
+              </div>
+
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                {isArabic
+                  ? "رؤية ورسالة MITSU"
+                  : "MITSU Vision & Mission"}
+              </h2>
+
+              <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                {isArabic
+                  ? "التوجه الذي يشكل مستقبل MITSU ويحدد ما نسعى إلى تحقيقه."
+                  : "The direction that shapes MITSU’s future and defines what we strive to achieve."}
+              </p>
+            </div>
+
+            <div className="hidden shrink-0 rounded-2xl border border-border bg-surface/70 px-4 py-3 shadow-sm backdrop-blur-xl md:block">
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Sparkles
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
+                <span>
+                  {isArabic
+                    ? "رؤية ورسالة واحدة"
+                    : "One Vision. One Mission."}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 md:hidden">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur-xl">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              <span>
+                {isArabic
+                  ? "رؤية ورسالة واحدة"
+                  : "One Vision. One Mission."}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Vision + Mission */}
-        <div className="grid gap-5 lg:grid-cols-2">
-          {items.map((item) => {
+        <div className="grid gap-6 lg:grid-cols-2">
+          {items.map((item, index) => {
             const Icon = item.icon;
 
             return (
               <article
                 key={item.type}
-                className="group relative min-h-[300px] overflow-hidden rounded-[2rem] border border-border/70 bg-surface/80 p-7 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl sm:p-9"
+                className="group relative flex min-h-[24rem] flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
+                {/* Accent */}
+                <div className="h-1 w-full bg-primary" />
+
                 {/* Decorative number */}
-                <span className="absolute end-7 top-6 text-6xl font-black leading-none text-foreground/[0.035] sm:text-7xl">
-                  {item.type === "vision" ? "01" : "02"}
+                <span
+                  aria-hidden="true"
+                  className="absolute end-6 top-7 text-7xl font-black leading-none text-foreground/[0.035] sm:text-8xl"
+                >
+                  {String(index + 1).padStart(2, "0")}
                 </span>
 
-                {/* Glow */}
+                {/* Hover glow */}
                 <div
                   aria-hidden="true"
-                  className="absolute -end-16 -top-16 h-44 w-44 rounded-full bg-primary/10 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  className="absolute -end-20 -top-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 />
 
-                <div className="relative flex h-full flex-col">
+                <div className="relative flex flex-1 flex-col p-6 sm:p-8">
                   <div className="flex items-center justify-between">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary transition-transform duration-300 group-hover:scale-105">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105">
                       <Icon
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         aria-hidden="true"
                       />
                     </div>
@@ -91,11 +168,11 @@ export function VisionMissionSection() {
                   </div>
 
                   <div className="mt-auto pt-12">
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
                       {item.label}
                     </span>
 
-                    <h3 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+                    <h3 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                       {item.title}
                     </h3>
 
@@ -103,12 +180,13 @@ export function VisionMissionSection() {
                       {item.description}
                     </p>
                   </div>
-                </div>
 
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-x-8 bottom-0 h-px origin-center scale-x-0 bg-gradient-to-r from-transparent via-primary/60 to-transparent transition-transform duration-500 group-hover:scale-x-100"
-                />
+                  {/* Bottom hover line */}
+                  <div
+                    aria-hidden="true"
+                    className="mt-6 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full"
+                  />
+                </div>
               </article>
             );
           })}
