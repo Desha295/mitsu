@@ -233,7 +233,9 @@ export function AcademicAdvisorsSection() {
                 <div className="min-w-0">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-                      Student Lookup
+                       {language === "ar"
+                      ? " البحث عن الطالب"
+                      : "Student Lookup"}
                     </span>
                   </div>
 
