@@ -21,3 +21,6 @@ export * from "./documents.service";
 export * from "./settings.service";
 export * from "./students.service";
 export * from "./notificationService";
+export * from "./families.service";
+export * from "./familyEvents.service";
+export * from "./socialLinks.service";

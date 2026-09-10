@@ -13,11 +13,7 @@ export const ROLES = {
 } as const satisfies Record<string, UserRole>;
 
 /**
- * Permission names, one per manageable content area (mirrors the
- * Administrator capabilities in 02_REQUIREMENTS.md §3.2 and the Admin
- * Dashboard responsibilities in 00_PROJECT_RULES.md #14). No admin UI
- * exists yet to exercise these — they're the permission vocabulary a
- * future dashboard will check against.
+ * Permission names, one per manageable content area.
  */
 export const PERMISSIONS = {
   manageAnnouncements: "manageAnnouncements",
@@ -30,18 +26,23 @@ export const PERMISSIONS = {
   manageLeadership: "manageLeadership",
   manageFacultyLeadership: "manageFacultyLeadership",
   manageStudyPlans: "manageStudyPlans",
+  manageFamilies: "manageFamilies",
   manageSettings: "manageSettings",
+  manageSocialLinks: "manageSocialLinks",
   manageAdmins: "manageAdmins",
 } as const;
 
-export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+export type Permission =
+  (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 /**
  * `admin` can manage every content area except other admins;
  * `super_admin` can manage everything, including admin accounts.
- * Mirrors the read/write split in firestore.rules — keep both in sync.
  */
-export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
+export const ROLE_PERMISSIONS: Record<
+  UserRole,
+  Permission[]
+> = {
   [ROLES.admin]: [
     PERMISSIONS.manageAnnouncements,
     PERMISSIONS.manageEvents,
@@ -53,20 +54,24 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     PERMISSIONS.manageLeadership,
     PERMISSIONS.manageFacultyLeadership,
     PERMISSIONS.manageStudyPlans,
+    PERMISSIONS.manageFamilies,
     PERMISSIONS.manageSettings,
+    PERMISSIONS.manageSocialLinks,
   ],
-  [ROLES.superAdmin]: Object.values(PERMISSIONS),
+
+  [ROLES.superAdmin]:
+    Object.values(PERMISSIONS),
 };
 
 /**
- * File-upload limits. These MUST match storage.rules exactly — Storage
- * rules can't import TypeScript, so the two are kept in sync manually.
- * Client-side validation (validation.ts) uses these for fast, friendly
- * feedback; the Storage rules enforce the same limits server-side as
- * the actual security boundary.
+ * File-upload limits. These MUST match storage.rules exactly.
  */
-export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
-export const MAX_DOCUMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+export const MAX_IMAGE_SIZE_BYTES =
+  5 * 1024 * 1024; // 5MB
+
+export const MAX_DOCUMENT_SIZE_BYTES =
+  10 * 1024 * 1024; // 10MB
+
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",

@@ -33,6 +33,8 @@ export const COLLECTIONS = {
   facultyLeadership: "facultyLeadership",
   students: "students",
   notifications: "notifications",
+  families: "families",
+  socialLinks: "socialLinks",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -201,6 +203,62 @@ export interface StudentDoc {
 }
 
 // ---------------------------------------------------------------------------
+// Student Families
+// ---------------------------------------------------------------------------
+
+/**
+ * Student Family.
+ *
+ * Optional contact/application fields are intentionally omitted from
+ * the public UI when they are not provided.
+ */
+export interface FamilyDoc {
+  nameAr: string;
+  nameEn: string;
+
+  descriptionAr: string;
+  descriptionEn: string;
+
+  imageUrl?: string;
+
+  whatsapp?: string;
+  email?: string;
+  phone?: string;
+
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+
+  applicationUrl?: string;
+
+  order: number;
+  isActive: boolean;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+/**
+ * Event / activity belonging to a specific Student Family.
+ *
+ * Stored as a subcollection:
+ * /families/{familyId}/events/{eventId}
+ */
+export interface FamilyEventDoc {
+  titleAr: string;
+  titleEn: string;
+
+  descriptionAr?: string;
+  descriptionEn?: string;
+
+  imageUrl: string;
+
+  date: Timestamp;
+
+  createdAt: Timestamp;
+}
+
+// ---------------------------------------------------------------------------
 // Notifications
 // ---------------------------------------------------------------------------
 
@@ -313,6 +371,15 @@ export interface GuideSectionDoc {
   isActive: boolean;
 }
 
+export interface SocialLinkDoc {
+  nameAr: string;
+  nameEn: string;
+  url: string;
+  icon: string;
+  order: number;
+  isActive: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Generic typed converter + reference helpers
 // ---------------------------------------------------------------------------
@@ -408,6 +475,30 @@ export function getStudentsCollection(): CollectionReference<StudentDoc> | null 
 export function getNotificationsCollection(): CollectionReference<NotificationDoc> | null {
   return getTypedCollection<NotificationDoc>(
     COLLECTIONS.notifications
+  );
+}
+
+export function getFamiliesCollection(): CollectionReference<FamilyDoc> | null {
+  return getTypedCollection<FamilyDoc>(COLLECTIONS.families);
+}
+
+export function getSocialLinksCollection(): CollectionReference<SocialLinkDoc> | null {
+  return getTypedCollection<SocialLinkDoc>(
+    COLLECTIONS.socialLinks
+  );
+}
+
+/**
+ * Returns the events subcollection for a specific Student Family.
+ *
+ * Firestore path:
+ * /families/{familyId}/events
+ */
+export function getFamilyEventsCollection(
+  familyId: string
+): CollectionReference<FamilyEventDoc> | null {
+  return getTypedCollection<FamilyEventDoc>(
+    `${COLLECTIONS.families}/${familyId}/events`
   );
 }
 

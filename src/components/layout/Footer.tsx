@@ -25,10 +25,16 @@ export function Footer() {
     href: item.href,
   }));
 
-  const systemLinks = activeSystems.map((s) => ({
-    label: language === "ar" ? s.nameAr : s.nameEn,
-    href: s.officialUrl || undefined,
-  }));
+  const systemLinks = activeSystems
+    .filter(
+      (system) =>
+        typeof system.officialUrl === "string" &&
+        system.officialUrl.trim().length > 0
+    )
+    .map((system) => ({
+      label: language === "ar" ? system.nameAr : system.nameEn,
+      href: system.officialUrl!.trim(),
+    }));
 
   return (
     <footer className="border-t border-border bg-surface">
@@ -37,6 +43,7 @@ export function Footer() {
           {/* Brand section */}
           <div>
             <Logo showIdentity={true} />
+
             <p className="mt-4 text-sm text-foreground/70">
               {translate("footer.aboutText")}
             </p>
@@ -51,14 +58,16 @@ export function Footer() {
           </div>
 
           {/* University Systems */}
-          <div>
-            <FooterLinkGroup
-              heading={translate("footer.systemsHeading")}
-              items={systemLinks}
-            />
-          </div>
+          {systemLinks.length > 0 && (
+            <div>
+              <FooterLinkGroup
+                heading={translate("footer.systemsHeading")}
+                items={systemLinks}
+              />
+            </div>
+          )}
 
-          {/* Social + Copyright */}
+          {/* Social */}
           <div className="flex flex-col">
             <FooterSocialLinks />
           </div>
@@ -68,8 +77,10 @@ export function Footer() {
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-xs text-foreground/50">
             <span className="block">
-              © {year} {BRAND_NAME}. {translate("footer.rightsReserved")}
+              © {year} {BRAND_NAME}.{" "}
+              {translate("footer.rightsReserved")}
             </span>
+
             <span className="block">{BRAND_FULL_NAME}</span>
           </p>
         </div>

@@ -5,7 +5,7 @@ import {
   CalendarDays,
   MapPin,
   FileText,
-  Play,
+  ArrowUpRight,
 } from "lucide-react";
 import type { EventCategory } from "@/data/announcements";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -40,10 +40,10 @@ const CATEGORY_LABEL_KEYS: Record<EventCategory, string> = {
   social: "events.categories.social",
 };
 
-function isKnownCategory(
-  value: string | undefined
-): value is EventCategory {
-  return Boolean(value) && (value as string) in CATEGORY_ICONS;
+function isKnownCategory(value: string | undefined): value is EventCategory {
+  if (!value) return false;
+
+  return value in CATEGORY_ICONS;
 }
 
 export function EventCard({
@@ -72,101 +72,157 @@ export function EventCard({
     : undefined;
 
   return (
-    <div
+    <article
       id={id}
       className={cx(
-        "flex flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-all duration-300 hover:shadow-md",
+        "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
         className
       )}
     >
-      {/* Image */}
-      {imageUrl && (
-        <img
-          src={imageUrl}
-          alt={title}
-          className="h-48 w-full object-cover"
-        />
-      )}
+      {/* Top accent */}
+      <div className="h-1 w-full bg-primary" />
 
-      <div className="flex flex-col p-6">
-        {isKnownCategory(category) && (
-          <span className="inline-flex w-fit items-center gap-1 rounded-full bg-secondary-light px-2.5 py-0.5 text-[11px] font-medium text-secondary-dark">
-            {CategoryIcon && (
-              <CategoryIcon
-                className="h-3 w-3"
-                aria-hidden="true"
-              />
-            )}
-            {translate(
-              CATEGORY_LABEL_KEYS[category]
-            )}
-          </span>
-        )}
+      {/* Media */}
+      {imageUrl ? (
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-muted">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
 
-        <h3 className="mt-3 text-base font-semibold text-foreground">
-          {title}
-        </h3>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
-        <p className="mt-2 flex-1 text-sm text-foreground/70">
-          {description}
-        </p>
+          {isKnownCategory(category) && (
+            <div className="absolute start-4 top-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm backdrop-blur">
+                {CategoryIcon && (
+                  <CategoryIcon
+                    className="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  />
+                )}
 
-        {/* Video */}
-        {mediaVideoUrl && (
-          <div className="mt-4">
-            <video
-              controls
-              className="w-full rounded-md"
-              src={mediaVideoUrl}
-            >
-              Your browser does not support the video element.
-            </video>
-          </div>
-        )}
-
-        {/* File */}
-        {mediaFileUrl && (
-          <a
-            href={mediaFileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
-          >
-            <FileText
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
-            {language === "ar"
-              ? "عرض الملف"
-              : "View File"}
-          </a>
-        )}
-
-        <div className="mt-4 flex flex-col gap-1.5 border-t border-border pt-3">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-            <CalendarDays
-              className="h-3.5 w-3.5 shrink-0"
-              aria-hidden="true"
-            />
-            <time dateTime={dateIso}>
-              {formatDate(
-                dateIso,
-                language
-              )}
-            </time>
-          </div>
-
-          {location && (
-            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-              <MapPin
-                className="h-3.5 w-3.5 shrink-0"
-                aria-hidden="true"
-              />
-              <span>{location}</span>
+                {translate(CATEGORY_LABEL_KEYS[category])}
+              </span>
             </div>
           )}
         </div>
+      ) : (
+        <div className="relative flex aspect-[16/10] w-full items-end overflow-hidden bg-primary-light p-6">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
+
+          <CalendarDays
+            className="absolute -end-4 -top-4 h-28 w-28 text-primary/10"
+            aria-hidden="true"
+          />
+
+          {isKnownCategory(category) && (
+            <span className="relative inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm">
+              {CategoryIcon && (
+                <CategoryIcon
+                  className="h-3.5 w-3.5 text-primary"
+                  aria-hidden="true"
+                />
+              )}
+
+              {translate(CATEGORY_LABEL_KEYS[category])}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
+        {!isKnownCategory(category) && (
+          <div className="mb-3 h-1 w-10 rounded-full bg-primary" />
+        )}
+
+        <h3 className="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-xl">
+          {title}
+        </h3>
+
+        <p className="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
+
+        {/* Event details */}
+        <div className="mt-6 space-y-3 border-t border-border pt-5">
+          <div className="flex items-start gap-3 text-sm text-muted-foreground">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <CalendarDays
+                className="h-4 w-4"
+                aria-hidden="true"
+              />
+            </div>
+
+            <div className="min-w-0 pt-1">
+              <time dateTime={dateIso}>
+                {formatDate(dateIso, language)}
+              </time>
+            </div>
+          </div>
+
+          {location && (
+            <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <MapPin
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span className="min-w-0 pt-1 line-clamp-2">
+                {location}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Media actions */}
+        {(mediaVideoUrl || mediaFileUrl) && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {mediaVideoUrl && (
+              <a
+                href={mediaVideoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-white transition-all duration-200 hover:bg-primary-dark hover:shadow-md"
+              >
+                <ArrowUpRight
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
+
+                {language === "ar"
+                  ? "مشاهدة الفيديو"
+                  : "Watch Video"}
+              </a>
+            )}
+
+            {mediaFileUrl && (
+              <a
+                href={mediaFileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-surface-muted hover:shadow-sm"
+              >
+                <FileText
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
+
+                {language === "ar"
+                  ? "عرض الملف"
+                  : "View File"}
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Bottom hover line */}
+        <div className="mt-6 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />
       </div>
-    </div>
+    </article>
   );
 }

@@ -42,7 +42,9 @@ const CATEGORY_LABEL_KEYS: Record<AnnouncementCategory, string> = {
   orientation: "announcements.filters.orientation",
 };
 
-function isKnownCategory(value: string): value is AnnouncementCategory {
+function isKnownCategory(
+  value: string
+): value is AnnouncementCategory {
   return value in CATEGORY_ICONS;
 }
 
@@ -85,110 +87,231 @@ export function AnnouncementCard({
   const isImportant = priority === "important";
 
   return (
-    <div
+    <article
       id={id}
       className={cx(
-        "flex flex-col rounded-lg border bg-surface p-6 shadow-sm transition-all duration-300 hover:shadow-md",
-        isUrgent
-          ? "border-2 border-primary bg-primary-light"
-          : isImportant
-            ? "border-secondary"
-            : "border-border",
+        "group relative flex h-full flex-col overflow-hidden rounded-3xl",
+        "border border-border/80 bg-surface/80",
+        "shadow-sm backdrop-blur-xl",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.10)]",
+        "dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.25)]",
+        isUrgent &&
+          "border-primary/40 ring-1 ring-primary/10",
+        isImportant &&
+          "border-secondary/40 ring-1 ring-secondary/10",
         className
       )}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        {isUrgent && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-white">
-            <Icons.AlertCircle
-              className="h-3 w-3"
-              aria-hidden="true"
-            />
-            {translate("announcements.priority.urgent")}
-          </span>
+      {/* Top accent */}
+      <div
+        aria-hidden="true"
+        className={cx(
+          "absolute inset-x-0 top-0 h-1",
+          isUrgent
+            ? "bg-primary"
+            : isImportant
+              ? "bg-secondary"
+              : "bg-primary/20"
         )}
+      />
 
-        {isImportant && (
-          <span className="inline-flex items-center rounded-full bg-secondary-light px-2.5 py-0.5 text-[11px] font-semibold text-secondary-dark">
-            {translate("announcements.priority.important")}
-          </span>
+      {/* Ambient hover glow */}
+      <div
+        aria-hidden="true"
+        className={cx(
+          "pointer-events-none absolute -end-20 -top-20 h-48 w-48 rounded-full blur-3xl",
+          "opacity-0 transition-opacity duration-300",
+          "group-hover:opacity-100",
+          isUrgent
+            ? "bg-primary/15"
+            : isImportant
+              ? "bg-secondary/15"
+              : "bg-primary/10"
         )}
+      />
 
-        <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-medium text-foreground/60">
-          {CategoryIcon && (
-            <CategoryIcon
-              className="h-3 w-3"
-              aria-hidden="true"
-            />
+      <div className="relative z-10 flex h-full flex-col p-6 sm:p-7">
+        {/* Meta row */}
+        <div
+          className={cx(
+            "flex flex-wrap items-center gap-2",
+            isEnglish
+              ? "justify-start"
+              : "justify-start"
+          )}
+        >
+          {isUrgent && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow-sm">
+              <Icons.AlertCircle
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+
+              {translate(
+                "announcements.priority.urgent"
+              )}
+            </span>
           )}
 
-          {translate(CATEGORY_LABEL_KEYS[knownCategory])}
-        </span>
+          {isImportant && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-3 py-1 text-[11px] font-semibold text-secondary-dark">
+              <Icons.Info
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
 
-        {featured && (
-          <span className="inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-semibold text-white">
-            {translate("announcements.featuredLabel")}
+              {translate(
+                "announcements.priority.important"
+              )}
+            </span>
+          )}
+
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-medium text-muted-foreground">
+            {CategoryIcon ? (
+              <CategoryIcon
+                className="h-3.5 w-3.5 text-primary"
+                aria-hidden="true"
+              />
+            ) : null}
+
+            {translate(
+              CATEGORY_LABEL_KEYS[knownCategory]
+            )}
           </span>
+
+          {featured && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
+              <Icons.Star
+                className="h-3 w-3"
+                aria-hidden="true"
+              />
+
+              {translate(
+                "announcements.featuredLabel"
+              )}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="mt-5">
+          <h3
+            dir={isEnglish ? "ltr" : "rtl"}
+            className={cx(
+              "tracking-tight text-foreground",
+              featured
+                ? "text-xl font-bold sm:text-2xl"
+                : "text-lg font-bold sm:text-xl",
+              isEnglish
+                ? "text-left"
+                : "text-right"
+            )}
+          >
+            {displayTitle}
+          </h3>
+
+          <p
+            dir={isEnglish ? "ltr" : "rtl"}
+            className={cx(
+              "mt-3 leading-7 text-muted-foreground",
+              featured
+                ? "text-base"
+                : "text-sm",
+              isEnglish
+                ? "text-left"
+                : "text-right"
+            )}
+          >
+            {displayDescription}
+          </p>
+        </div>
+
+        {/* Media */}
+        {mediaImageUrl && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-muted">
+            <img
+              src={mediaImageUrl}
+              alt={displayTitle}
+              className="aspect-[16/9] w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+            />
+          </div>
         )}
+
+        {mediaVideoUrl && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-black">
+            <video
+              src={mediaVideoUrl}
+              controls
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {mediaFileUrl && (
+          <a
+            href={mediaFileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cx(
+              "mt-6 inline-flex w-fit items-center gap-2 rounded-xl",
+              "border border-primary/20 bg-primary/5 px-4 py-2.5",
+              "text-sm font-semibold text-primary",
+              "transition-all duration-200",
+              "hover:border-primary/30 hover:bg-primary/10",
+              "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background",
+              isEnglish
+                ? "self-start"
+                : "self-end"
+            )}
+          >
+            {isEnglish
+              ? "Open Link"
+              : "فتح الرابط"}
+
+            {isEnglish ? (
+              <Icons.ArrowUpRight
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden="true"
+              />
+            ) : (
+              <Icons.ArrowUpLeft
+                className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden="true"
+              />
+            )}
+          </a>
+        )}
+
+        {/* Footer */}
+        <div
+          className={cx(
+            "mt-auto flex items-center border-t border-border/70 pt-5",
+            "text-xs font-medium text-muted-foreground",
+            isEnglish
+              ? "justify-start"
+              : "justify-end"
+          )}
+        >
+          <time dateTime={dateIso}>
+            {formatDate(dateIso, language)}
+          </time>
+        </div>
       </div>
 
-      <h3
-        dir={isEnglish ? "ltr" : "rtl"}
+      {/* Bottom hover line */}
+      <div
+        aria-hidden="true"
         className={cx(
-          "mt-3 font-semibold text-foreground",
-          featured
-            ? "text-xl sm:text-2xl"
-            : "text-base"
+          "absolute bottom-0 start-0 h-1 w-0",
+          "transition-all duration-300 group-hover:w-full",
+          isUrgent
+            ? "bg-primary"
+            : isImportant
+              ? "bg-secondary"
+              : "bg-primary"
         )}
-      >
-        {displayTitle}
-      </h3>
-
-      <p
-        dir={isEnglish ? "ltr" : "rtl"}
-        className={cx(
-          "mt-2 text-foreground/70",
-          featured
-            ? "text-base"
-            : "text-sm"
-        )}
-      >
-        {displayDescription}
-      </p>
-
-      {mediaImageUrl && (
-        <img
-          src={mediaImageUrl}
-          alt={displayTitle}
-          className="mt-4 w-full rounded-md object-cover"
-        />
-      )}
-
-      {mediaVideoUrl && (
-        <video
-          src={mediaVideoUrl}
-          controls
-          className="mt-4 w-full rounded-md"
-        />
-      )}
-
-      {mediaFileUrl && (
-        <a
-          href={mediaFileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-        >
-          {isEnglish ? "Open Link" : "فتح الرابط"}
-        </a>
-      )}
-
-      <time
-        dateTime={dateIso}
-        className="mt-4 text-xs font-medium text-foreground/50"
-      >
-        {formatDate(dateIso, language)}
-      </time>
-    </div>
+      />
+    </article>
   );
 }

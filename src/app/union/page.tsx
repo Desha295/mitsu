@@ -7,7 +7,7 @@ import { BRAND_NAME } from "@/constants/brand";
 export const metadata: Metadata = {
   title: `Student Union — ${BRAND_NAME}`,
   description:
-    "Meet the MITSU Student Union: vision, mission, leadership, and committees.",
+    "Meet the IT Student Union: vision, mission, leadership, and committees.",
 };
 
 /**

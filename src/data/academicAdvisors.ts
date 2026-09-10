@@ -92,19 +92,19 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "rahma-waled",
-    nameAr: "رحمة وائل شوقي",
+    nameAr: "رحمة وليد شوقي",
     nameEn: "Rahma Waled Shawky",
     email: "rahma.waled@must.edu.eg",
   },
   {
     id: "rojina-mohamadin",
-    nameAr: "روجينا محمدين عبد القادر",
+    nameAr: "روچينا  عبد القادر",
     nameEn: "Rojina Mohamadin Abdelkader",
     email: "rojina.abdelkader@must.edu.eg",
   },
   {
     id: "salma-yehia",
-    nameAr: "سلمى يحيى فوزي حسن علي",
+    nameAr: "سلمى يحيى   ",
     nameEn: "Salma Yehia Fawzy Hassan Ali",
     email: "salma.fawzy@must.edu.eg",
   },
@@ -128,7 +128,7 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "dalia-abdraboo",
-    nameAr: "داليا عبد ربه سعد عبد ربه",
+    nameAr: "داليا عبد ربه ",
     nameEn: "Dalia Abdraboo Saad Abdraboo",
     email: "dalia.saad@must.edu.eg",
   },
@@ -146,13 +146,13 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "maged-khafagy",
-    nameAr: "ماجد محمد عبد المنعم خفاجي",
+    nameAr: "ماجد  خفاجي",
     nameEn: "Maged Mohamed Abdel Monem Khafagy",
     email: "mkhafagy@must.edu.eg",
   },
   {
     id: "nermeen-kamal",
-    nameAr: "نرمين كمال صداوي إبراهيم",
+    nameAr: "نرمين كمال  ",
     nameEn: "Nermeen Kamal Sadawy Ibrahim",
     email: "nermeen.ibrahim@must.edu.eg",
   },
@@ -176,7 +176,7 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "jana-sakr",
-    nameAr: "جانا إسلام عبد الرحمن حسن موسى صقر",
+    nameAr: "چنى صقر",
     nameEn: "Jana Eslam Abdelrahman Hassan Mosa Sakr",
     email: "jana.sakr@must.edu.eg",
   },
@@ -200,7 +200,7 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "islam-saied",
-    nameAr: "إسلام سعيد سعيد",
+    nameAr: "إسلام سعيد ",
     nameEn: "Islam Saied Saied",
     email: "islam.saied@must.edu.eg",
   },
@@ -213,18 +213,18 @@ export const academicAdvisors: AcademicAdvisor[] = [
   {
     id: "nehal-abdel-salam",
     nameAr: "نهال عبد السلام محمد",
-    nameEn: "Nehal Abd el-Salam Mohamed",
+    nameEn: "Nehal Abd El-Salam Mohamed",
     email: "nehal.mohamed@must.edu.eg",
   },
   {
     id: "ahmed-lotfy",
-    nameAr: "أحمد عبد اللطيف محمد صلاح الدين لطفي",
+    nameAr: "أحمد عبد اللطيف",
     nameEn: "Ahmed Abdellatife Mohamed Salaheldine Lotfy",
     email: "ahmed.lotfy@must.edu.eg",
   },
   {
     id: "ahmed-elashry",
-    nameAr: "أحمد طارق منصور السيد العشري",
+    nameAr: "أحمد طارق العشري",
     nameEn: "Ahmed Tarek Mansour Elsaid Elashry",
     email: "ahmed.elashry@must.edu.eg",
   },

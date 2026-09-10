@@ -2,26 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { mainNavigation } from "@/data/navigation";
 import { useLanguage } from "@/hooks/useLanguage";
 import { cx, focusRing } from "@/lib/utils";
 
 interface NavLinksProps {
   orientation?: "horizontal" | "vertical";
-  /** Called after a link is activated — used to close the mobile menu. */
   onNavigate?: () => void;
   className?: string;
 }
 
-/**
- * Renders the link list only — no <nav> landmark here, since Navbar and
- * MobileMenu each provide their own <nav aria-label> wrapper around this
- * component. Keeps this component single-responsibility and reusable in
- * both places without duplicating landmark semantics (07_COMPONENT_RULES.md).
- *
- * Data comes from data/navigation.ts — no hardcoded links, per Sprint 1.1
- * Navbar requirements.
- */
 export function NavLinks({
   orientation = "horizontal",
   onNavigate,
@@ -35,13 +26,17 @@ export function NavLinks({
       className={cx(
         "flex",
         orientation === "horizontal"
-          ? "items-center gap-1"
-          : "flex-col gap-1",
+          ? "items-center justify-center gap-0.5"
+          : "flex-col gap-1.5",
         className
       )}
     >
       {mainNavigation.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive =
+          pathname === item.href ||
+          (item.href !== "/" &&
+            pathname.startsWith(`${item.href}/`));
+
         return (
           <li key={item.href}>
             <Link
@@ -49,14 +44,34 @@ export function NavLinks({
               onClick={onNavigate}
               aria-current={isActive ? "page" : undefined}
               className={cx(
-                "block rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150",
+                "group relative block rounded-xl px-3.5 py-2.5",
+                "text-sm font-medium",
+                "transition-all duration-200 ease-out",
+                "outline-none",
+                focusRing,
                 isActive
-                  ? "text-primary"
-                  : "text-foreground/80 hover:text-foreground hover:bg-surface-muted",
-                focusRing
+                  ? "bg-primary text-primary-foreground shadow-[0_4px_14px_rgba(0,0,0,0.10)]"
+                  : "text-foreground/70 hover:bg-background/80 hover:text-foreground hover:shadow-sm",
+                orientation === "vertical" && "w-full"
               )}
             >
-              {translate(item.labelKey)}
+              <span className="relative z-10">
+                {translate(item.labelKey)}
+              </span>
+
+              {/* Active indicator */}
+              {isActive ? (
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "absolute bottom-1.5 start-1/2",
+                    "h-0.5 w-4 -translate-x-1/2",
+                    "rounded-full",
+                    "bg-primary-foreground/70",
+                    "transition-all duration-200",
+                  ].join(" ")}
+                />
+              ) : null}
             </Link>
           </li>
         );

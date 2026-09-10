@@ -137,7 +137,34 @@ match /admins/{userId} {
 
   allow write: if isSuperAdmin();
 }
+// -------------------------------------------------------------------
+// Student Families
+// -------------------------------------------------------------------
 
+match /families/{familyId} {
+  // Public users can read active families.
+  // Admins can read and manage all families.
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+
+  // Family Events
+  match /events/{eventId} {
+    // Public users can read family events.
+    // Admins can read and manage all family events.
+    allow read: if true;
+    allow write: if isAdmin();
+  }
+}
+// -------------------------------------------------------------------
+// Social Links
+// -------------------------------------------------------------------
+
+// Public users can read active social links.
+// Admins can read and manage all social links.
+match /socialLinks/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
 // -------------------------------------------------------------------
 // Deny everything else by default
 // -------------------------------------------------------------------

@@ -12,6 +12,7 @@ export const mainNavigation: NavigationItem[] = [
   { labelKey: "nav.advisors", href: "/academic-advisors" },
   { labelKey: "nav.announcements", href: "/announcements" },
   { labelKey: "nav.union", href: "/union" },
+  { labelKey: "nav.families", href: "/families" },
   { labelKey: "nav.about", href: "/about" },
   { labelKey: "nav.contact", href: "/contact" },
 ];

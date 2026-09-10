@@ -1,65 +1,84 @@
 "use client";
 
+import { FileImage, Loader2 } from "lucide-react";
+
 import { Container } from "@/components/layout/Container";
 import { StudyPlanCard } from "@/components/shared/StudyPlanCard";
 import { studyPlans } from "@/data/studyPlans";
 import { useLanguage } from "@/hooks/useLanguage";
 
-/**
- * Study Plans section (components/sections — large page section per
- * 07_COMPONENT_RULES.md §3.3). Displays official study plan images as
- * reference documents only (UI_GUIDELINES.md: "Study Plans should be
- * displayed as official reference documents") — no extracted or
- * summarized content, just the images themselves via StudyPlanCard.
- *
- * SPRINT 4 — INTENTIONAL EXCEPTION (Phase 4.8, not migrated):
- * Every other public section was migrated to Firestore in Sprint 4.
- * This one deliberately was not, and stays on src/data/studyPlans.ts as
- * a live runtime source, not just historical reference.
- *
- * Reason: this section is an image gallery with a zoom viewer (each
- * item is a raster image with required intrinsic width/height for
- * next/image). Firestore's `documents` collection / documentsService
- * models something different in kind — generic downloadable PDF
- * resources (DocumentForm.tsx enforces `accept="application/pdf"` on
- * upload; there's no width/height anywhere in DocumentResourceDoc).
- * These are two different content models, not two representations of
- * the same data, so there's no reasonable field-level mapping the way
- * Systems/Committees/Leadership had for their missing presentational
- * fields — forcing one would mean either fabricating a correspondence
- * between unrelated items or redesigning this section's UI into a
- * document/download list, both of which were explicitly ruled out.
- *
- * To be revisited in a future sprint once the content model itself is
- * decided (e.g. adding image/dimension fields to the schema, or
- * deciding this section should become a PDF list backed by
- * documentsService as-is). Until then this has no Firestore dependency
- * and no loading/empty/error states, unlike every other Phase 4 section.
- */
 export function StudyPlansSection() {
   const { translate } = useLanguage();
 
-  const sortedPlans = [...studyPlans].sort((a, b) => a.order - b.order);
+  const sortedPlans = [...studyPlans].sort(
+    (a, b) => a.order - b.order
+  );
 
   return (
-    <section className="bg-surface-muted py-12 sm:py-16 md:py-20">
-      <Container className="flex flex-col gap-12">
-        {/* Heading */}
-        <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+    <section className="relative overflow-hidden border-t border-border/60 bg-surface-muted py-16 sm:py-20 lg:py-28">
+      {/* Background grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+        }}
+      />
+
+      {/* Ambient glows */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-40 top-10 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+      />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-40 bottom-10 h-80 w-80 rounded-full bg-primary/5 blur-3xl"
+      />
+
+      <Container className="relative">
+        {/* Header */}
+        <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            <FileImage
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+            <span>{translate("studyPlans.heading")}</span>
+          </div>
+
+          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             {translate("studyPlans.heading")}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground/70">
+
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             {translate("studyPlans.subheading")}
           </p>
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {sortedPlans.map((plan) => (
-            <StudyPlanCard key={plan.id} plan={plan} />
-          ))}
-        </div>
+        {/* Plans */}
+        {sortedPlans.length > 0 ? (
+          <div className="mx-auto grid w-full max-w-7xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {sortedPlans.map((plan) => (
+              <StudyPlanCard
+                key={plan.id}
+                plan={plan}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-border bg-surface/50 px-6 py-16 text-center">
+            <Loader2
+              className="mx-auto mb-3 h-6 w-6 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <p className="text-sm text-muted-foreground">
+              {translate("common.loading")}
+            </p>
+          </div>
+        )}
       </Container>
     </section>
   );

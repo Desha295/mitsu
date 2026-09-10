@@ -13,6 +13,7 @@
     "announcements": "Announcements",
     "advisors": "Academic Advisors",
     "union": "Student Union",
+    "families": "Student Families",
     "about": "About MITSU",
     "contact": "Contact"
   },
@@ -93,7 +94,7 @@
       "explore": "Explore"
     },
     "campus": {
-      "heading": "Faculty Community",
+      "heading": "College Community",
       "imageAlt": "MUST Campus",
       "universityLogoAlt": "University logo"
     },
@@ -247,11 +248,11 @@
     }
   },
   "union": {
-    "name": "MITSU Student Union",
+    "name": "IT Student Union",
     "overview": "The Student Union of the Faculty of Information Technology at MUST is the official representative body of students. It works to enhance student life by organizing academic, cultural, social, sports, artistic, and community activities while strengthening communication between students and the faculty administration. The Union aims to create an engaging, supportive, and inspiring university environment for every student.",
     "vision": "To build an innovative, collaborative, and inclusive student community that empowers every student to achieve academic excellence, personal growth, leadership, and social responsibility.",
     "mission": "To represent students effectively, organize meaningful activities, support student initiatives, foster leadership skills, and connect students with university opportunities through transparent communication and teamwork.",
-    "heroImageAlt": "MITSU Student Union",
+    "heroImageAlt": "IT Student Union",
     "visionHeading": "Our Vision",
     "missionHeading": "Our Mission",
     "leadershipHeading": "Leadership",
@@ -470,7 +471,7 @@
   },
   "contact": {
     "heading": "Contact Us",
-    "subheading": "Reach the Student Union office, leadership, and official channels.",
+    "subheading": "Reach the Student Union , leadership, and official channels.",
     "officeHeading": "Contact Information",
     "officeSubheading": "",
     "office": {
@@ -511,11 +512,13 @@
       "announcements": "Announcements",
       "events": "Events",
       "union": "Student Union",
+      "families": "Student Families",
       "leadership": "Leadership",
       "facultyLeadership": "Faculty Leadership",
       "systems": "University Systems",
       "guide": "Student Guide",
       "studyPlans": "Study Plans",
+      "socialLinks": "Social Links",
       "contact": "Contact",
       "about": "About",
       "settings": "Settings"

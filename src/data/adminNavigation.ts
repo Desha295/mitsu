@@ -1,11 +1,7 @@
 /**
- * Admin sidebar navigation data (Sprint 3.1 — Admin Dashboard Foundation).
+ * Admin sidebar navigation data.
  *
- * Only "Dashboard" (`/admin`) is a real, working route this sprint —
- * every other item is structural/placeholder, marked `isImplemented:
- * false` so AdminSidebar can render them as "Coming soon" rather than
- * linking to routes that don't exist yet (they'll become real as future
- * sprints build /admin/announcements, /admin/events, etc.).
+ * All items marked as implemented point to working admin routes.
  */
 
 export interface AdminNavItem {
@@ -74,6 +70,13 @@ export const adminNavigation: AdminNavItem[] = [
     isImplemented: true,
   },
   {
+    id: "families",
+    icon: "UsersRound",
+    labelKey: "admin.nav.families",
+    href: "/admin/families",
+    isImplemented: true,
+  },
+  {
     id: "systems",
     icon: "Laptop",
     labelKey: "admin.nav.systems",
@@ -92,6 +95,13 @@ export const adminNavigation: AdminNavItem[] = [
     icon: "FileText",
     labelKey: "admin.nav.studyPlans",
     href: "/admin/study-plans",
+    isImplemented: true,
+  },
+  {
+    id: "socialLinks",
+    icon: "Share2",
+    labelKey: "admin.nav.socialLinks",
+    href: "/admin/social-links",
     isImplemented: true,
   },
   {

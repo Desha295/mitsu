@@ -40,7 +40,7 @@ export default function AcademicAdvisorsPage() {
   const { user } = useAuth();
 
   const [excelUrl, setExcelUrl] = useState("");
-  const [academicTerm, setAcademicTerm] = useState("Fall 2026");
+  const [academicTerm, setAcademicTerm] = useState("Fall 2026 - 2027");
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<PreviewResponse | null>(null);
@@ -229,12 +229,12 @@ export default function AcademicAdvisorsPage() {
               onChange={(event) => setAcademicTerm(event.target.value)}
               className="w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2"
             >
-              <option value="Fall 2026">Fall 2026</option>
-              <option value="Spring 2027">Spring 2027</option>
-              <option value="Summer 2027">Summer 2027</option>
-              <option value="Fall 2027">Fall 2027</option>
-              <option value="Spring 2028">Spring 2028</option>
-              <option value="Summer 2028">Summer 2028</option>
+              <option value="Fall 2026-2027">Fall 2026 - 2027</option>
+              <option value="Spring 2027">Spring 2027 </option>
+              <option value="Summer 2027">Summer 2027 </option>
+              <option value="Fall 2027">Fall 2027-2028</option>
+              <option value="Spring 2028">Spring 2028 </option>
+              <option value="Summer 2028">Summer 2028 </option>
             </select>
 
             <p className="text-xs text-muted-foreground">
