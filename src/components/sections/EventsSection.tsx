@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight,
   CalendarDays,
   Loader2,
   Sparkles,
@@ -20,7 +19,7 @@ import { timestampToDate } from "@/lib/firebase/query-helpers";
 import type { WithId } from "@/lib/firebase/services";
 import { cx } from "@/lib/utils";
 
-const PUBLISHED_SOONEST_FIRST: QueryOptions<EventDoc> = {
+const PUBLISHED_EVENTS: QueryOptions<EventDoc> = {
   filters: [
     {
       field: "isPublished",
@@ -34,15 +33,144 @@ const PUBLISHED_SOONEST_FIRST: QueryOptions<EventDoc> = {
   },
 };
 
-function toDateIso(doc: WithId<EventDoc>): string {
+function getEventDate(
+  event: WithId<EventDoc>
+): Date {
+  const converted = timestampToDate(event.date);
+
+  if (
+    converted &&
+    !Number.isNaN(converted.getTime())
+  ) {
+    return converted;
+  }
+
+  const raw = event.date as unknown;
+
+  if (
+    typeof raw === "string" ||
+    typeof raw === "number"
+  ) {
+    const parsed = new Date(raw);
+
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+
+  if (
+    raw &&
+    typeof raw === "object"
+  ) {
+    const value = raw as {
+      seconds?: unknown;
+      toDate?: unknown;
+    };
+
+    if (
+      typeof value.toDate === "function"
+    ) {
+      const parsed = value.toDate();
+
+      if (
+        parsed instanceof Date &&
+        !Number.isNaN(parsed.getTime())
+      ) {
+        return parsed;
+      }
+    }
+
+    if (
+      typeof value.seconds === "number"
+    ) {
+      return new Date(
+        value.seconds * 1000
+      );
+    }
+  }
+
+  return new Date(0);
+}
+
+function toDateIso(
+  event: WithId<EventDoc>
+): string {
+  return getEventDate(event).toISOString();
+}
+
+function EventGrid({
+  events,
+  language,
+  highlightedId,
+}: {
+  events: WithId<EventDoc>[];
+  language: "ar" | "en";
+  highlightedId: string | null;
+}) {
+  const now = Date.now();
+
   return (
-    timestampToDate(doc.date) ??
-    new Date(0)
-  ).toISOString();
+    <div className="flex flex-wrap justify-center gap-6">
+      {events.map((event) => {
+        const eventDate = getEventDate(event);
+        const eventTime = eventDate.getTime();
+
+        const isUpcoming =
+          eventTime >= now;
+
+        const isNotificationTarget =
+          highlightedId === event.id;
+
+        const title =
+          language === "ar"
+            ? event.titleAr
+            : event.titleEn;
+
+        const description =
+          language === "ar"
+            ? event.descriptionAr
+            : event.descriptionEn;
+
+        const location =
+          language === "ar"
+            ? event.locationAr
+            : event.locationEn;
+
+        return (
+          <div
+            key={event.id}
+            className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333333%-1rem)]"
+          >
+            <EventCard
+              id={`event-${event.id}`}
+              className={cx(
+                "h-full transition-all duration-300",
+                isNotificationTarget &&
+                  "relative z-10 scale-[1.01] shadow-xl ring-2 ring-primary ring-offset-4 ring-offset-background"
+              )}
+              title={title}
+              description={description}
+              category={event.category}
+              dateIso={toDateIso(event)}
+              location={location}
+              imageUrl={event.imageUrl}
+              mediaVideoUrl={
+                event.mediaVideoUrl
+              }
+              mediaFileUrl={
+                event.mediaFileUrl
+              }
+              isUpcoming={isUpcoming}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function EventsSection() {
-  const { translate, language } = useLanguage();
+  const { language } = useLanguage();
 
   const [highlightedId, setHighlightedId] =
     useState<string | null>(null);
@@ -53,8 +181,40 @@ export function EventsSection() {
     error,
   } = useFirestoreList(
     eventsService,
-    PUBLISHED_SOONEST_FIRST
+    PUBLISHED_EVENTS
   );
+
+  const { upcomingEvents, pastEvents } =
+    useMemo(() => {
+      const now = Date.now();
+
+      const upcoming = items
+        .filter(
+          (event) =>
+            getEventDate(event).getTime() >= now
+        )
+        .sort(
+          (a, b) =>
+            getEventDate(a).getTime() -
+            getEventDate(b).getTime()
+        );
+
+      const past = items
+        .filter(
+          (event) =>
+            getEventDate(event).getTime() < now
+        )
+        .sort(
+          (a, b) =>
+            getEventDate(b).getTime() -
+            getEventDate(a).getTime()
+        );
+
+      return {
+        upcomingEvents: upcoming,
+        pastEvents: past,
+      };
+    }, [items]);
 
   useEffect(() => {
     if (
@@ -76,12 +236,9 @@ export function EventsSection() {
       return;
     }
 
-    const targetId =
-      `event-${highlightId}`;
-
     const target =
       document.getElementById(
-        targetId
+        `event-${highlightId}`
       );
 
     if (!target) {
@@ -148,9 +305,7 @@ export function EventsSection() {
             {language === "ar" ? (
               <>
                 <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  {language === "ar"
-                    ? "الفعاليات القادمة"
-                    : "Upcoming Events"}
+                  الفعاليات
                 </span>
 
                 <span className="h-px w-8 bg-primary" />
@@ -160,7 +315,7 @@ export function EventsSection() {
                 <span className="h-px w-8 bg-primary" />
 
                 <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  Upcoming Events
+                  Events
                 </span>
               </>
             )}
@@ -180,37 +335,16 @@ export function EventsSection() {
                   "text-right"
               )}
             >
-              <div
-                className={cx(
-                  "mb-3 flex items-center gap-3",
-                  language === "ar" &&
-                    "justify-end"
-                )}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
-                  <CalendarDays
-                    className="h-5 w-5"
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <span className="rounded-full border border-border bg-surface/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
-                  {language === "ar"
-                    ? "مركز الفعاليات"
-                    : "Events Center"}
-                </span>
-              </div>
-
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                {translate(
-                  "events.upcomingHeading"
-                )}
+                {language === "ar"
+                  ? "فعاليات MITSU"
+                  : "MITSU Events"}
               </h2>
 
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                {translate(
-                  "events.subheading"
-                )}
+                {language === "ar"
+                  ? "تعرّف على فعاليات MITSU القادمة والسابقة، وابقَ على اطلاع بكل ما يحدث داخل مجتمعنا الطلابي."
+                  : "Explore upcoming and past MITSU events and stay connected with everything happening across our student community."}
               </p>
             </div>
 
@@ -222,8 +356,8 @@ export function EventsSection() {
 
               <span className="text-xs font-medium text-muted-foreground">
                 {language === "ar"
-                  ? "لا تفوّت فعالياتنا"
-                  : "Stay up to date"}
+                  ? "فعالياتنا وذكرياتنا"
+                  : "Events & Memories"}
               </span>
             </div>
           </div>
@@ -241,9 +375,9 @@ export function EventsSection() {
             />
 
             <p className="text-sm text-muted-foreground">
-              {translate(
-                "common.loading"
-              )}
+              {language === "ar"
+                ? "جاري تحميل الفعاليات..."
+                : "Loading events..."}
             </p>
           </div>
         )}
@@ -260,9 +394,9 @@ export function EventsSection() {
             />
 
             <p className="text-sm font-medium text-foreground">
-              {translate(
-                "events.errorState"
-              )}
+              {language === "ar"
+                ? "تعذر تحميل الفعاليات حاليًا."
+                : "Unable to load events right now."}
             </p>
           </div>
         )}
@@ -270,83 +404,7 @@ export function EventsSection() {
         {/* Content */}
         {!loading && !error && (
           <>
-            {/* Results heading */}
-            <div
-              className={cx(
-                "mb-6 flex items-center justify-between gap-4",
-                language === "ar" &&
-                  "flex-row-reverse"
-              )}
-            >
-              <div
-                className={cx(
-                  "flex items-center gap-3",
-                  language === "ar" &&
-                    "flex-row-reverse"
-                )}
-              >
-                <span className="h-8 w-1 rounded-full bg-primary" />
-
-                <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                  {translate(
-                    "events.upcomingHeading"
-                  )}
-                </h3>
-              </div>
-
-              <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                {items.length}
-              </span>
-            </div>
-
-            {/* Events */}
-            {items.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {items.map((event) => {
-                  const title =
-                    language === "ar"
-                      ? event.titleAr
-                      : event.titleEn;
-
-                  const description =
-                    language === "ar"
-                      ? event.descriptionAr
-                      : event.descriptionEn;
-
-                  const location =
-                    language === "ar"
-                      ? event.locationAr
-                      : event.locationEn;
-
-                  const isNotificationTarget =
-                    highlightedId === event.id;
-
-                  return (
-                    <EventCard
-                      key={event.id}
-                      id={`event-${event.id}`}
-                      className={cx(
-                        "transition-all duration-300",
-                        isNotificationTarget &&
-                          "relative z-10 scale-[1.01] shadow-xl ring-2 ring-primary ring-offset-4 ring-offset-background"
-                      )}
-                      title={title}
-                      description={description}
-                      category={event.category}
-                      dateIso={toDateIso(event)}
-                      location={location}
-                      imageUrl={event.imageUrl}
-                      mediaVideoUrl={
-                        event.mediaVideoUrl
-                      }
-                      mediaFileUrl={
-                        event.mediaFileUrl
-                      }
-                    />
-                  );
-                })}
-              </div>
-            ) : (
+            {items.length === 0 ? (
               <div className="flex min-h-[14rem] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-surface/50 px-6 text-center">
                 <CalendarDays
                   className="h-8 w-8 text-muted-foreground"
@@ -354,10 +412,94 @@ export function EventsSection() {
                 />
 
                 <p className="mt-4 text-sm font-medium text-foreground">
-                  {translate(
-                    "events.emptyState"
-                  )}
+                  {language === "ar"
+                    ? "لا توجد فعاليات متاحة حاليًا."
+                    : "No events available at the moment."}
                 </p>
+              </div>
+            ) : (
+              <div className="space-y-14">
+                {/* Upcoming */}
+                {upcomingEvents.length > 0 && (
+                  <div>
+                    <div
+                      className={cx(
+                        "mb-6 flex items-center justify-between gap-4",
+                        language === "ar" &&
+                          "flex-row-reverse"
+                      )}
+                    >
+                      <div
+                        className={cx(
+                          "flex items-center gap-3",
+                          language === "ar" &&
+                            "flex-row-reverse"
+                        )}
+                      >
+                        <span className="h-8 w-1 rounded-full bg-primary" />
+
+                        <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                          {language === "ar"
+                            ? "الفعاليات القادمة"
+                            : "Upcoming Events"}
+                        </h3>
+                      </div>
+
+                      <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                        {upcomingEvents.length}
+                      </span>
+                    </div>
+
+                    <EventGrid
+                      events={upcomingEvents}
+                      language={language}
+                      highlightedId={
+                        highlightedId
+                      }
+                    />
+                  </div>
+                )}
+
+                {/* Past */}
+                {pastEvents.length > 0 && (
+                  <div>
+                    <div
+                      className={cx(
+                        "mb-6 flex items-center justify-between gap-4",
+                        language === "ar" &&
+                          "flex-row-reverse"
+                      )}
+                    >
+                      <div
+                        className={cx(
+                          "flex items-center gap-3",
+                          language === "ar" &&
+                            "flex-row-reverse"
+                        )}
+                      >
+                        <span className="h-8 w-1 rounded-full bg-primary" />
+
+                        <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                          {language === "ar"
+                            ? "الفعاليات السابقة"
+                            : "Past Events"}
+                        </h3>
+                      </div>
+
+                      <span className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                        {pastEvents.length}
+                      </span>
+                    </div>
+
+                    <EventGrid
+                      events={pastEvents}
+                      language={language}
+                      highlightedId={
+                        highlightedId
+                      }
+                    />
+                  </div>
+                )}
               </div>
             )}
           </>

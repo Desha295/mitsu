@@ -22,6 +22,7 @@ interface EventCardProps {
   mediaFileUrl?: string;
   id?: string;
   className?: string;
+  isUpcoming?: boolean;
 }
 
 const CATEGORY_ICONS: Record<EventCategory, string> = {
@@ -40,7 +41,9 @@ const CATEGORY_LABEL_KEYS: Record<EventCategory, string> = {
   social: "events.categories.social",
 };
 
-function isKnownCategory(value: string | undefined): value is EventCategory {
+function isKnownCategory(
+  value: string | undefined
+): value is EventCategory {
   if (!value) return false;
 
   return value in CATEGORY_ICONS;
@@ -57,6 +60,7 @@ export function EventCard({
   mediaFileUrl,
   id,
   className,
+  isUpcoming = true,
 }: EventCardProps) {
   const { translate, language } = useLanguage();
 
@@ -93,8 +97,30 @@ export function EventCard({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
-          {isKnownCategory(category) && (
-            <div className="absolute start-4 top-4">
+          <div className="absolute start-4 top-4 flex flex-wrap gap-2">
+            <span
+              className={cx(
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur",
+                isUpcoming
+                  ? "border-primary/20 bg-primary text-white"
+                  : "border-white/20 bg-white/95 text-gray-900"
+              )}
+            >
+              <CalendarDays
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
+
+              {isUpcoming
+                ? language === "ar"
+                  ? "فعالية قادمة"
+                  : "Upcoming Event"
+                : language === "ar"
+                  ? "فعالية سابقة"
+                  : "Past Event"}
+            </span>
+
+            {isKnownCategory(category) && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm backdrop-blur">
                 {CategoryIcon && (
                   <CategoryIcon
@@ -103,10 +129,12 @@ export function EventCard({
                   />
                 )}
 
-                {translate(CATEGORY_LABEL_KEYS[category])}
+                {translate(
+                  CATEGORY_LABEL_KEYS[category]
+                )}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ) : (
         <div className="relative flex aspect-[16/10] w-full items-end overflow-hidden bg-primary-light p-6">
@@ -117,18 +145,44 @@ export function EventCard({
             aria-hidden="true"
           />
 
-          {isKnownCategory(category) && (
-            <span className="relative inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm">
-              {CategoryIcon && (
-                <CategoryIcon
-                  className="h-3.5 w-3.5 text-primary"
-                  aria-hidden="true"
-                />
+          <div className="relative flex flex-wrap gap-2">
+            <span
+              className={cx(
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm",
+                isUpcoming
+                  ? "border-primary/20 bg-primary text-white"
+                  : "border-border bg-surface text-foreground"
               )}
+            >
+              <CalendarDays
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              />
 
-              {translate(CATEGORY_LABEL_KEYS[category])}
+              {isUpcoming
+                ? language === "ar"
+                  ? "فعالية قادمة"
+                  : "Upcoming Event"
+                : language === "ar"
+                  ? "فعالية سابقة"
+                  : "Past Event"}
             </span>
-          )}
+
+            {isKnownCategory(category) && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm">
+                {CategoryIcon && (
+                  <CategoryIcon
+                    className="h-3.5 w-3.5 text-primary"
+                    aria-hidden="true"
+                  />
+                )}
+
+                {translate(
+                  CATEGORY_LABEL_KEYS[category]
+                )}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -201,24 +255,24 @@ export function EventCard({
             )}
 
             {mediaFileUrl && (
-              <a
-                href={mediaFileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-surface-muted hover:shadow-sm"
-              >
-                <FileText
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                />
+          <a
+            href={mediaFileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-surface-muted hover:shadow-sm"
+          >
+            <ArrowUpRight
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
 
-                {language === "ar"
-                  ? "عرض الملف"
-                  : "View File"}
-              </a>
-            )}
-          </div>
+            {language === "ar"
+              ? "فتح الرابط"
+              : "Open Link"}
+          </a>
         )}
+                  </div>
+                )}
 
         {/* Bottom hover line */}
         <div className="mt-6 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />

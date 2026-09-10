@@ -191,7 +191,7 @@ export default function FamilyDetailsPage() {
   }
 
   const name = isArabic ? family.nameAr : family.nameEn;
-  const secondaryName = isArabic ? family.nameEn : family.nameAr;
+
   const description = isArabic
     ? family.descriptionAr
     : family.descriptionEn;
@@ -262,10 +262,6 @@ export default function FamilyDetailsPage() {
               <h1 className="break-words text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
                 {name}
               </h1>
-
-              <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-                {secondaryName}
-              </p>
 
               <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
                 {description}
@@ -530,10 +526,6 @@ export default function FamilyDetailsPage() {
                   ? event.titleAr
                   : event.titleEn;
 
-                const secondaryTitle = isArabic
-                  ? event.titleEn
-                  : event.titleAr;
-
                 const eventDescription = isArabic
                   ? event.descriptionAr
                   : event.descriptionEn;
@@ -580,10 +572,6 @@ export default function FamilyDetailsPage() {
                           <h3 className="line-clamp-2 break-words text-lg font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-xl">
                             {eventTitle}
                           </h3>
-
-                          <p className="mt-1 line-clamp-1 break-words text-xs leading-5 text-muted-foreground">
-                            {secondaryTitle}
-                          </p>
                         </div>
 
                         <ArrowUpRight
