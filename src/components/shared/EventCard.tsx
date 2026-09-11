@@ -4,7 +4,6 @@ import * as Icons from "lucide-react";
 import {
   CalendarDays,
   MapPin,
-  FileText,
   ArrowUpRight,
 } from "lucide-react";
 import type { EventCategory } from "@/data/announcements";
@@ -79,7 +78,7 @@ export function EventCard({
     <article
       id={id}
       className={cx(
-        "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+        "group relative flex h-full min-h-[540px] flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
         className
       )}
     >
@@ -187,21 +186,23 @@ export function EventCard({
       )}
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-6 sm:p-7">
+      <div className="flex flex-1 flex-col p-7 sm:p-8">
         {!isKnownCategory(category) && (
           <div className="mb-3 h-1 w-10 rounded-full bg-primary" />
         )}
 
-        <h3 className="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-xl">
+        <h3 className="break-words text-xl font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-2xl">
           {title}
         </h3>
 
-        <p className="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
+        {description && (
+          <p className="mt-4 break-words text-sm leading-7 text-muted-foreground sm:text-base">
+            {description}
+          </p>
+        )}
 
         {/* Event details */}
-        <div className="mt-6 space-y-3 border-t border-border pt-5">
+        <div className="mt-7 space-y-3 border-t border-border pt-5">
           <div className="flex items-start gap-3 text-sm text-muted-foreground">
             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <CalendarDays
@@ -226,7 +227,7 @@ export function EventCard({
                 />
               </div>
 
-              <span className="min-w-0 pt-1 line-clamp-2">
+              <span className="min-w-0 pt-1 break-words">
                 {location}
               </span>
             </div>
@@ -255,24 +256,24 @@ export function EventCard({
             )}
 
             {mediaFileUrl && (
-          <a
-            href={mediaFileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-surface-muted hover:shadow-sm"
-          >
-            <ArrowUpRight
-              className="h-3.5 w-3.5"
-              aria-hidden="true"
-            />
+              <a
+                href={mediaFileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:bg-surface-muted hover:shadow-sm"
+              >
+                <ArrowUpRight
+                  className="h-3.5 w-3.5"
+                  aria-hidden="true"
+                />
 
-            {language === "ar"
-              ? "فتح الرابط"
-              : "Open Link"}
-          </a>
+                {language === "ar"
+                  ? "فتح الرابط"
+                  : "Open Link"}
+              </a>
+            )}
+          </div>
         )}
-                  </div>
-                )}
 
         {/* Bottom hover line */}
         <div className="mt-6 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />

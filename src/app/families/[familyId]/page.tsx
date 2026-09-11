@@ -440,11 +440,7 @@ export default function FamilyDetailsPage() {
                 </span>
               </div>
 
-              <div
-                className={
-                  isArabic ? "text-right" : "text-left"
-                }
-              >
+              <div className={isArabic ? "text-right" : "text-left"}>
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
                   <CalendarDays
                     className="h-3.5 w-3.5 text-primary"
@@ -456,9 +452,7 @@ export default function FamilyDetailsPage() {
                 </div>
 
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                  {isArabic
-                    ? "فعاليات الأسرة"
-                    : "Family Events"}
+                  {isArabic ? "فعاليات الأسرة" : "Family Events"}
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
@@ -482,18 +476,18 @@ export default function FamilyDetailsPage() {
           </div>
 
           {eventsLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
-                  className="animate-pulse overflow-hidden rounded-3xl border border-border bg-surface shadow-sm"
+                  className="min-h-[560px] animate-pulse overflow-hidden rounded-3xl border border-border bg-surface shadow-sm"
                 >
                   <div className="aspect-[16/10] bg-muted" />
 
-                  <div className="space-y-4 p-6">
-                    <div className="h-6 w-3/4 rounded bg-muted" />
-                    <div className="h-4 w-1/2 rounded bg-muted" />
-                    <div className="h-16 rounded bg-muted" />
+                  <div className="space-y-5 p-7 sm:p-8">
+                    <div className="h-7 w-3/4 rounded bg-muted" />
+                    <div className="h-5 w-1/2 rounded bg-muted" />
+                    <div className="h-24 rounded bg-muted" />
                   </div>
                 </div>
               ))}
@@ -520,7 +514,7 @@ export default function FamilyDetailsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {events.map((event) => {
                 const eventTitle = isArabic
                   ? event.titleAr
@@ -533,56 +527,63 @@ export default function FamilyDetailsPage() {
                 return (
                   <article
                     key={event.id}
-                    className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    className="group relative flex h-full min-h-[560px] flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/20 hover:shadow-xl"
                   >
                     <div className="h-1 w-full bg-primary" />
 
+                    {/* Event Image */}
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-surface-muted">
                       <img
                         src={event.imageUrl}
                         alt={eventTitle}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                       />
 
                       <div
                         aria-hidden="true"
-                        className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent"
+                        className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
                       />
 
-                      <div className="absolute bottom-4 start-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm backdrop-blur">
-                        <CalendarDays
-                          className="h-3.5 w-3.5"
-                          aria-hidden="true"
-                        />
+                      <div className="absolute bottom-5 start-5 max-w-[calc(100%-2.5rem)]">
+                        <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/95 px-3.5 py-2 text-xs font-semibold text-gray-900 shadow-md backdrop-blur">
+                          <CalendarDays
+                            className="h-3.5 w-3.5 shrink-0"
+                            aria-hidden="true"
+                          />
 
-                        <span>{formatDate(event.date)}</span>
+                          <span className="break-words">
+                            {formatDate(event.date)}
+                          </span>
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex flex-1 flex-col p-6 sm:p-7">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
+                    {/* Event Content */}
+                    <div className="flex flex-1 flex-col p-7 sm:p-8">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
                           <CalendarDays
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                             aria-hidden="true"
                           />
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <h3 className="line-clamp-2 break-words text-lg font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-xl">
+                          <h3 className="break-words text-xl font-bold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-2xl">
                             {eventTitle}
                           </h3>
                         </div>
 
                         <ArrowUpRight
-                          className="mt-1 h-4 w-4 shrink-0 text-primary/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+                          className="mt-1 h-5 w-5 shrink-0 text-primary/30 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
                           aria-hidden="true"
                         />
                       </div>
 
-                      <div className="mt-5 space-y-3 border-t border-border pt-5">
+                      {/* Event Information */}
+                      <div className="mt-7 space-y-4 border-t border-border pt-6">
                         <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                             <CalendarDays
                               className="h-4 w-4"
                               aria-hidden="true"
@@ -590,14 +591,18 @@ export default function FamilyDetailsPage() {
                           </div>
 
                           <div className="min-w-0 pt-1">
-                            <time>
+                            <p className="mb-1 text-xs font-semibold text-foreground/60">
+                              {isArabic ? "التاريخ" : "Date"}
+                            </p>
+
+                            <time className="break-words leading-6">
                               {formatDate(event.date)}
                             </time>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                             <Clock
                               className="h-4 w-4"
                               aria-hidden="true"
@@ -605,20 +610,25 @@ export default function FamilyDetailsPage() {
                           </div>
 
                           <div className="min-w-0 pt-1">
-                            {formatTime(event.date)}
+                            <p className="mb-1 text-xs font-semibold text-foreground/60">
+                              {isArabic ? "الوقت" : "Time"}
+                            </p>
+
+                            <span>{formatTime(event.date)}</span>
                           </div>
                         </div>
                       </div>
 
+                      {/* Description */}
                       {eventDescription ? (
-                        <p className="mt-5 line-clamp-3 flex-1 text-sm leading-6 text-muted-foreground">
+                        <p className="mt-7 flex-1 break-words text-sm leading-7 text-muted-foreground sm:text-base">
                           {eventDescription}
                         </p>
                       ) : (
                         <div className="flex-1" />
                       )}
 
-                      <div className="mt-6 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />
+                      <div className="mt-7 h-px w-0 bg-primary transition-all duration-500 group-hover:w-full" />
                     </div>
                   </article>
                 );
