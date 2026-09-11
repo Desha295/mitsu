@@ -16,22 +16,6 @@ interface LeaderCardProps {
   socialLinks?: SocialLinkItem[];
 }
 
-/**
- * Leadership card (components/shared — feature component per
- * 07_COMPONENT_RULES.md §3.4).
- *
- * Sprint 4 — Phase 4.7: props changed from a whole static `UnionLeader`
- * (translation-key based) object to resolved primitives, since this
- * component is shared by two callers with different data sources:
- * LeadershipSection (now Firestore-backed via leadershipService) and
- * ContactSection (still fully static, unchanged, out of scope for
- * Sprint 4). A single clean prop contract lets both callers resolve
- * their own content their own way, rather than this component assuming
- * either one.
- *
- * Renders the social links row only when there are any (the Vice
- * President currently has none) rather than showing an empty row.
- */
 export function LeaderCard({
   name,
   position,
@@ -42,41 +26,67 @@ export function LeaderCard({
   const hasSocialLinks = socialLinks.length > 0;
 
   return (
-    <div className="flex flex-col items-center rounded-lg border border-border bg-surface p-6 text-center shadow-sm transition-shadow duration-200 hover:shadow-md">
-      <div className="relative h-32 w-32 overflow-hidden rounded-full border border-border bg-surface-muted sm:h-36 sm:w-36">
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt={imageAlt}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 128px, 144px"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-foreground/40">
-            <ImageOff className="h-8 w-8" aria-hidden="true" />
-          </div>
-        )}
+    <article className="group relative flex h-full flex-col items-center overflow-hidden rounded-3xl border border-border/70 bg-surface/80 px-6 py-8 text-center shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg sm:px-8">
+      {/* Subtle accent */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-primary/70 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* Portrait */}
+      <div className="relative">
+        <div className="absolute -inset-2 rounded-full bg-primary/5 transition-all duration-300 group-hover:bg-primary/10" />
+
+        <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-surface-muted shadow-md sm:h-36 sm:w-36">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={imageAlt}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 128px, 144px"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-foreground/35">
+              <ImageOff
+                className="h-9 w-9"
+                aria-hidden="true"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <h3 className="mt-4 text-lg font-semibold text-foreground">{name}</h3>
-      <p className="mt-1 text-sm text-foreground/70">{position}</p>
+      {/* Content */}
+      <div className="mt-6 flex flex-1 flex-col items-center">
+        <h3 className="text-xl font-bold leading-tight tracking-tight text-foreground">
+          {name}
+        </h3>
 
+        <div className="mt-3 rounded-full border border-primary/10 bg-primary/5 px-4 py-1.5">
+          <p className="text-sm font-medium leading-5 text-primary">
+            {position}
+          </p>
+        </div>
+      </div>
+
+      {/* Social Links */}
       {hasSocialLinks && (
         <SocialLinksRow socialLinks={socialLinks} />
       )}
-    </div>
+    </article>
   );
 }
 
-/** Kept as a small inline helper (not a new shared file) since it's only
- * ever used here, right below, purely to keep LeaderCard's main return
- * readable — this still needs translate() for each link's label. */
-function SocialLinksRow({ socialLinks }: { socialLinks: SocialLinkItem[] }) {
+function SocialLinksRow({
+  socialLinks,
+}: {
+  socialLinks: SocialLinkItem[];
+}) {
   const { translate } = useLanguage();
 
   return (
-    <div className="mt-4 flex items-center gap-2">
+    <div className="mt-6 flex items-center justify-center gap-2 border-t border-border/60 pt-5">
       {socialLinks.map((social) => {
         const IconComponent = (
           Icons as unknown as Record<
@@ -84,7 +94,12 @@ function SocialLinksRow({ socialLinks }: { socialLinks: SocialLinkItem[] }) {
             React.ComponentType<{ className?: string }>
           >
         )[social.icon];
+
         const label = translate(social.labelKey);
+
+        if (!IconComponent) {
+          return null;
+        }
 
         return (
           <a
@@ -94,13 +109,14 @@ function SocialLinksRow({ socialLinks }: { socialLinks: SocialLinkItem[] }) {
             rel="noopener noreferrer"
             aria-label={label}
             className={cx(
-              "inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground/70 transition-colors duration-150 hover:bg-surface-muted hover:text-foreground",
+              "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-background/50 text-foreground/60 transition-all duration-200 hover:border-primary/20 hover:bg-primary/5 hover:text-primary",
               focusRing
             )}
           >
-            {IconComponent && (
-              <IconComponent className="h-4 w-4" aria-hidden="true" />
-            )}
+            <IconComponent
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
           </a>
         );
       })}

@@ -21,31 +21,71 @@ export function FacultyLeadershipSection() {
     data: members,
     loading,
     error,
-  } = useFirestoreList(facultyLeadershipService, ACTIVE_MEMBERS_ORDERED);
+  } = useFirestoreList(
+    facultyLeadershipService,
+    ACTIVE_MEMBERS_ORDERED
+  );
 
-  // Hide the entire section when there are no active leaders
-  // or when the data cannot be loaded.
   if (!loading && (error || members.length === 0)) {
     return null;
   }
 
+  const getName = (member: FacultyLeadershipDoc) =>
+    language === "ar" ? member.nameAr : member.nameEn;
+
+  const getRole = (member: FacultyLeadershipDoc) =>
+    language === "ar" ? member.roleAr : member.roleEn;
+
+  const renderCard = (
+    member: FacultyLeadershipDoc,
+    index: number
+  ) => {
+    const name = getName(member);
+    const role = getRole(member);
+
+    return (
+      <LeaderCard
+        key={`${member.order}-${index}`}
+        name={name}
+        position={role}
+        imageUrl={member.imageUrl}
+        imageAlt={`${name}, ${role}`}
+      />
+    );
+  };
+
   return (
-    <section className="bg-background py-12 sm:py-16 md:py-20">
-      <Container className="flex flex-col gap-12">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+    <section className="relative overflow-hidden bg-background py-14 sm:py-16 md:py-20">
+      {/* Ambient background */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
+      >
+        <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-56 w-56 rounded-full bg-primary/5 blur-3xl" />
+      </div>
+
+      <Container className="relative">
+        {/* Header */}
+        <div
+          className="mx-auto max-w-3xl text-center"
+          dir={language === "ar" ? "rtl" : "ltr"}
+        >
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
             {translate("home.facultyLeadership.heading")}
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-foreground/70">
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-foreground/65 sm:text-lg">
             {translate("home.facultyLeadership.subheading")}
           </p>
         </div>
 
+        {/* Loading */}
         {loading && (
           <div
             role="status"
-            className="flex min-h-[14rem] flex-col items-center justify-center gap-3"
+            className="mx-auto mt-10 flex min-h-[16rem] max-w-5xl flex-col items-center justify-center gap-3 rounded-3xl border border-border/70 bg-surface/70 shadow-sm backdrop-blur-sm"
           >
             <Loader2
               className="h-8 w-8 animate-spin text-primary"
@@ -59,83 +99,36 @@ export function FacultyLeadershipSection() {
         )}
 
         {!loading && (
-          <div className="mx-auto w-full max-w-4xl space-y-6">
+          <div className="mx-auto mt-12 w-full max-w-6xl">
             {/* Dean */}
             {members[0] && (
               <div className="flex justify-center">
-                <div className="w-full sm:max-w-sm">
-                  {(() => {
-                    const name =
-                      language === "ar"
-                        ? members[0].nameAr
-                        : members[0].nameEn;
-
-                    const role =
-                      language === "ar"
-                        ? members[0].roleAr
-                        : members[0].roleEn;
-
-                    return (
-                      <LeaderCard
-                        key={members[0].id}
-                        name={name}
-                        position={role}
-                        imageUrl={members[0].imageUrl}
-                        imageAlt={`${name}, ${role}`}
-                      />
-                    );
-                  })()}
+                <div className="w-full max-w-sm">
+                  {renderCard(members[0], 0)}
                 </div>
               </div>
             )}
 
-            {/* Vice Deans */}
+            {/* Vice Deans - 3 in one row */}
             {members.length > 1 && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {members.slice(1, 3).map((member) => {
-                  const name =
-                    language === "ar" ? member.nameAr : member.nameEn;
-
-                  const role =
-                    language === "ar" ? member.roleAr : member.roleEn;
-
-                  return (
-                    <div
-                      key={member.id}
-                      className="w-full sm:mx-auto sm:max-w-sm"
-                    >
-                      <LeaderCard
-                        name={name}
-                        position={role}
-                        imageUrl={member.imageUrl}
-                        imageAlt={`${name}, ${role}`}
-                      />
-                    </div>
-                  );
-                })}
+              <div className="mx-auto mt-10 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
+                {members.slice(1, 4).map((member, index) =>
+                  renderCard(member, index + 1)
+                )}
               </div>
             )}
 
-            {/* Other Leaders */}
-            {members.length > 3 && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {members.slice(3).map((member) => {
-                  const name =
-                    language === "ar" ? member.nameAr : member.nameEn;
-
-                  const role =
-                    language === "ar" ? member.roleAr : member.roleEn;
-
-                  return (
-                    <LeaderCard
-                      key={member.id}
-                      name={name}
-                      position={role}
-                      imageUrl={member.imageUrl}
-                      imageAlt={`${name}, ${role}`}
-                    />
-                  );
-                })}
+            {/* Administrative Leaders */}
+            {members.length > 4 && (
+              <div className="mx-auto mt-10 flex max-w-6xl flex-wrap justify-center gap-6">
+                {members.slice(4).map((member, index) => (
+                  <div
+                    key={`${member.order}-${index + 4}`}
+                    className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
+                  >
+                    {renderCard(member, index + 4)}
+                  </div>
+                ))}
               </div>
             )}
           </div>
