@@ -242,8 +242,8 @@ export const academicAdvisors: AcademicAdvisor[] = [
   },
   {
     id: "mohamed-ahmed-aboghonaim",
-    nameAr: "محمد أحمد أبو غنيم",
-    nameEn: "Mohamed Ahmed Aboghonaim",
+    nameAr: "محمد أحمد عبدالمعتمد ",
+    nameEn: "Mohamed Ahmed Abdelmoatmed",
     email: "mohamed.aboghonaim@must.edu.eg",
   },
 ].sort((a, b) => a.nameEn.localeCompare(b.nameEn));
