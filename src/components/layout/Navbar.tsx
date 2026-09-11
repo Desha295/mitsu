@@ -33,10 +33,16 @@ export function Navbar() {
             "dark:shadow-[0_12px_40px_rgba(0,0,0,0.28)]",
           ].join(" ")}
         >
-          {/* Subtle top accent */}
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
-          <Container className="flex h-[4.75rem] items-center gap-3 px-4 sm:px-6 lg:px-8">
+          <Container
+            className={[
+              "!mx-0 !max-w-none",
+              "flex h-[4.75rem] items-center",
+              "gap-4",
+              "px-5 sm:px-7 lg:px-10 xl:px-12",
+            ].join(" ")}
+          >
             {/* Logo */}
             <div className="shrink-0">
               <Logo showIdentity={false} />
@@ -45,7 +51,7 @@ export function Navbar() {
             {/* Desktop navigation */}
             <nav
               aria-label={translate("navbar.mainNavigation")}
-              className="hidden min-w-0 flex-1 md:block"
+              className="hidden min-w-0 flex-1 xl:block"
             >
               <NavLinks orientation="horizontal" />
             </nav>
@@ -53,7 +59,9 @@ export function Navbar() {
             {/* Actions */}
             <div
               className={[
-                "ms-auto flex shrink-0 items-center gap-1.5",
+                "ms-auto shrink-0",
+                "flex items-center",
+                "gap-1.5",
                 "rounded-2xl border border-border/70",
                 "bg-background/70 p-1.5",
                 "shadow-sm backdrop-blur-xl",
@@ -67,14 +75,14 @@ export function Navbar() {
 
               <ThemeSwitcher />
 
-              <div className="hidden h-6 w-px bg-border/70 md:block" />
+              <div className="hidden h-6 w-px bg-border/70 xl:block" />
 
               <IconButton
                 label={hamburgerLabel}
                 onClick={() =>
                   setMobileMenuOpen((current) => !current)
                 }
-                className="md:hidden"
+                className="xl:hidden"
               >
                 {mobileMenuOpen ? (
                   <X

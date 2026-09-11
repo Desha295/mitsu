@@ -59,7 +59,6 @@ export function NavLinks({
                 {translate(item.labelKey)}
               </span>
 
-              {/* Active indicator */}
               {isActive ? (
                 <span
                   aria-hidden="true"

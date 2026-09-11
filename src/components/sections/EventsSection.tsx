@@ -27,15 +27,9 @@ const PUBLISHED_EVENTS: QueryOptions<EventDoc> = {
       value: true,
     },
   ],
-  orderByField: {
-    field: "date",
-    direction: "asc",
-  },
 };
 
-function getEventDate(
-  event: WithId<EventDoc>
-): Date {
+function getEventDate(event: WithId<EventDoc>): Date {
   const converted = timestampToDate(event.date);
 
   if (
@@ -58,18 +52,13 @@ function getEventDate(
     }
   }
 
-  if (
-    raw &&
-    typeof raw === "object"
-  ) {
+  if (raw && typeof raw === "object") {
     const value = raw as {
       seconds?: unknown;
       toDate?: unknown;
     };
 
-    if (
-      typeof value.toDate === "function"
-    ) {
+    if (typeof value.toDate === "function") {
       const parsed = value.toDate();
 
       if (
@@ -80,21 +69,15 @@ function getEventDate(
       }
     }
 
-    if (
-      typeof value.seconds === "number"
-    ) {
-      return new Date(
-        value.seconds * 1000
-      );
+    if (typeof value.seconds === "number") {
+      return new Date(value.seconds * 1000);
     }
   }
 
   return new Date(0);
 }
 
-function toDateIso(
-  event: WithId<EventDoc>
-): string {
+function toDateIso(event: WithId<EventDoc>): string {
   return getEventDate(event).toISOString();
 }
 
@@ -110,14 +93,12 @@ function EventGrid({
   const now = Date.now();
 
   return (
-    <div className="flex flex-wrap justify-center gap-6">
+    <div className="flex flex-wrap justify-center gap-8">
       {events.map((event) => {
         const eventDate = getEventDate(event);
         const eventTime = eventDate.getTime();
 
-        const isUpcoming =
-          eventTime >= now;
-
+        const isUpcoming = eventTime >= now;
         const isNotificationTarget =
           highlightedId === event.id;
 
@@ -139,7 +120,7 @@ function EventGrid({
         return (
           <div
             key={event.id}
-            className="w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333333%-1rem)]"
+            className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333333%-1.333rem)]"
           >
             <EventCard
               id={`event-${event.id}`}
@@ -154,12 +135,8 @@ function EventGrid({
               dateIso={toDateIso(event)}
               location={location}
               imageUrl={event.imageUrl}
-              mediaVideoUrl={
-                event.mediaVideoUrl
-              }
-              mediaFileUrl={
-                event.mediaFileUrl
-              }
+              mediaVideoUrl={event.mediaVideoUrl}
+              mediaFileUrl={event.mediaFileUrl}
               isUpcoming={isUpcoming}
             />
           </div>
@@ -188,31 +165,34 @@ export function EventsSection() {
     useMemo(() => {
       const now = Date.now();
 
-      const upcoming = items
-        .filter(
-          (event) =>
-            getEventDate(event).getTime() >= now
-        )
-        .sort(
-          (a, b) =>
-            getEventDate(a).getTime() -
-            getEventDate(b).getTime()
-        );
-
-      const past = items
-        .filter(
-          (event) =>
-            getEventDate(event).getTime() < now
-        )
-        .sort(
-          (a, b) =>
-            getEventDate(b).getTime() -
-            getEventDate(a).getTime()
-        );
+      const sortedEvents = [...items].sort(
+        (a, b) =>
+          getEventDate(a).getTime() -
+          getEventDate(b).getTime()
+      );
 
       return {
-        upcomingEvents: upcoming,
-        pastEvents: past,
+        upcomingEvents: sortedEvents
+          .filter(
+            (event) =>
+              getEventDate(event).getTime() >= now
+          )
+          .sort(
+            (a, b) =>
+              getEventDate(a).getTime() -
+              getEventDate(b).getTime()
+          ),
+
+        pastEvents: sortedEvents
+          .filter(
+            (event) =>
+              getEventDate(event).getTime() < now
+          )
+          .sort(
+            (a, b) =>
+              getEventDate(b).getTime() -
+              getEventDate(a).getTime()
+          ),
       };
     }, [items]);
 
@@ -236,10 +216,9 @@ export function EventsSection() {
       return;
     }
 
-    const target =
-      document.getElementById(
-        `event-${highlightId}`
-      );
+    const target = document.getElementById(
+      `event-${highlightId}`
+    );
 
     if (!target) {
       return;
@@ -247,33 +226,25 @@ export function EventsSection() {
 
     setHighlightedId(highlightId);
 
-    const scrollTimer =
-      window.setTimeout(() => {
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 100);
+    const scrollTimer = window.setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
 
-    const highlightTimer =
-      window.setTimeout(() => {
-        setHighlightedId(null);
-      }, 4000);
+    const highlightTimer = window.setTimeout(() => {
+      setHighlightedId(null);
+    }, 4000);
 
     return () => {
-      window.clearTimeout(
-        scrollTimer
-      );
-
-      window.clearTimeout(
-        highlightTimer
-      );
+      window.clearTimeout(scrollTimer);
+      window.clearTimeout(highlightTimer);
     };
   }, [loading, error, items]);
 
   return (
     <section className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
-      {/* Ambient background */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -293,13 +264,17 @@ export function EventsSection() {
       </div>
 
       <Container className="relative">
-        {/* Header */}
-        <div className="mb-10 sm:mb-12">
+        <div
+          className={cx(
+            "mb-10 sm:mb-12",
+            language === "ar" && "text-right"
+          )}
+          dir={language === "ar" ? "rtl" : "ltr"}
+        >
           <div
             className={cx(
               "mb-5 flex items-center gap-3",
-              language === "ar" &&
-                "justify-end"
+              language === "ar" && "justify-end"
             )}
           >
             {language === "ar" ? (
@@ -324,17 +299,10 @@ export function EventsSection() {
           <div
             className={cx(
               "flex flex-col gap-5 md:flex-row md:items-end md:justify-between md:gap-10",
-              language === "ar" &&
-                "md:flex-row-reverse"
+              language === "ar" && "md:flex-row-reverse"
             )}
           >
-            <div
-              className={cx(
-                "max-w-3xl",
-                language === "ar" &&
-                  "text-right"
-              )}
-            >
+            <div className="max-w-3xl">
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
                 {language === "ar"
                   ? "فعاليات MITSU"
@@ -363,7 +331,6 @@ export function EventsSection() {
           </div>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div
             role="status"
@@ -382,7 +349,6 @@ export function EventsSection() {
           </div>
         )}
 
-        {/* Error */}
         {!loading && error && (
           <div
             role="alert"
@@ -401,7 +367,6 @@ export function EventsSection() {
           </div>
         )}
 
-        {/* Content */}
         {!loading && !error && (
           <>
             {items.length === 0 ? (
@@ -419,7 +384,6 @@ export function EventsSection() {
               </div>
             ) : (
               <div className="space-y-14">
-                {/* Upcoming */}
                 {upcomingEvents.length > 0 && (
                   <div>
                     <div
@@ -428,14 +392,13 @@ export function EventsSection() {
                         language === "ar" &&
                           "flex-row-reverse"
                       )}
+                      dir={
+                        language === "ar"
+                          ? "rtl"
+                          : "ltr"
+                      }
                     >
-                      <div
-                        className={cx(
-                          "flex items-center gap-3",
-                          language === "ar" &&
-                            "flex-row-reverse"
-                        )}
-                      >
+                      <div className="flex items-center gap-3">
                         <span className="h-8 w-1 rounded-full bg-primary" />
 
                         <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -453,14 +416,11 @@ export function EventsSection() {
                     <EventGrid
                       events={upcomingEvents}
                       language={language}
-                      highlightedId={
-                        highlightedId
-                      }
+                      highlightedId={highlightedId}
                     />
                   </div>
                 )}
 
-                {/* Past */}
                 {pastEvents.length > 0 && (
                   <div>
                     <div
@@ -469,14 +429,13 @@ export function EventsSection() {
                         language === "ar" &&
                           "flex-row-reverse"
                       )}
+                      dir={
+                        language === "ar"
+                          ? "rtl"
+                          : "ltr"
+                      }
                     >
-                      <div
-                        className={cx(
-                          "flex items-center gap-3",
-                          language === "ar" &&
-                            "flex-row-reverse"
-                        )}
-                      >
+                      <div className="flex items-center gap-3">
                         <span className="h-8 w-1 rounded-full bg-primary" />
 
                         <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -494,9 +453,7 @@ export function EventsSection() {
                     <EventGrid
                       events={pastEvents}
                       language={language}
-                      highlightedId={
-                        highlightedId
-                      }
+                      highlightedId={highlightedId}
                     />
                   </div>
                 )}
