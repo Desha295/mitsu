@@ -166,6 +166,16 @@ match /socialLinks/{id} {
   allow write: if isAdmin();
 }
 // -------------------------------------------------------------------
+// Student Groups
+// -------------------------------------------------------------------
+
+// Public users can read active student groups.
+// Admins can read and manage all student groups.
+match /studentGroups/{id} {
+  allow read: if resource.data.isActive == true || isAdmin();
+  allow write: if isAdmin();
+}
+// -------------------------------------------------------------------
 // Deny everything else by default
 // -------------------------------------------------------------------
 

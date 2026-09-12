@@ -77,6 +77,13 @@ export const adminNavigation: AdminNavItem[] = [
     isImplemented: true,
   },
   {
+    id: "studentGroups",
+    icon: "MessageCircle",
+    labelKey: "admin.nav.studentGroups",
+    href: "/admin/student-groups",
+    isImplemented: true,
+  },
+  {
     id: "systems",
     icon: "Laptop",
     labelKey: "admin.nav.systems",

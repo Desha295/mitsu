@@ -1,0 +1,10 @@
+warning: in the working copy of 'firestore.indexes.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'firestore.rules', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/sections/UnionHeroSection.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/data/adminNavigation.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/data/navigation.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/auth/constants.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/firebase/collections.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/lib/firebase/services/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/locales/ar.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/locales/en.json', LF will be replaced by CRLF the next time Git touches it

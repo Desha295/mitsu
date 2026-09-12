@@ -24,3 +24,4 @@ export * from "./notificationService";
 export * from "./families.service";
 export * from "./familyEvents.service";
 export * from "./socialLinks.service";
+export * from "./studentGroups.service";

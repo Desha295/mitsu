@@ -29,6 +29,7 @@ export const PERMISSIONS = {
   manageFamilies: "manageFamilies",
   manageSettings: "manageSettings",
   manageSocialLinks: "manageSocialLinks",
+  manageStudentGroups: "manageStudentGroups",
   manageAdmins: "manageAdmins",
 } as const;
 
@@ -57,6 +58,7 @@ export const ROLE_PERMISSIONS: Record<
     PERMISSIONS.manageFamilies,
     PERMISSIONS.manageSettings,
     PERMISSIONS.manageSocialLinks,
+    PERMISSIONS.manageStudentGroups,
   ],
 
   [ROLES.superAdmin]:

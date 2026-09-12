@@ -35,6 +35,7 @@ export const COLLECTIONS = {
   notifications: "notifications",
   families: "families",
   socialLinks: "socialLinks",
+  studentGroups: "studentGroups",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -198,6 +199,34 @@ export interface StudentDoc {
   semester: number;
   academicTerm: string;
   isActive: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// ---------------------------------------------------------------------------
+// Student Groups
+// ---------------------------------------------------------------------------
+
+/**
+ * Student group / community link.
+ *
+ * Groups are organized by academic level and managed dynamically
+ * through Firestore.
+ */
+export interface StudentGroupDoc {
+  nameAr: string;
+  nameEn: string;
+
+  descriptionAr?: string;
+  descriptionEn?: string;
+
+  level: 1 | 2 | 3 | 4;
+
+  whatsappUrl: string;
+
+  order: number;
+  isActive: boolean;
+
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -470,6 +499,12 @@ export function getAdminsCollection(): CollectionReference<AdminDoc> | null {
 
 export function getStudentsCollection(): CollectionReference<StudentDoc> | null {
   return getTypedCollection<StudentDoc>(COLLECTIONS.students);
+}
+
+export function getStudentGroupsCollection(): CollectionReference<StudentGroupDoc> | null {
+  return getTypedCollection<StudentGroupDoc>(
+    COLLECTIONS.studentGroups
+  );
 }
 
 export function getNotificationsCollection(): CollectionReference<NotificationDoc> | null {

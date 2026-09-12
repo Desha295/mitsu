@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Eye, Target, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
 import { unionOverview } from "@/data/union";
@@ -43,11 +43,6 @@ export function UnionHeroSection() {
       <Container className="relative">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div className="flex flex-col">
-            <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              {translate("union.heading")}
-            </div>
-
             <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               {translate(unionOverview.nameKey)}
             </h1>
@@ -55,18 +50,6 @@ export function UnionHeroSection() {
             <p className="mt-6 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">
               {translate(unionOverview.overviewKey)}
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface/70 px-4 py-2.5 text-sm font-medium text-foreground backdrop-blur-xl">
-                <span className="h-2 w-2 rounded-full bg-primary" />
-                {translate("union.visionHeading")}
-              </div>
-
-              <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface/70 px-4 py-2.5 text-sm font-medium text-foreground backdrop-blur-xl">
-                <span className="h-2 w-2 rounded-full bg-secondary" />
-                {translate("union.missionHeading")}
-              </div>
-            </div>
           </div>
 
           <div className="relative mx-auto w-full max-w-xl">
@@ -135,68 +118,6 @@ export function UnionHeroSection() {
                     {translate(unionOverview.nameKey)}
                   </p>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-20 grid gap-5 sm:grid-cols-2 lg:mt-24">
-          <div className="group relative overflow-hidden rounded-3xl border border-border/70 bg-surface/80 p-6 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 sm:p-7">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
-            />
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary transition-transform duration-300 group-hover:scale-105">
-                <Eye
-                  className="h-6 w-6"
-                  aria-hidden="true"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
-                  MITSU
-                </p>
-
-                <h2 className="text-lg font-semibold text-foreground sm:text-xl">
-                  {translate("union.visionHeading")}
-                </h2>
-
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  {translate(unionOverview.visionKey)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-3xl border border-border/70 bg-surface/80 p-6 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/5 sm:p-7">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-secondary/50 to-transparent"
-            />
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-secondary/20 bg-secondary/5 text-secondary-dark transition-transform duration-300 group-hover:scale-105">
-                <Target
-                  className="h-6 w-6"
-                  aria-hidden="true"
-                />
-              </div>
-
-              <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-dark">
-                  MITSU
-                </p>
-
-                <h2 className="text-lg font-semibold text-foreground sm:text-xl">
-                  {translate("union.missionHeading")}
-                </h2>
-
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  {translate(unionOverview.missionKey)}
-                </p>
               </div>
             </div>
           </div>
