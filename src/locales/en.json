@@ -428,8 +428,7 @@
   },
   "about": {
     "heading": "About MITSU",
-    "introduction": "MITSU is the official digital platform developed by the Student Union of the Faculty of Information Technology at Misr University for Science and Technology (MUST). The platform is designed to become the primary digital gateway for freshmen, providing one trusted place where students can begin their university journey. MITSU is intended to remain useful for future Student Union boards through a scalable and maintainable architecture.",
-    "visionHeading": "Our Vision",
+"introduction": "MITSU stands for MUST Information Technology Student Union, the Student Union of the Faculty of Information Technology at Misr University for Science and Technology (MUST). MITSU serves as the Union’s official digital platform, created to be a central hub for students, bringing together academic information, announcements, events, resources, services, and student activities in one place. The platform aims to provide a more organized and accessible digital experience for all students, with a flexible and scalable foundation designed to ensure its continuity and continued growth with future Student Union boards.",    "visionHeading": "Our Vision",
     "vision": "Create a unified digital experience that allows every freshman to begin university life with confidence, clarity, and immediate access to official university resources.",
     "missionHeading": "Our Mission",
     "mission": "Simplify communication between freshmen, the Student Union, and official university systems through one reliable, modern, mobile-first platform.",
