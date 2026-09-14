@@ -79,8 +79,8 @@ async function createEventNotification(
     descriptionEn: event.descriptionEn,
     type: "event",
 
-    // Deep-link directly to the event.
-    href: `/announcements?highlight=${encodeURIComponent(
+    // Deep-link directly to the event page.
+    href: `/events?highlight=${encodeURIComponent(
       eventId
     )}`,
 

@@ -19,22 +19,17 @@ export default function FamiliesPage() {
   const { language } = useLanguage();
   const isArabic = language === "ar";
 
-  const { data: families, loading } = useFirestoreList<FamilyDoc>(
+  const { data: allFamilies, loading } = useFirestoreList<FamilyDoc>(
     familiesService,
     {
-      filters: [
-        {
-          field: "isActive",
-          op: "==",
-          value: true,
-        },
-      ],
       orderByField: {
         field: "order",
         direction: "asc",
       },
     }
   );
+
+  const families = allFamilies.filter((family) => family.isActive);
 
   return (
     <main className="min-h-screen bg-background">
