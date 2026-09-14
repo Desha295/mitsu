@@ -3,6 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
+  experimental: {
+    // Tailwind produces a small atomic stylesheet. Inlining it removes the
+    // extra render-blocking request on a visitor's first page load.
+    inlineCss: true,
+  },
+  turbopack: {
+    resolveAlias: {
+      // Next 16 currently bundles these ES polyfills unconditionally even
+      // though every browser in its documented support matrix has them.
+      "../build/polyfills/polyfill-module": "./src/lib/modern-polyfills.js",
+      "next/dist/build/polyfills/polyfill-module": "./src/lib/modern-polyfills.js",
+    },
+  },
+  transpilePackages: ["next"],
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
