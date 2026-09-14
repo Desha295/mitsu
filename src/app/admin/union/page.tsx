@@ -181,15 +181,20 @@ export default function AdminUnionPage() {
       formTarget === null ||
       formTarget === "new"
     ) {
-      setMembers([]);
-      setMemberFormTarget(null);
-      return;
+      const clearTimer = window.setTimeout(() => {
+        setMembers([]);
+        setMemberFormTarget(null);
+      }, 0);
+      return () => window.clearTimeout(clearTimer);
     }
 
     let cancelled = false;
 
-    setMembersLoading(true);
-    setMemberFormTarget(null);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setMembersLoading(true);
+      setMemberFormTarget(null);
+    });
 
     committeeMembersService
       .getAll({

@@ -43,7 +43,10 @@ const normalizedPrivateKey = privateKey
   });
 }
 
-const adminApp = getAdminApp();
-
-export const adminDb = getFirestore(adminApp);
-export const adminAuth = getAuth(adminApp);
+export function getFirebaseAdmin() {
+  const adminApp = getAdminApp();
+  return {
+    adminDb: getFirestore(adminApp),
+    adminAuth: getAuth(adminApp),
+  };
+}

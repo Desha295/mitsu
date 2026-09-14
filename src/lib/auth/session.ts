@@ -20,7 +20,7 @@ import {
   type Unsubscribe,
   type User,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
+import { auth } from "@/lib/firebase/auth";
 
 function requireAuth() {
   if (!auth) {

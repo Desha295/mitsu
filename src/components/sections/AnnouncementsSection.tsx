@@ -134,9 +134,8 @@ export function AnnouncementsSection({
       return;
     }
 
-    setHighlightedId(highlightId);
-
     const scrollTimer = window.setTimeout(() => {
+      setHighlightedId(highlightId);
       target.scrollIntoView({
         behavior: "smooth",
         block: "center",

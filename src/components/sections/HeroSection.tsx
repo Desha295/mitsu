@@ -36,7 +36,7 @@ export function HeroSection() {
 
   if (loading) {
     return (
-      <section className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
+      <section className="relative min-h-[calc(100svh-6.5rem)] overflow-hidden bg-background py-16 sm:py-20 md:py-24">
         <Container>
           <div
             role="status"
@@ -57,7 +57,7 @@ export function HeroSection() {
 
   if (error) {
     return (
-      <section className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
+      <section className="relative min-h-[calc(100svh-6.5rem)] overflow-hidden bg-background py-16 sm:py-20 md:py-24">
         <Container>
           <div
             role="alert"
@@ -75,7 +75,7 @@ export function HeroSection() {
 
   if (!hero) {
     return (
-      <section className="relative overflow-hidden bg-background py-16 sm:py-20 md:py-24">
+      <section className="relative min-h-[calc(100svh-6.5rem)] overflow-hidden bg-background py-16 sm:py-20 md:py-24">
         <Container>
           <div className="flex min-h-[24rem] flex-col items-center justify-center gap-3 text-center">
             <Logo showIdentity={true} />
@@ -105,7 +105,7 @@ export function HeroSection() {
     : hero.secondaryCtaLabelEn;
 
   return (
-    <section className="relative overflow-hidden bg-background">
+    <section className="relative min-h-[calc(100svh-6.5rem)] overflow-hidden bg-background">
       {/* Background atmosphere */}
       <div
         aria-hidden="true"
@@ -267,7 +267,8 @@ export function HeroSection() {
                     alt={translate("home.hero.imageAlt")}
                     fill
                     className="object-contain p-5 transition-transform duration-500 hover:scale-[1.025]"
-                    priority
+                    loading="eager"
+                    fetchPriority="high"
                     sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 500px"
                   />
                 ) : (

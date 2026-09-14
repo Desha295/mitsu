@@ -7,6 +7,7 @@ import { Unauthorized } from "@/components/admin/Unauthorized";
 import { LoadingDashboard } from "@/components/admin/LoadingDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGuard } from "@/lib/auth/routeGuard";
+import { AuthProvider } from "@/context/AuthContext";
 
 /**
  * Protects the entire /admin route segment (Sprint 3.1). Applies to
@@ -26,9 +27,11 @@ export default function AdminRouteLayout({
   children: ReactNode;
 }) {
   return (
-    <RequireAuth>
-      <AdminGate>{children}</AdminGate>
-    </RequireAuth>
+    <AuthProvider>
+      <RequireAuth>
+        <AdminGate>{children}</AdminGate>
+      </RequireAuth>
+    </AuthProvider>
   );
 }
 
