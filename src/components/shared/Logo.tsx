@@ -28,10 +28,8 @@ interface LogoProps {
  * deliberately edits the site name in Settings.
  *
  * Sprint 6.1: an optional image mark (`logoUrl`) now renders beside the
- * wordmark once an admin sets one. `unoptimized` is used rather than
- * relying on next.config.ts's remotePatterns allowlist, since this URL
- * is a plain admin-entered value (SettingsForm is a text input, not a
- * guaranteed Storage upload like Hero's image) and could be any domain.
+ * wordmark once an admin sets one. Remote image hosts are restricted by
+ * Next's image allowlist so the image optimizer cannot proxy arbitrary URLs.
  * When unset, nothing renders here — identical to before this sprint.
  */
 export function Logo({ showIdentity = true, className }: LogoProps) {
@@ -47,7 +45,9 @@ export function Logo({ showIdentity = true, className }: LogoProps) {
             src={settings.logoUrl}
             alt=""
             fill
-            unoptimized
+            sizes="32px"
+            loading="eager"
+            fetchPriority="high"
             className="object-contain"
           />
         </span>

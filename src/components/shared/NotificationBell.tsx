@@ -123,9 +123,9 @@ export function NotificationBell() {
     NotificationWithId[]
   >([]);
 
-  const [readIds, setReadIds] = useState<string[]>([]);
+  const [readIds, setReadIds] = useState<string[]>(getReadNotificationIds);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   async function loadNotifications() {
@@ -172,20 +172,6 @@ export function NotificationBell() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    setReadIds(getReadNotificationIds());
-  }, []);
-
-  useEffect(() => {
-    void loadNotifications();
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    void loadNotifications();
-  }, [open]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -280,9 +266,13 @@ export function NotificationBell() {
     >
       <button
         type="button"
-        onClick={() =>
-          setOpen((current) => !current)
-        }
+        onClick={() => {
+          const nextOpen = !open;
+          setOpen(nextOpen);
+          if (nextOpen && notifications.length === 0 && !loading) {
+            void loadNotifications();
+          }
+        }}
         aria-label={notificationLabel}
         aria-expanded={open}
         className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"

@@ -85,13 +85,13 @@ function EventGrid({
   events,
   language,
   highlightedId,
+  now,
 }: {
   events: WithId<EventDoc>[];
   language: "ar" | "en";
   highlightedId: string | null;
+  now: number;
 }) {
-  const now = Date.now();
-
   return (
     <div className="flex flex-wrap justify-center gap-8">
       {events.map((event) => {
@@ -148,6 +148,7 @@ function EventGrid({
 
 export function EventsSection() {
   const { language } = useLanguage();
+  const [now] = useState(() => Date.now());
 
   const [highlightedId, setHighlightedId] =
     useState<string | null>(null);
@@ -163,8 +164,6 @@ export function EventsSection() {
 
   const { upcomingEvents, pastEvents } =
     useMemo(() => {
-      const now = Date.now();
-
       const sortedEvents = [...items].sort(
         (a, b) =>
           getEventDate(a).getTime() -
@@ -194,7 +193,7 @@ export function EventsSection() {
               getEventDate(a).getTime()
           ),
       };
-    }, [items]);
+    }, [items, now]);
 
   useEffect(() => {
     if (
@@ -224,9 +223,8 @@ export function EventsSection() {
       return;
     }
 
-    setHighlightedId(highlightId);
-
     const scrollTimer = window.setTimeout(() => {
+      setHighlightedId(highlightId);
       target.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -417,6 +415,7 @@ export function EventsSection() {
                       events={upcomingEvents}
                       language={language}
                       highlightedId={highlightedId}
+                      now={now}
                     />
                   </div>
                 )}
@@ -454,6 +453,7 @@ export function EventsSection() {
                       events={pastEvents}
                       language={language}
                       highlightedId={highlightedId}
+                      now={now}
                     />
                   </div>
                 )}

@@ -1,4 +1,4 @@
-import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { getFirebaseAdmin } from "@/lib/firebase/admin";
 import { COLLECTIONS, type AdminDoc } from "@/lib/firebase/collections";
 import { ROLES } from "./constants";
 import type { UserRole } from "./types";
@@ -22,6 +22,7 @@ export async function requireServerAdmin(
     throw new Error("UNAUTHORIZED");
   }
 
+  const { adminAuth, adminDb } = getFirebaseAdmin();
   const decodedToken = await adminAuth.verifyIdToken(idToken);
 
   const adminSnapshot = await adminDb

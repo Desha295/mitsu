@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Timestamp } from "firebase-admin/firestore";
 import { parseStudentsExcel } from "@/lib/excel/parseStudentsExcel";
 import { requireServerAdmin } from "@/lib/auth/serverAuth";
-import { adminDb } from "@/lib/firebase/admin";
+import { getFirebaseAdmin } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,7 @@ const BATCH_SIZE = 450;
 export async function POST(request: NextRequest) {
   try {
     await requireServerAdmin(request.headers.get("authorization"));
+    const { adminDb } = getFirebaseAdmin();
 
     const body = await request.json();
 
@@ -66,6 +67,13 @@ export async function POST(request: NextRequest) {
           success: false,
           message: "يجب أن يكون رابط الملف باستخدام HTTPS.",
         },
+        { status: 400 }
+      );
+    }
+
+    if (!isAllowedSpreadsheetHost(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { success: false, message: "رابط الملف يجب أن يكون من Firebase Storage أو Google Cloud Storage." },
         { status: 400 }
       );
     }
@@ -270,4 +278,9 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function isAllowedSpreadsheetHost(hostname: string) {
+  return hostname === "firebasestorage.googleapis.com" ||
+    hostname === "storage.googleapis.com";
 }

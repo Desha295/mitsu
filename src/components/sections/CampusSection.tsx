@@ -40,7 +40,7 @@ export function CampusSection() {
                 }
                 width={64}
                 height={64}
-                unoptimized
+                sizes="(max-width: 640px) 64px, 80px"
                 className="h-full w-full object-contain"
               />
             </div>
@@ -81,9 +81,8 @@ export function CampusSection() {
                   translate("home.campus.imageAlt")
                 }
                 fill
-                unoptimized
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]"
-                sizes="(max-width: 768px) 100vw, 1400px"
+                sizes="(max-width: 768px) calc(100vw - 3rem), 1152px"
               />
 
               {/* Image overlay */}

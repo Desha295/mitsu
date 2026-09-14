@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!isAllowedSpreadsheetHost(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { success: false, message: "رابط الملف يجب أن يكون من Firebase Storage أو Google Cloud Storage." },
+        { status: 400 }
+      );
+    }
+
     const response = await fetch(parsedUrl.toString(), {
       method: "GET",
       redirect: "follow",
@@ -138,4 +145,9 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function isAllowedSpreadsheetHost(hostname: string) {
+  return hostname === "firebasestorage.googleapis.com" ||
+    hostname === "storage.googleapis.com";
 }

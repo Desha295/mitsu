@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import type { FamilyEventDoc } from "@/lib/firebase/collections";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -51,17 +51,6 @@ export function FamilyEventForm({
   });
 
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setValues({
-      titleAr: initialValues?.titleAr ?? "",
-      titleEn: initialValues?.titleEn ?? "",
-      descriptionAr: initialValues?.descriptionAr ?? "",
-      descriptionEn: initialValues?.descriptionEn ?? "",
-      imageUrl: initialValues?.imageUrl ?? "",
-      date: timestampToDateInput(initialValues?.date),
-    });
-  }, [initialValues]);
 
   const updateField = (
     field: keyof FamilyEventFormValues,
