@@ -21,6 +21,7 @@ import {
 import type { IconType } from "react-icons";
 
 import { Container } from "@/components/layout/Container";
+import { ContactForm } from "@/components/sections/ContactForm";
 import { officeInfo } from "@/data/contact";
 import { useFirestoreDoc } from "@/hooks/useFirestoreDoc";
 import { useFirestoreList } from "@/hooks/useFirestoreList";
@@ -285,6 +286,8 @@ export function ContactSection() {
             })}
           </div>
         </div>
+
+        <ContactForm />
 
         <div
           id="channels"

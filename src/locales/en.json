@@ -491,6 +491,23 @@
         "name": "Academic Advisor (Microsoft Teams)",
         "description": "Academic Advisors communicate with students exclusively through Microsoft Teams."
       }
+    },
+    "form": {
+      "eyebrow": "SEND A MESSAGE",
+      "heading": "Write to us directly",
+      "description": "Send your question or feedback and the Student Union team will get back to you as soon as possible.",
+      "name": "Full name",
+      "namePlaceholder": "Your full name",
+      "email": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "subject": "Subject",
+      "subjectPlaceholder": "What would you like to ask about?",
+      "message": "Message",
+      "messagePlaceholder": "Write your message here...",
+      "submit": "Send message",
+      "sending": "Sending...",
+      "success": "Your message was sent successfully. We'll get back to you soon.",
+      "error": "We couldn't send your message. Please try again."
     }
   },
   "login": {
