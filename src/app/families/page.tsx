@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -18,18 +19,29 @@ import type { FamilyDoc } from "@/lib/firebase/collections";
 export default function FamiliesPage() {
   const { language } = useLanguage();
   const isArabic = language === "ar";
+  const publicFamiliesQuery = useMemo(
+    () => ({
+      filters: [
+        {
+          field: "isActive",
+          op: "==" as const,
+          value: true,
+        },
+      ],
+      orderByField: {
+        field: "order",
+        direction: "asc" as const,
+      },
+    }),
+    []
+  );
 
   const { data: allFamilies, loading } = useFirestoreList<FamilyDoc>(
     familiesService,
-    {
-      orderByField: {
-        field: "order",
-        direction: "asc",
-      },
-    }
+    publicFamiliesQuery
   );
 
-  const families = allFamilies.filter((family) => family.isActive);
+  const families = allFamilies;
 
   return (
     <main className="min-h-screen bg-background">
