@@ -22,13 +22,25 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment Setup
 
-Copy `.env.local.example` to `.env.local` and fill in Firebase project credentials once a project exists:
+Copy `.env.local.example` to `.env.local` and fill in the required values:
 
 ```bash
 cp .env.local.example .env.local
 ```
 
 Until then, the app runs fine on placeholder/local data — Firebase calls are inert (see `src/lib/firebase.ts`).
+
+### Production contact form (Vercel)
+
+`.env.local` is intentionally local-only and is never deployed. In the Vercel project, add the following variables under **Settings → Environment Variables**, selecting the **Production** environment, then deploy again:
+
+```txt
+RESEND_API_KEY=re_...
+RESEND_FROM_EMAIL=MITSU <contact@your-verified-domain.com>
+RESEND_TO_EMAIL=your-inbox@example.com
+```
+
+Keep `RESEND_API_KEY` server-only: do **not** rename it with a `NEXT_PUBLIC_` prefix. The sender address must use a domain verified in [Resend](https://resend.com/domains). Add the same variables to Preview if you want the contact form to work on preview deployments.
 
 ## Project Documentation
 
