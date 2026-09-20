@@ -1,7 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+
 import { useAuth } from "@/hooks/useAuth";
+import { academicAdvisors } from "@/data/academicAdvisors";
+import { db } from "@/lib/firebase/config";
+import { COLLECTIONS } from "@/lib/firebase/collections";
+
+const ADVISOR_ALIASES_DOCUMENT = "academicAdvisorAliases";
+
+type AdvisorAliases = Record<string, string[]>;
+
+function readAdvisorAliases(value: unknown): AdvisorAliases {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([advisorId, aliases]) =>
+      Array.isArray(aliases)
+        ? [[
+            advisorId,
+            aliases.filter(
+              (alias): alias is string => typeof alias === "string"
+            ),
+          ]]
+        : []
+    )
+  );
+}
+
+function aliasesToInput(aliases: string[]) {
+  return aliases.join("\n");
+}
+
+function inputToAliases(value: string) {
+  return Array.from(
+    new Set(
+      value
+        .split(/[\n,]/)
+        .map((alias) => alias.trim())
+        .filter(Boolean)
+    )
+  );
+}
 
 interface StudentPreview {
   studentId: string;
@@ -46,6 +94,94 @@ export default function AcademicAdvisorsPage() {
   const [result, setResult] = useState<PreviewResponse | null>(null);
   const [importResult, setImportResult] =
     useState<ImportResponse | null>(null);
+  const [aliasInputs, setAliasInputs] = useState<
+    Record<string, string>
+  >({});
+  const [aliasesLoading, setAliasesLoading] = useState(Boolean(db));
+  const [aliasesSaving, setAliasesSaving] = useState(false);
+  const [aliasesMessage, setAliasesMessage] = useState("");
+
+  useEffect(() => {
+    const firestore = db;
+
+    if (!firestore) {
+      return;
+    }
+
+    const aliasesRef = doc(
+      firestore,
+      COLLECTIONS.settings,
+      ADVISOR_ALIASES_DOCUMENT
+    );
+
+    async function loadAdvisorAliases() {
+      try {
+        const aliasesSnapshot = await getDoc(aliasesRef);
+        const savedAliases = aliasesSnapshot.exists()
+          ? readAdvisorAliases(aliasesSnapshot.data().aliases)
+          : {};
+
+        setAliasInputs(
+          Object.fromEntries(
+            academicAdvisors.map((advisor) => [
+              advisor.id,
+              aliasesToInput(savedAliases[advisor.id] ?? []),
+            ])
+          )
+        );
+      } catch (error) {
+        console.error("[ACADEMIC_ADVISOR_ALIASES_LOAD]", error);
+        setAliasesMessage("تعذر تحميل أسماء الشيت البديلة.");
+      } finally {
+        setAliasesLoading(false);
+      }
+    }
+
+    void loadAdvisorAliases();
+  }, []);
+
+  async function handleSaveAliases() {
+    if (!db) {
+      setAliasesMessage("تعذر الاتصال بقاعدة البيانات حاليًا.");
+      return;
+    }
+
+    try {
+      setAliasesSaving(true);
+      setAliasesMessage("");
+
+      const aliases = Object.fromEntries(
+        academicAdvisors.flatMap((advisor) => {
+          const advisorAliases = inputToAliases(
+            aliasInputs[advisor.id] ?? ""
+          );
+
+          return advisorAliases.length > 0
+            ? [[advisor.id, advisorAliases]]
+            : [];
+        })
+      );
+
+      await setDoc(
+        doc(
+          db,
+          COLLECTIONS.settings,
+          ADVISOR_ALIASES_DOCUMENT
+        ),
+        {
+          aliases,
+          updatedAt: serverTimestamp(),
+        }
+      );
+
+      setAliasesMessage("تم حفظ أسماء الشيت البديلة بنجاح.");
+    } catch (error) {
+      console.error("[ACADEMIC_ADVISOR_ALIASES_SAVE]", error);
+      setAliasesMessage("تعذر حفظ أسماء الشيت البديلة.");
+    } finally {
+      setAliasesSaving(false);
+    }
+  }
 
   async function handlePreview() {
     if (!excelUrl.trim()) {
@@ -250,6 +386,62 @@ export default function AcademicAdvisorsPage() {
           className="mt-5 rounded-xl px-5 py-3 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "جاري قراءة الملف..." : "معاينة الملف"}
+        </button>
+      </section>
+
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div>
+          <h2 className="font-semibold">ربط أسماء المرشدين في الشيت</h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            اكتب الاسم كما يظهر في ملف Excel مقابل اسم المرشد المعروض في
+            الموقع. يمكن إضافة أكثر من اسم، كل اسم في سطر أو مفصول بفاصلة.
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          {academicAdvisors.map((advisor) => (
+            <label
+              key={advisor.id}
+              className="rounded-xl border bg-background p-4"
+            >
+              <span className="block text-sm font-medium">
+                {advisor.nameAr}
+              </span>
+
+              <span className="mt-1 block text-xs text-muted-foreground" dir="ltr">
+                {advisor.nameEn}
+              </span>
+
+              <textarea
+                value={aliasInputs[advisor.id] ?? ""}
+                onChange={(event) =>
+                  setAliasInputs((current) => ({
+                    ...current,
+                    [advisor.id]: event.target.value,
+                  }))
+                }
+                disabled={aliasesLoading || aliasesSaving}
+                placeholder="الاسم كما يظهر في الشيت"
+                className="mt-3 min-h-20 w-full rounded-lg border bg-card px-3 py-2 text-sm outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </label>
+          ))}
+        </div>
+
+        {aliasesMessage ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {aliasesMessage}
+          </p>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={handleSaveAliases}
+          disabled={aliasesLoading || aliasesSaving}
+          className="mt-5 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {aliasesSaving ? "جاري الحفظ..." : "حفظ أسماء الشيت"}
         </button>
       </section>
 

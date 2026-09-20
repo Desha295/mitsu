@@ -8,7 +8,7 @@ import {
   Loader2,
   ArrowUpRight,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 
 import { Container } from "@/components/layout/Container";
@@ -21,12 +21,56 @@ import {
   type StudentDoc,
 } from "@/lib/firebase/collections";
 
+const ADVISOR_ALIASES_DOCUMENT = "academicAdvisorAliases";
+
+type AdvisorAliases = Record<string, string[]>;
+
+function readAdvisorAliases(value: unknown): AdvisorAliases {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([advisorId, aliases]) =>
+      Array.isArray(aliases)
+        ? [[
+            advisorId,
+            aliases.filter(
+              (alias): alias is string => typeof alias === "string"
+            ),
+          ]]
+        : []
+    )
+  );
+}
+
 function normalizeSearchText(value: string) {
   return value
     .trim()
     .toLocaleLowerCase()
     .replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/[-–—]/g, " ")
     .replace(/\s+/g, " ");
+}
+
+function advisorNamesMatch(
+  advisorName: string,
+  studentAdvisorName: string
+) {
+  const normalizedAdvisorName = normalizeSearchText(advisorName);
+  const normalizedStudentAdvisorName = normalizeSearchText(
+    studentAdvisorName
+  );
+
+  return (
+    normalizedAdvisorName === normalizedStudentAdvisorName ||
+    normalizedAdvisorName.startsWith(
+      `${normalizedStudentAdvisorName} `
+    ) ||
+    normalizedStudentAdvisorName.startsWith(
+      `${normalizedAdvisorName} `
+    )
+  );
 }
 
 export function AcademicAdvisorsSection() {
@@ -41,6 +85,41 @@ export function AcademicAdvisorsSection() {
   const [studentResult, setStudentResult] =
     useState<StudentDoc | null>(null);
   const [studentError, setStudentError] = useState("");
+  const [advisorAliases, setAdvisorAliases] =
+    useState<AdvisorAliases>({});
+
+  useEffect(() => {
+    const firestore = db;
+
+    if (!firestore) {
+      return;
+    }
+
+    const aliasesRef = doc(
+      firestore,
+      COLLECTIONS.settings,
+      ADVISOR_ALIASES_DOCUMENT
+    );
+
+    async function loadAdvisorAliases() {
+      try {
+        const aliasesSnapshot = await getDoc(aliasesRef);
+
+        if (aliasesSnapshot.exists()) {
+          setAdvisorAliases(
+            readAdvisorAliases(aliasesSnapshot.data().aliases)
+          );
+        }
+      } catch (error) {
+        console.error(
+          "[ACADEMIC_ADVISOR_ALIASES_LOAD]",
+          error
+        );
+      }
+    }
+
+    void loadAdvisorAliases();
+  }, []);
 
   const filteredAdvisors = useMemo(() => {
     const query = normalizeSearchText(searchQuery);
@@ -141,10 +220,17 @@ export function AcademicAdvisorsSection() {
           );
 
         return (
-          normalizeSearchText(advisor.nameAr) ===
-            studentAdvisorName ||
-          normalizeSearchText(advisor.nameEn) ===
+          advisorNamesMatch(
+            advisor.nameAr,
             studentAdvisorName
+          ) ||
+          advisorNamesMatch(
+            advisor.nameEn,
+            studentAdvisorName
+          ) ||
+          (advisorAliases[advisor.id] ?? []).some((alias) =>
+            advisorNamesMatch(alias, studentAdvisorName)
+          )
         );
       })
     : null;
