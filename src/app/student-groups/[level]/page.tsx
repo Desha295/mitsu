@@ -96,9 +96,7 @@ function StudentGroupsContent({
   );
 
   const groups = entries.filter((entry) => entry.kind !== "material");
-  const materials = entries.filter(
-    (entry) => entry.kind === "material" || Boolean(entry.materialUrl)
-  );
+  const materials = entries.filter((entry) => entry.kind === "material");
 
   const levelInfo = LEVELS[level];
 
