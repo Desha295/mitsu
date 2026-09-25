@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
+  BookOpen,
   ExternalLink,
   MessageCircle,
   Users,
@@ -89,9 +90,14 @@ function StudentGroupsContent({
     [level]
   );
 
-  const { data: groups, loading, error } = useFirestoreList(
+  const { data: entries, loading, error } = useFirestoreList(
     studentGroupsService,
     queryOptions
+  );
+
+  const groups = entries.filter((entry) => entry.kind !== "material");
+  const materials = entries.filter(
+    (entry) => entry.kind === "material" || Boolean(entry.materialUrl)
   );
 
   const levelInfo = LEVELS[level];
@@ -218,7 +224,7 @@ function StudentGroupsContent({
           </p>
         </div>
 
-        {groups.length === 0 ? (
+        {entries.length === 0 ? (
           <div className="mx-auto mt-14 max-w-xl rounded-[2rem] border border-border/70 bg-surface/70 p-10 text-center shadow-xl backdrop-blur-xl">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Users className="h-7 w-7" aria-hidden="true" />
@@ -266,6 +272,18 @@ function StudentGroupsContent({
                 ))}
               </div>
             ))}
+
+            {materials.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-5">
+                {materials.map((material) => (
+                  <StudentMaterialCard
+                    key={material.id}
+                    material={material}
+                    language={language}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </Container>
@@ -358,6 +376,69 @@ function StudentGroupCard({
             className="h-4 w-4"
             aria-hidden="true"
           />
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function StudentMaterialCard({
+  material,
+  language,
+}: {
+  material: {
+    id: string;
+    nameAr: string;
+    nameEn: string;
+    materialUrl?: string;
+  };
+  language: string;
+}) {
+  const name = language === "ar" ? material.nameAr : material.nameEn;
+
+  return (
+    <div
+      className={cx(
+        "group relative w-full overflow-hidden rounded-[2rem]",
+        "border border-border/70 bg-surface/70",
+        "p-7 shadow-lg shadow-primary/[0.03]",
+        "backdrop-blur-xl",
+        "transition-all duration-500",
+        "hover:-translate-y-1",
+        "hover:border-primary/30",
+        "hover:shadow-2xl hover:shadow-primary/10",
+        "sm:w-[calc(50%-0.625rem)]",
+        "lg:w-[calc(33.333%-0.833rem)]"
+      )}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
+      />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/10 bg-primary/10 text-primary">
+            <BookOpen className="h-7 w-7" aria-hidden="true" />
+          </div>
+
+          <div className="rounded-full border border-border/70 bg-surface-muted/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
+            Material
+          </div>
+        </div>
+
+        <h2 className="mt-7 text-xl font-bold text-foreground sm:text-2xl">
+          {name}
+        </h2>
+
+        <a
+          href={material.materialUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-3.5 text-sm font-bold text-primary transition-all duration-300 hover:bg-primary/10"
+        >
+          <span>{language === "ar" ? "المواد" : "Open Material"}</span>
+          <ExternalLink className="h-4 w-4" aria-hidden="true" />
         </a>
       </div>
     </div>

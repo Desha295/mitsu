@@ -29,7 +29,6 @@ const EMPTY_STUDENT_GROUP: StudentGroupDoc = {
   level: 1,
 
   whatsappUrl: "",
-
   order: 0,
   isActive: true,
 
@@ -37,7 +36,15 @@ const EMPTY_STUDENT_GROUP: StudentGroupDoc = {
   updatedAt: undefined as unknown as StudentGroupDoc["updatedAt"],
 };
 
-type FormTarget = WithId<StudentGroupDoc> | "new" | null;
+const EMPTY_STUDENT_MATERIAL: StudentGroupDoc = {
+  ...EMPTY_STUDENT_GROUP,
+  kind: "material",
+  nameAr: "مواد الفرقة الأولى",
+  nameEn: "Level 1 Material",
+  materialUrl: "",
+};
+
+type FormTarget = WithId<StudentGroupDoc> | "new" | "new-material" | null;
 
 type Feedback = "created" | "updated" | "deleted" | null;
 
@@ -131,7 +138,7 @@ export default function AdminStudentGroupsPage() {
   }
 
   async function handleUpdate(values: StudentGroupDoc) {
-    if (formTarget === null || formTarget === "new") {
+    if (formTarget === null || formTarget === "new" || formTarget === "new-material") {
       return;
     }
 
@@ -182,7 +189,9 @@ export default function AdminStudentGroupsPage() {
   }
 
   const inForm = formTarget !== null;
-  const isCreating = formTarget === "new";
+  const isCreating = formTarget === "new" || formTarget === "new-material";
+  const isMaterialForm = formTarget === "new-material" ||
+    (typeof formTarget === "object" && formTarget?.kind === "material");
 
   return (
     <PageContainer className="flex flex-col gap-8">
@@ -194,17 +203,17 @@ export default function AdminStudentGroupsPage() {
               : "Student Groups"
             : isCreating
               ? isArabic
-                ? "إضافة جروب طلابي"
-                : "Add Student Group"
+                ? isMaterialForm ? "إضافة مواد للدفعة" : "إضافة جروب طلابي"
+                : isMaterialForm ? "Add Student Material" : "Add Student Group"
               : isArabic
-                ? "تعديل الجروب الطلابي"
-                : "Edit Student Group"
+                ? isMaterialForm ? "تعديل مواد الدفعة" : "تعديل الجروب الطلابي"
+                : isMaterialForm ? "Edit Student Material" : "Edit Student Group"
         }
         description={
           !inForm
             ? isArabic
-              ? "إدارة جروبات الطلاب وروابط WhatsApp حسب الفرقة الدراسية."
-              : "Manage student groups and WhatsApp links by academic level."
+              ? "إدارة جروبات الطلاب والمواد التعليمية حسب الفرقة الدراسية."
+              : "Manage student groups and learning materials by academic level."
             : undefined
         }
         breadcrumbs={[
@@ -238,23 +247,24 @@ export default function AdminStudentGroupsPage() {
         ]}
         actions={
           !inForm ? (
-            <button
-              type="button"
-              onClick={() => setFormTarget("new")}
-              className={cx(
-                "inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark",
-                focusRing
-              )}
-            >
-              <Plus
-                className="h-4 w-4"
-                aria-hidden="true"
-              />
-
-              {isArabic
-                ? "إضافة جروب"
-                : "Add Group"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setFormTarget("new")}
+                className={cx("inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors duration-150 hover:bg-primary-dark", focusRing)}
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {isArabic ? "إضافة جروب" : "Add Group"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormTarget("new-material")}
+                className={cx("inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10", focusRing)}
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {isArabic ? "إضافة مواد" : "Add Material"}
+              </button>
+            </div>
           ) : undefined
         }
       />
@@ -333,11 +343,11 @@ export default function AdminStudentGroupsPage() {
 
                 <div className="mt-4 rounded-lg border border-border bg-background/50 px-3 py-2">
                   <p className="text-xs font-medium text-muted-foreground">
-                    WhatsApp
+                    {item.kind === "material" ? "Material" : "WhatsApp"}
                   </p>
 
                   <p className="mt-1 truncate text-sm text-foreground">
-                    {item.whatsappUrl}
+                    {item.kind === "material" ? item.materialUrl : item.whatsappUrl}
                   </p>
                 </div>
 
@@ -356,7 +366,7 @@ export default function AdminStudentGroupsPage() {
                   </button>
 
                   <a
-                    href={item.whatsappUrl}
+                    href={item.kind === "material" ? item.materialUrl : item.whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={cx(
@@ -369,9 +379,7 @@ export default function AdminStudentGroupsPage() {
                       aria-hidden="true"
                     />
 
-                    {isArabic
-                      ? "فتح"
-                      : "Open"}
+                    {isArabic ? "فتح" : "Open"}
                   </a>
 
                   <button
@@ -414,7 +422,7 @@ export default function AdminStudentGroupsPage() {
           }
           initialValues={
             isCreating
-              ? EMPTY_STUDENT_GROUP
+              ? isMaterialForm ? EMPTY_STUDENT_MATERIAL : EMPTY_STUDENT_GROUP
               : stripId(
                   formTarget as WithId<StudentGroupDoc>
                 )
@@ -424,15 +432,16 @@ export default function AdminStudentGroupsPage() {
           }
           onCancel={() => setFormTarget(null)}
           language={language}
+          isMaterial={isMaterialForm}
         />
       )}
 
       <ConfirmDialog
         open={deleteTarget !== null}
         title={
-          isArabic
-            ? "حذف الجروب الطلابي"
-            : "Delete Student Group"
+          deleteTarget?.kind === "material"
+            ? isArabic ? "حذف مواد الدفعة" : "Delete Student Material"
+            : isArabic ? "حذف الجروب الطلابي" : "Delete Student Group"
         }
         description={
           deleteTarget
@@ -466,6 +475,7 @@ type StudentGroupFormProps = {
   onSubmit: (values: StudentGroupDoc) => Promise<void>;
   onCancel: () => void;
   language: "ar" | "en";
+  isMaterial: boolean;
 };
 
 function StudentGroupForm({
@@ -473,6 +483,7 @@ function StudentGroupForm({
   onSubmit,
   onCancel,
   language,
+  isMaterial,
 }: StudentGroupFormProps) {
   const [values, setValues] =
     useState<StudentGroupDoc>(initialValues);
@@ -515,6 +526,7 @@ function StudentGroupForm({
       className="rounded-xl border border-border bg-surface p-6 shadow-sm"
     >
       <div className="grid gap-6 md:grid-cols-2">
+        {!isMaterial && <>
         <div>
           <label className={labelClass}>
             {language === "ar"
@@ -586,6 +598,7 @@ function StudentGroupForm({
             className={`${inputClass} min-h-32 resize-y`}
           />
         </div>
+        </>}
 
         <div>
           <label className={labelClass}>
@@ -596,12 +609,15 @@ function StudentGroupForm({
 
           <select
             value={values.level}
-            onChange={(e) =>
-              update(
-                "level",
-                Number(e.target.value)
-              )
-            }
+            onChange={(e) => {
+              const level = Number(e.target.value) as StudentGroupDoc["level"];
+              update("level", level);
+              if (isMaterial) {
+                const names = ["الأولى", "الثانية", "الثالثة", "الرابعة"];
+                update("nameAr", `مواد الفرقة ${names[level - 1]}`);
+                update("nameEn", `Level ${level} Material`);
+              }
+            }}
             className={inputClass}
           >
             <option value={1}>
@@ -630,7 +646,7 @@ function StudentGroupForm({
           </select>
         </div>
 
-        <div>
+        {!isMaterial && <div>
           <label className={labelClass}>
             {language === "ar"
               ? "ترتيب الجروب"
@@ -649,9 +665,9 @@ function StudentGroupForm({
             }
             className={inputClass}
           />
-        </div>
+        </div>}
 
-        <div className="md:col-span-2">
+        {!isMaterial && <div className="md:col-span-2">
           <label className={labelClass}>
             WhatsApp Group URL
           </label>
@@ -669,7 +685,26 @@ function StudentGroupForm({
             placeholder="https://chat.whatsapp.com/..."
             required
           />
-        </div>
+        </div>}
+
+        {isMaterial && <div className="md:col-span-2">
+          <label className={labelClass}>
+            {language === "ar"
+              ? "رابط المواد التعليمية"
+              : "Material URL"}
+          </label>
+
+          <input
+            type="url"
+            value={values.materialUrl ?? ""}
+            onChange={(e) =>
+              update("materialUrl", e.target.value)
+            }
+            className={inputClass}
+            placeholder="https://..."
+            required
+          />
+        </div>}
 
         <div className="flex items-center gap-3 md:col-span-2">
           <input
@@ -690,8 +725,8 @@ function StudentGroupForm({
             className="text-sm font-medium text-foreground"
           >
             {language === "ar"
-              ? "الجروب نشط ويظهر للطلاب"
-              : "Group is active and visible to students"}
+              ? isMaterial ? "المواد نشطة وتظهر للطلاب" : "الجروب نشط ويظهر للطلاب"
+              : isMaterial ? "Material is active and visible to students" : "Group is active and visible to students"}
           </label>
         </div>
       </div>
@@ -723,8 +758,8 @@ function StudentGroupForm({
               ? "جاري الحفظ..."
               : "Saving..."
             : language === "ar"
-              ? "حفظ الجروب"
-              : "Save Group"}
+              ? isMaterial ? "حفظ المواد" : "حفظ الجروب"
+              : isMaterial ? "Save Material" : "Save Group"}
         </button>
       </div>
     </form>

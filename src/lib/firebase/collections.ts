@@ -214,6 +214,7 @@ export interface StudentDoc {
  * through Firestore.
  */
 export interface StudentGroupDoc {
+  kind?: "material";
   nameAr: string;
   nameEn: string;
 
@@ -223,6 +224,7 @@ export interface StudentGroupDoc {
   level: 1 | 2 | 3 | 4;
 
   whatsappUrl: string;
+  materialUrl?: string;
 
   order: number;
   isActive: boolean;
