@@ -766,6 +766,7 @@
         "title": "Title",
         "description": "Description",
         "date": "Date",
+        "comingSoon": "Coming soon (date not set yet)",
         "location": "Location",
         "category": "Category",
         "noCategory": "No category",

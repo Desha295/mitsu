@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Save, Upload } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
 import type { EventDoc } from "@/lib/firebase/collections";
 import {
   timestampToDate,
@@ -78,6 +79,9 @@ export function EventForm({
   const [isPublished, setIsPublished] =
     useState(initialValues.isPublished);
 
+  const [isComingSoon, setIsComingSoon] =
+    useState(initialValues.isComingSoon ?? false);
+
   const [submitting, setSubmitting] =
     useState(false);
 
@@ -129,11 +133,12 @@ export function EventForm({
       }
     }
 
-    if (!dateInput.trim()) {
+    if (!isComingSoon && !dateInput.trim()) {
       errors.date = translate(
         "admin.events.form.required"
       );
     } else if (
+      !isComingSoon &&
       Number.isNaN(
         new Date(dateInput).getTime()
       )
@@ -273,9 +278,12 @@ export function EventForm({
       await onSubmit(
         {
           ...values,
-          date: dateToTimestamp(
-            new Date(dateInput)
-          ),
+          date: isComingSoon
+            ? (timestampToDate(values.date)
+                ? values.date
+                : Timestamp.now())
+            : dateToTimestamp(new Date(dateInput)),
+          isComingSoon,
           isPublished,
         },
         {
@@ -490,6 +498,7 @@ export function EventForm({
             id="event-date"
             type="date"
             value={dateInput}
+            disabled={isComingSoon}
             onChange={(event) =>
               updateDate(
                 event.target.value
@@ -515,6 +524,23 @@ export function EventForm({
               {fieldErrors.date}
             </p>
           )}
+
+          <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={isComingSoon}
+              onChange={(event) => {
+                setIsComingSoon(event.target.checked);
+                setFieldErrors((prev) => {
+                  const next = { ...prev };
+                  delete next.date;
+                  return next;
+                });
+              }}
+              className={cx("h-4 w-4 rounded border-border", focusRing)}
+            />
+            {translate("admin.events.form.comingSoon")}
+          </label>
         </div>
 
         {/* Arabic Location */}

@@ -22,6 +22,7 @@ interface EventCardProps {
   id?: string;
   className?: string;
   isUpcoming?: boolean;
+  isComingSoon?: boolean;
 }
 
 const CATEGORY_ICONS: Record<EventCategory, string> = {
@@ -60,6 +61,7 @@ export function EventCard({
   id,
   className,
   isUpcoming = true,
+  isComingSoon = false,
 }: EventCardProps) {
   const { translate, language } = useLanguage();
 
@@ -212,9 +214,13 @@ export function EventCard({
             </div>
 
             <div className="min-w-0 pt-1">
-              <time dateTime={dateIso}>
-                {formatDate(dateIso, language)}
-              </time>
+              {isComingSoon ? (
+                <span>{language === "ar" ? "قريبًا" : "Coming soon"}</span>
+              ) : (
+                <time dateTime={dateIso}>
+                  {formatDate(dateIso, language)}
+                </time>
+              )}
             </div>
           </div>
 

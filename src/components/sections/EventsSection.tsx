@@ -98,7 +98,7 @@ function EventGrid({
         const eventDate = getEventDate(event);
         const eventTime = eventDate.getTime();
 
-        const isUpcoming = eventTime >= now;
+        const isUpcoming = event.isComingSoon || eventTime >= now;
         const isNotificationTarget =
           highlightedId === event.id;
 
@@ -138,6 +138,7 @@ function EventGrid({
               mediaVideoUrl={event.mediaVideoUrl}
               mediaFileUrl={event.mediaFileUrl}
               isUpcoming={isUpcoming}
+              isComingSoon={event.isComingSoon}
             />
           </div>
         );
@@ -174,18 +175,20 @@ export function EventsSection() {
         upcomingEvents: sortedEvents
           .filter(
             (event) =>
-              getEventDate(event).getTime() >= now
+              event.isComingSoon || getEventDate(event).getTime() >= now
           )
           .sort(
-            (a, b) =>
-              getEventDate(a).getTime() -
-              getEventDate(b).getTime()
+            (a, b) => {
+              if (a.isComingSoon) return b.isComingSoon ? 0 : 1;
+              if (b.isComingSoon) return -1;
+              return getEventDate(a).getTime() - getEventDate(b).getTime();
+            }
           ),
 
         pastEvents: sortedEvents
           .filter(
             (event) =>
-              getEventDate(event).getTime() < now
+              !event.isComingSoon && getEventDate(event).getTime() < now
           )
           .sort(
             (a, b) =>

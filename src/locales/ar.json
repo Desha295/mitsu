@@ -767,6 +767,7 @@
         "title": "العنوان",
         "description": "الوصف",
         "date": "التاريخ",
+        "comingSoon": "قريبًا (لم يُحدد التاريخ بعد)",
         "location": "المكان",
         "category": "الفئة",
         "noCategory": "بدون فئة",

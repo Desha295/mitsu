@@ -69,6 +69,7 @@ export interface EventDoc {
   descriptionAr: string;
   descriptionEn: string;
   date: Timestamp;
+  isComingSoon?: boolean;
   locationAr?: string;
   locationEn?: string;
   imageUrl?: string;
