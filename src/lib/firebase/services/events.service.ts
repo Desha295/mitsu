@@ -28,6 +28,7 @@ import {
 } from "../collections";
 
 import { createFirestoreService } from "./createFirestoreService";
+import { requestPushDelivery } from "../pushDelivery";
 
 export const eventsService =
   createFirestoreService<EventDoc>(
@@ -99,6 +100,7 @@ async function createEventNotification(
     notificationRef,
     notificationData
   );
+  await requestPushDelivery(notificationRef.id);
 }
 
 /**

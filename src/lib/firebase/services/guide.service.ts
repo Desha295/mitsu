@@ -28,6 +28,7 @@ import {
 } from "../collections";
 
 import { createFirestoreService } from "./createFirestoreService";
+import { requestPushDelivery } from "../pushDelivery";
 
 export const guideService =
   createFirestoreService<GuideSectionDoc>(
@@ -91,6 +92,7 @@ async function createGuideNotification(
     notificationRef,
     notificationData
   );
+  await requestPushDelivery(notificationRef.id);
 }
 
 /**

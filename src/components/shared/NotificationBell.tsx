@@ -14,6 +14,7 @@ import {
   getPublishedNotifications,
 } from "@/lib/firebase/services/notificationService";
 import type { NotificationDoc } from "@/lib/firebase/collections";
+import { PushNotificationControl } from "@/components/shared/PushNotificationControl";
 
 type NotificationWithId = NotificationDoc & {
   id: string;
@@ -322,6 +323,8 @@ export function NotificationBell() {
               </button>
             ) : null}
           </div>
+
+          <PushNotificationControl />
 
           <div className="max-h-[70vh] overflow-y-auto sm:max-h-[28rem]">
             {loading ? (

@@ -102,6 +102,16 @@ match /notifications/{id} {
   allow write: if isAdmin();
 }
 
+// Push device tokens and delivery records are managed only by trusted
+// server routes using Firebase Admin SDK. Never expose tokens to clients.
+match /pushSubscriptions/{subscriptionId} {
+  allow read, write: if false;
+}
+
+match /pushDeliveries/{deliveryId} {
+  allow read, write: if false;
+}
+
 // -------------------------------------------------------------------
 // Academic Advisors / Students
 // -------------------------------------------------------------------

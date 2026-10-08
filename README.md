@@ -9,6 +9,7 @@
 - [Next.js](https://nextjs.org) (App Router) + TypeScript
 - Tailwind CSS v4 (CSS-first `@theme` tokens in `src/app/globals.css`)
 - Firebase (Firestore, Storage, Authentication)
+- Firebase Cloud Messaging (web push notifications)
 - Deployed on Vercel
 
 ## Getting Started
@@ -29,6 +30,18 @@ cp .env.local.example .env.local
 ```
 
 Until then, the app runs fine on placeholder/local data — Firebase calls are inert (see `src/lib/firebase.ts`).
+
+### Web push notifications (FCM)
+
+Device push is optional and does not replace the Firestore notification center. To enable it:
+
+1. In Firebase Console, open **Project settings → Cloud Messaging → Web configuration**, generate a Web Push certificate key pair, and copy the public VAPID key.
+2. In Firebase Authentication, enable the **Anonymous** provider so visitors without an account can register a device. Existing signed-in users use their current Firebase identity.
+3. Confirm the **Firebase Cloud Messaging API** and **FCM Registration API** are enabled for the same Firebase project.
+4. Set `NEXT_PUBLIC_FIREBASE_VAPID_KEY` to the public VAPID key in local `.env.local` and in Vercel **Settings → Environment Variables** for Production and Preview. Keep the existing `FIREBASE_ADMIN_PROJECT_ID`, `FIREBASE_ADMIN_CLIENT_EMAIL`, and `FIREBASE_ADMIN_PRIVATE_KEY` server-only in Vercel; the service account must be authorized to send FCM messages.
+5. Deploy the updated `firestore.rules` and redeploy the app so the worker and new API routes are live on HTTPS.
+
+On iPhone/iPad, Web Push requires iOS/iPadOS 16.4 or later and the site must be added to the Home Screen before permission can be requested. Notification support also varies by browser; unsupported browsers continue to use the in-site Firestore notification center.
 
 ### Production contact form (Vercel)
 

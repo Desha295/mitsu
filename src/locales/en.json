@@ -6,6 +6,18 @@
     "comingSoon": "Coming soon",
     "opensInNewTab": "Opens in a new tab"
   },
+  "push": {
+    "title": "Device notifications",
+    "description": "Get alerts for new MITSU announcements and events, even when the site is closed.",
+    "enabled": "Device notifications are enabled on this browser.",
+    "enable": "Enable",
+    "disable": "Turn off",
+    "denied": "Notifications are blocked in your browser settings.",
+    "setupMissing": "Push notifications are not configured yet. Please try again later.",
+    "unsupported": "This browser does not support device notifications.",
+    "iosInstall": "On iPhone or iPad, add MITSU to your Home Screen and open it there to enable notifications.",
+    "error": "Could not update notification settings. Please try again."
+  },
   "nav": {
     "home": "Home",
     "guide": "Student Guide",
