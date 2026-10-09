@@ -46,7 +46,11 @@ export function PushNotificationControl() {
       const code = error instanceof Error ? error.message : "";
       if (code === "PUSH_PERMISSION_DENIED") setMessage(translate("push.denied"));
       else if (code === "PUSH_NOT_CONFIGURED") setMessage(translate("push.setupMissing"));
-      else setMessage(translate("push.error"));
+      else if (code === "PUSH_ANONYMOUS_AUTH:auth/operation-not-allowed") {
+        setMessage(`${translate("push.anonymousAuthDisabled")} (${code})`);
+      } else {
+        setMessage(`${translate("push.error")} [${code || "UNKNOWN"}]`);
+      }
     } finally {
       setBusy(false);
     }

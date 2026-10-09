@@ -10,12 +10,15 @@ function tokenId(token: string) {
 }
 
 export async function POST(request: NextRequest) {
+  let stage = "request";
   try {
     const authorization = request.headers.get("authorization");
     if (!authorization?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    stage = "firebase-admin-init";
     const { adminAuth, adminDb } = getFirebaseAdmin();
+    stage = "id-token-verification";
     const user = await adminAuth.verifyIdToken(authorization.slice(7).trim());
     const body = await request.json();
     const action = body?.action;
@@ -27,8 +30,10 @@ export async function POST(request: NextRequest) {
 
     const ref = adminDb.collection("pushSubscriptions").doc(tokenId(token));
     if (action === "subscribe") {
+      stage = "firestore-subscription-write";
       await ref.set({ token, ownerUid: user.uid, enabled: true, updatedAt: new Date() });
     } else {
+      stage = "firestore-subscription-delete";
       const existing = await ref.get();
       if (existing.exists && existing.get("ownerUid") === user.uid) {
         await ref.delete();
@@ -37,9 +42,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-    const status = message.includes("Firebase ID token") ? 401 : 500;
-    console.error("[MITSU] Push subscription update failed:", message);
-    return NextResponse.json({ error: "Subscription update failed" }, { status });
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: unknown }).code || "UNKNOWN")
+      : "UNKNOWN";
+    const status = stage === "id-token-verification" ? 401 : 500;
+    console.error("[MITSU] Push subscription update failed", { stage, code });
+    return NextResponse.json(
+      { error: "Subscription update failed", stage, code },
+      { status }
+    );
   }
 }

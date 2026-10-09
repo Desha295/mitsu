@@ -14,6 +14,7 @@
     "disable": "Turn off",
     "denied": "Notifications are blocked in your browser settings.",
     "setupMissing": "Push notifications are not configured yet. Please try again later.",
+    "anonymousAuthDisabled": "Anonymous sign-in was rejected. Enable the Anonymous provider in Firebase Authentication.",
     "unsupported": "This browser does not support device notifications.",
     "iosInstall": "On iPhone or iPad, add MITSU to your Home Screen and open it there to enable notifications.",
     "error": "Could not update notification settings. Please try again."

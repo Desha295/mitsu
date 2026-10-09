@@ -52,7 +52,9 @@ export async function enablePushNotifications() {
     throw new Error("PUSH_NOT_CONFIGURED");
   }
 
-  const permission = await Notification.requestPermission();
+  const permission = await Notification.requestPermission().catch((error: unknown) => {
+    throw pushError("permission", error);
+  });
   if (permission !== "granted") throw new Error("PUSH_PERMISSION_DENIED");
 
   const messaging = await getBrowserMessaging();
@@ -60,29 +62,63 @@ export async function enablePushNotifications() {
 
   let user = auth.currentUser;
   if (!user) {
-    user = (await signInAnonymously(auth)).user;
+    try {
+      user = (await signInAnonymously(auth)).user;
+    } catch (error) {
+      throw pushError("anonymous-auth", error);
+    }
   }
 
-  const registration = await navigator.serviceWorker.register(
-    "/firebase-messaging-sw.js",
-    { scope: "/" }
-  );
-  const token = await getToken(messaging, {
-    vapidKey,
-    serviceWorkerRegistration: registration,
-  });
+  let registration: ServiceWorkerRegistration;
+  try {
+    registration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+      { scope: "/" }
+    );
+  } catch (error) {
+    throw pushError("service-worker", error);
+  }
+
+  let token: string;
+  try {
+    token = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: registration,
+    });
+  } catch (error) {
+    throw pushError("fcm-token", error);
+  }
   if (!token) throw new Error("PUSH_TOKEN_UNAVAILABLE");
 
-  const idToken = await user.getIdToken();
-  const response = await fetch("/api/push/subscriptions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ action: "subscribe", token }),
-  });
-  if (!response.ok) throw new Error("PUSH_SUBSCRIPTION_FAILED");
+  try {
+    const idToken = await user.getIdToken();
+    const response = await fetch("/api/push/subscriptions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ action: "subscribe", token }),
+    });
+    if (!response.ok) {
+      const result = await response.json().catch(() => null) as { code?: string; stage?: string } | null;
+      throw new Error(
+        `PUSH_SUBSCRIPTION_API:${result?.stage || "api"}:${result?.code || `HTTP_${response.status}`}`
+      );
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("PUSH_")) throw error;
+    throw pushError("subscription-api", error);
+  }
+}
+
+function pushError(stage: string, error: unknown) {
+  const code = typeof error === "object" && error !== null && "code" in error
+    ? String((error as { code?: unknown }).code || "UNKNOWN")
+    : "UNKNOWN";
+  const diagnostic = `PUSH_${stage.toUpperCase().replaceAll("-", "_")}:${code}`;
+  console.error("[MITSU] Push activation failed", { stage, code });
+  return new Error(diagnostic);
 }
 
 export async function disablePushNotifications() {
