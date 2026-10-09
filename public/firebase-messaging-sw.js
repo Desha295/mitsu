@@ -29,7 +29,7 @@ if (self.MITSU_FIREBASE_CONFIG && !firebase.apps.length) {
     const isArabic = self.navigator.language.toLowerCase().startsWith("ar");
     const title = isArabic ? data.titleAr : data.titleEn;
     const body = isArabic ? data.bodyAr : data.bodyEn;
-    self.registration.showNotification(title || (isArabic ? "إشعار جديد" : "New notification"), {
+    return self.registration.showNotification(title || (isArabic ? "إشعار جديد" : "New notification"), {
       body: body || "",
       icon: "/images/branding/mitsu-logo.png",
       badge: "/images/branding/mitsu-logo.png",

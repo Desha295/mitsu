@@ -22,19 +22,6 @@ const normalizedPrivateKey = privateKey
   .replace(/^["']|["']$/g, "")
   .replace(/\\n/g, "\n")
   .trim();
-  console.log("[MITSU] Firebase Admin key check:", {
-    projectId,
-    clientEmail,
-    keyLength: normalizedPrivateKey.length,
-    startsCorrectly: normalizedPrivateKey.startsWith(
-      "-----BEGIN PRIVATE KEY-----"
-    ),
-    endsCorrectly: normalizedPrivateKey.endsWith(
-      "-----END PRIVATE KEY-----"
-    ),
-    containsNewLines: normalizedPrivateKey.includes("\n"),
-  });
-
   return initializeApp({
     credential: cert({
       projectId,

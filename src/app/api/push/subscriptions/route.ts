@@ -24,11 +24,19 @@ export async function POST(request: NextRequest) {
     const action = body?.action;
     const token = typeof body?.token === "string" ? body.token.trim() : "";
 
-    if (!token || token.length > 4096 || (action !== "subscribe" && action !== "unsubscribe")) {
+    if (!token || token.length > 4096 || !["subscribe", "unsubscribe", "status"].includes(action)) {
       return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
     }
 
     const ref = adminDb.collection("pushSubscriptions").doc(tokenId(token));
+    if (action === "status") {
+      stage = "firestore-subscription-read";
+      const existing = await ref.get();
+      return NextResponse.json({
+        success: true,
+        subscribed: existing.exists && existing.get("ownerUid") === user.uid && existing.get("enabled") === true,
+      });
+    }
     if (action === "subscribe") {
       stage = "firestore-subscription-write";
       await ref.set({ token, ownerUid: user.uid, enabled: true, updatedAt: new Date() });

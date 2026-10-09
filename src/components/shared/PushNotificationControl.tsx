@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BellRing, Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
   disablePushNotifications,
   enablePushNotifications,
   getPushAvailability,
+  getPushSubscriptionState,
   isPushConfigured,
   requiresIosHomeScreenInstall,
 } from "@/lib/firebase/pushClient";
@@ -19,19 +20,26 @@ export function PushNotificationControl() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [iosInstallRequired, setIosInstallRequired] = useState(false);
+  const operationInProgress = useRef(false);
 
   useEffect(() => {
     let active = true;
-    void getPushAvailability().then((available) => {
+    void getPushAvailability().then(async (available) => {
       if (!active) return;
-      setSupported(available && isPushConfigured());
-      setEnabled(available && Notification.permission === "granted");
+      const configured = isPushConfigured();
+      setSupported(available && configured);
+      if (available && configured && Notification.permission === "granted") {
+        const subscribed = await getPushSubscriptionState();
+        if (active) setEnabled(subscribed);
+      }
       setIosInstallRequired(requiresIosHomeScreenInstall());
     });
     return () => { active = false; };
   }, []);
 
   async function toggle() {
+    if (operationInProgress.current) return;
+    operationInProgress.current = true;
     setBusy(true);
     setMessage("");
     try {
@@ -52,6 +60,7 @@ export function PushNotificationControl() {
         setMessage(`${translate("push.error")} [${code || "UNKNOWN"}]`);
       }
     } finally {
+      operationInProgress.current = false;
       setBusy(false);
     }
   }
